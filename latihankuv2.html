@@ -1316,7 +1316,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
             await setDoc(
               doc(db, "student_motivation_messages", auth.currentUser.uid),
               {
-                message: aiMessage,
+                message: aiMessage || "", // Pastikan tidak undefined
                 lastGenerated: serverTimestamp(),
                 studentAppId: studentData.id,
               },
@@ -2104,8 +2104,11 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
             return {
               question: q.question,
               answer: studentAnswer ? studentAnswer.answer : "", // Jawaban siswa
-              score: gradedQ ? gradedQ.score : 0,
-              aiSuggestion: gradedQ ? gradedQ.aiSuggestion : "",
+              score: gradedQ && gradedQ.score !== undefined ? gradedQ.score : 0, // Pastikan score tidak undefined
+              aiSuggestion:
+                gradedQ && gradedQ.aiSuggestion !== undefined
+                  ? gradedQ.aiSuggestion
+                  : "", // Pastikan aiSuggestion tidak undefined
               minWords: q.minWords || 0,
             };
           });
@@ -2126,7 +2129,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
             exerciseType: dailyExercise.type,
             score: parseInt(totalScore),
             answers: updatedAnswers,
-            aiSuggestions: gradingResult.overallSuggestions,
+            aiSuggestions: gradingResult.overallSuggestions || "", // Pastikan overallSuggestions tidak undefined
             timestamp: serverTimestamp(),
           });
 
