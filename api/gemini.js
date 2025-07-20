@@ -8,7 +8,18 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 // Inisialisasi Gemini API.
 // Kunci API diambil dari environment variable Vercel (process.env.GEMINI_API_KEY).
 // Kunci ini TIDAK akan terekspos di kode frontend.
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const API_KEY = process.env.GEMINI_API_KEY;
+
+// Tambahkan pemeriksaan untuk API_KEY
+if (!API_KEY) {
+  console.error(
+    "Kesalahan: GEMINI_API_KEY tidak ditemukan di environment variables."
+  );
+  // Dalam lingkungan produksi, Anda mungkin ingin menghentikan aplikasi atau memberikan respons error yang lebih spesifik.
+  // Untuk tujuan pengembangan, kita akan tetap mencoba inisialisasi, tetapi ini akan gagal.
+}
+
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 // Pilih model Gemini yang akan digunakan.
 // Sesuaikan dengan model yang kamu gunakan di aplikasi frontend sebelumnya (misal: "gemini-2.0-flash").
@@ -40,6 +51,14 @@ module.exports = async (req, res) => {
   // Memastikan ada body pada permintaan.
   if (!req.body) {
     return res.status(400).json({ error: "Body permintaan tidak ada." });
+  }
+
+  // Jika API_KEY tidak ada, langsung berikan error
+  if (!API_KEY) {
+    return res.status(500).json({
+      error: "Kesalahan konfigurasi server: Kunci API Gemini tidak ditemukan.",
+      details: "Harap pastikan GEMINI_API_KEY diatur di lingkungan Vercel.",
+    });
   }
 
   try {
