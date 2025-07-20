@@ -112,9 +112,13 @@ module.exports = async (req, res) => {
   } catch (error) {
     // Menangani error jika terjadi masalah saat memanggil Gemini API atau error lainnya.
     console.error("Error saat memanggil Gemini API dari fungsi Vercel:", error);
+    // Log objek error lengkap untuk detail lebih lanjut
+    console.error("Objek error lengkap:", JSON.stringify(error, null, 2));
     res.status(500).json({
       error: "Gagal menghasilkan konten dari Gemini API.",
       details: error.message,
+      // Anda bisa menambahkan properti error lain dari objek 'error' di sini jika ada,
+      // seperti error.code, error.status, dll., tergantung pada struktur error yang dikembalikan.
     });
   }
 };
