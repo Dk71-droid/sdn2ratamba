@@ -35,52 +35,35 @@ module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // Metode HTTP yang diizinkan
   res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // Header yang diizinkan
 
-  // Menangani permintaan 'OPTIONS' (preflight request) yang dikirim browser sebelum permintaan POST/GET sebenarnya.
+  // Tangani preflight request dari browser (OPTIONS method)
   if (req.method === "OPTIONS") {
-    res.status(200).end(); // Kirim respons 200 OK untuk preflight
-    return;
+    return res.status(200).end();
   }
 
-  // Memastikan metode permintaan adalah POST.
+  // Pastikan metode request adalah POST
   if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ error: "Metode Tidak Diizinkan. Hanya POST yang diizinkan." });
+    return res.status(405).json({ error: "Metode tidak diizinkan." });
   }
 
-  // Memastikan ada body pada permintaan.
+  // Pastikan ada payload JSON
   if (!req.body) {
-    return res.status(400).json({ error: "Body permintaan tidak ada." });
+    return res.status(400).json({ error: "Body request kosong." });
   }
 
-  // Jika API_KEY tidak ada, langsung berikan error
-  if (!API_KEY) {
-    return res.status(500).json({
-      error: "Kesalahan konfigurasi server: Kunci API Gemini tidak ditemukan.",
-      details: "Harap pastikan GEMINI_API_KEY diatur di lingkungan Vercel.",
-    });
+  const { prompt, generationConfig } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ error: "Parameter 'prompt' diperlukan." });
   }
 
   try {
-    // Mengurai body permintaan yang dikirim dari frontend (diasumsikan dalam format JSON).
-    const { prompt, generationConfig } = req.body;
+    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
 
-    // Validasi bahwa 'prompt' ada.
-    if (!prompt) {
-      return res.status(400).json({ error: "Prompt diperlukan." });
-    }
-
-    // Membangun payload untuk dikirim ke Gemini API.
-    const payload = {
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-    };
-
-    // Jika 'generationConfig' disediakan dari frontend, tambahkan ke payload.
+    // Jika generationConfig disediakan, tambahkan ke payload
     if (generationConfig) {
       payload.generationConfig = generationConfig;
     }
 
-    // Memanggil Gemini API dengan payload yang sudah disiapkan.
     const result = await model.generateContent(payload);
     const geminiResponse = await result.response;
     const geminiText = await geminiResponse.text(); // Mengambil teks mentah dari respons Gemini.
@@ -106,19 +89,35 @@ module.exports = async (req, res) => {
         });
       }
     } else {
-      // Jika tidak diharapkan JSON, kembalikan teks mentah Gemini dalam objek { text: ... }.
+      // Jika tidak diharapkan JSON, kembalikan teks mentah Gemini dalam objek { text: ... }
+      // Ini penting agar frontend selalu menerima objek yang bisa di-parse, bukan string mentah.
       res.status(200).json({ text: geminiText });
     }
   } catch (error) {
     // Menangani error jika terjadi masalah saat memanggil Gemini API atau error lainnya.
     console.error("Error saat memanggil Gemini API dari fungsi Vercel:", error);
-    // Log objek error lengkap untuk detail lebih lanjut
+    // Log objek error lengkap untuk debugging yang lebih baik
     console.error("Objek error lengkap:", JSON.stringify(error, null, 2));
-    res.status(500).json({
-      error: "Gagal menghasilkan konten dari Gemini API.",
-      details: error.message,
-      // Anda bisa menambahkan properti error lain dari objek 'error' di sini jika ada,
-      // seperti error.code, error.status, dll., tergantung pada struktur error yang dikembalikan.
+
+    let errorMessage = "Gagal menghasilkan konten dari Gemini API.";
+    let statusCode = 500;
+
+    // Coba ekstrak pesan error yang lebih spesifik dari objek error Gemini
+    if (error.status) {
+      statusCode = error.status;
+      if (error.status === 429) {
+        errorMessage = "Anda telah melebihi kuota Gemini API harian Anda. Silakan coba lagi nanti atau tingkatkan kuota Anda.";
+      } else if (error.statusText) {
+        errorMessage = `Panggilan API gagal dengan status ${error.status}: ${error.statusText}`;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    res.status(statusCode).json({
+      error: errorMessage,
+      details: error.message, // Sertakan pesan error asli untuk debugging
+      rawError: JSON.stringify(error), // Sertakan seluruh objek error sebagai string
     });
   }
 };
