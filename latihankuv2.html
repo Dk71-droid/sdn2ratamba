@@ -612,7 +612,7 @@
       let dailyExercise = null;
       let studentExerciseHistory = [];
       let studentPerformanceChart = null;
-      let hasAttemptedDailyGenerateForStudent = false; // Flag for student auto-generate
+      let hasAttemptedDailyGenerateStudent = false; // Flag to prevent multiple auto-generations per session
 
       // State untuk Modals
       let showConfirmationModal = false;
@@ -625,6 +625,10 @@
       let exerciseDetailsData = null;
 
       // --- VERCEL SERVERLESS FUNCTION ENDPOINT ---
+      // Ganti dengan URL deployment Vercel-mu.
+      // Jika file gemini.js ada di folder 'api' di root proyek Vercel yang sama,
+      // maka kamu bisa menggunakan path relatif '/api/gemini'.
+      // Contoh: 'https://namaprojekmu.vercel.app/api/gemini'
       const VERCEL_GEMINI_API_ENDPOINT = "/api/gemini";
 
       // --- DOM Elements ---
@@ -931,19 +935,20 @@
               dailyExercise = null;
               // NEW: Automatic generation if no exercise for today and not yet attempted by this student
               if (
-                !hasAttemptedDailyGenerateForStudent &&
+                !hasAttemptedDailyGenerateStudent &&
                 studentData && // Ensure studentData is loaded
                 auth.currentUser // Ensure Firebase user is authenticated
               ) {
-                hasAttemptedDailyGenerateForStudent = true; // Set flag to prevent re-triggering
+                hasAttemptedDailyGenerateStudent = true; // Set flag to prevent re-triggering
                 showMessage(
                   "info",
                   "Latihan harian untuk hari ini belum ada. Mencoba menggenerate otomatis..."
                 );
                 const dailyTypeForToday = getDailyExerciseTypeForAI(todayDate);
-                await generateAndSaveDailyExerciseForStudent(
+                await generateAndSaveDailyExercise(
                   todayDate,
-                  dailyTypeForToday
+                  dailyTypeForToday,
+                  true // isAutoGenerate set to true
                 );
               }
             }
@@ -1018,7 +1023,7 @@
             dailyExercise = null;
             studentExerciseHistory = [];
             currentStudentView = "dashboard";
-            hasAttemptedDailyGenerateForStudent = false; // Reset flag
+            hasAttemptedDailyGenerateStudent = false; // Reset flag
             if (studentPerformanceChart) {
               studentPerformanceChart.destroy();
               studentPerformanceChart = null;
@@ -1152,7 +1157,7 @@
                         (activity) => `
                             <tr>
                                 <td>${activity.exerciseDate}</td>
-                                <td>${activity.exerciseType}</td>
+                                <td>${activity.type}</td>
                                 <td>${
                                   activity.score !== undefined
                                     ? activity.score
@@ -1282,13 +1287,25 @@
           })
           .join("\n");
 
-        const prompt = `Sebagai seorang teman atau kakak yang peduli, tolong berikan pesan motivasi dan saran singkat (maksimal 3-4 kalimat) kepada siswa ini. Gunakan bahasa sehari-hari yang santai, akrab, dan dekat dengan siswa. Pesan harus berdasarkan riwayat latihan terakhirnya (dalam 1 bulan terakhir, maksimal 5 entri) dan rata-rata nilai. Fokus pada semangat untuk terus belajar dan berkembang, dan sebutkan secara umum area yang bisa ditingkatkan kalau ada pola dari saran-saran sebelumnya.
+        // --- START OF PROMPT MODIFICATION ---
+        const prompt = `Sebagai seorang teman atau kakak yang peduli, tolong berikan pesan motivasi dan saran singkat (maksimal 3-4 kalimat) kepada siswa ini. Gunakan bahasa sehari-hari yang santai, akrab, dan dekat dengan siswa. Pesan harus berdasarkan riwayat latihan terakhirnya (dalam 1 bulan terakhir, maksimal 5 entri) dan rata-rata nilai.
+        
+        Penting: Nilai yang diberikan adalah dalam rentang 1-100.
+        
+        Kriteria Penilaian:
+        - Nilai 0-49: Perlu banyak peningkatan.
+        - Nilai 50-69: Perlu peningkatan.
+        - Nilai 70-84: Baik.
+        - Nilai 85-100: Sangat Baik.
+
+        Fokus pada semangat untuk terus belajar dan berkembang, dan sebutkan secara umum area yang bisa ditingkatkan kalau ada pola dari saran-saran sebelumnya. Sesuaikan nada motivasi berdasarkan rata-rata nilai keseluruhan siswa.
 
 Riwayat Latihan Terakhir (dalam 1 bulan, maksimal 5 entri):
 ${recentHistorySummary || "Belum ada riwayat latihan dalam 1 bulan terakhir."}
 
 Rata-rata Nilai Keseluruhan: ${overallAverageScore}
 `;
+        // --- END OF PROMPT MODIFICATION ---
 
         try {
           // Panggil serverless function di Vercel
@@ -1428,9 +1445,10 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
        * @param {string} targetDate - The date for which to generate the exercise (YYYY-MM-DD).
        * @param {string} exerciseType - The type of exercise to generate ('Literasi' or 'Numerasi').
        */
-      async function generateAndSaveDailyExerciseForStudent(
+      async function generateAndSaveDailyExercise(
         targetDate,
-        exerciseType
+        exerciseType,
+        isAutoGenerate = false
       ) {
         showMessage(
           "loading",
