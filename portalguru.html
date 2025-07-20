@@ -396,7 +396,7 @@
         border-radius: 0.5rem;
         margin-bottom: 0.7rem; /* Further reduced margin */
         border: 1px solid #e2e8f0;
-        font-size: 0.8rem; /* Even smaller font for question items */
+        font-size: 0.8rem;
       }
       .ai-question-item p strong {
         color: #06b6d4;
@@ -404,22 +404,22 @@
       .ai-question-item small {
         color: #64748b;
         font-style: italic;
-        font-size: 0.7rem; /* Even smaller font for small text */
+        font-size: 0.7rem;
       }
       .ai-reading-text {
         background-color: #f0f9ff;
-        padding: 0.7rem; /* Further reduced padding */
+        padding: 0.7rem;
         border-left: 4px solid #06b6d4;
         border-radius: 0.5rem;
-        margin-bottom: 1rem; /* Further reduced margin */
-        line-height: 1.4; /* Further reduced line height */
+        margin-bottom: 1rem;
+        line-height: 1.4;
         text-align: justify;
         font-size: 0.8rem;
       }
       @media (max-width: 767px) {
         .ai-reading-text {
-          font-size: 0.75rem; /* Smallest font on mobile */
-          padding: 0.5rem; /* Smallest padding on mobile */
+          font-size: 0.75rem;
+          padding: 0.5rem;
         }
       }
     </style>
@@ -643,6 +643,7 @@
         serverTimestamp,
         getDocs,
         deleteDoc,
+        Timestamp, // Import Timestamp for date comparisons
       } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       // --- Firebase Configuration ---
@@ -802,6 +803,7 @@
           if (userDocSnap.exists() && userDocSnap.data().role === "teacher") {
             teacherData = userDocSnap.data();
             setupFirestoreListeners(user.uid);
+            await cleanOldData(); // Call cleanOldData on teacher login
             renderMainContent(); // Initial render of portal content
           } else {
             showMessage("error", "Akses ditolak. Silakan login sebagai guru.");
@@ -2230,6 +2232,87 @@
           "success",
           `Generate selesai: ${successCount} soal berhasil, ${failCount} soal gagal/dilewati.`
         );
+      }
+
+      /**
+       * Menghapus data lama dari koleksi daily_ai_exercises dan student_exercise_history.
+       * Dipanggil saat guru login.
+       */
+      async function cleanOldData() {
+        showMessage(
+          "loading",
+          "Memeriksa dan membersihkan data lama...",
+          "Pembersihan Data"
+        );
+        let deletedExerciseCount = 0;
+        let deletedHistoryCount = 0;
+
+        try {
+          // 1. Hapus soal latihan yang lebih tua dari 30 hari
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          const thirtyDaysAgoTimestamp = Timestamp.fromDate(thirtyDaysAgo);
+
+          const oldExercisesQuery = query(
+            collection(db, "daily_ai_exercises"),
+            where("timestamp", "<", thirtyDaysAgoTimestamp)
+          );
+          const oldExercisesSnapshot = await getDocs(oldExercisesQuery);
+
+          const deleteExercisePromises = [];
+          oldExercisesSnapshot.forEach((docToDelete) => {
+            deleteExercisePromises.push(
+              deleteDoc(doc(db, "daily_ai_exercises", docToDelete.id))
+            );
+            deletedExerciseCount++;
+          });
+          await Promise.all(deleteExercisePromises);
+          console.log(`Dihapus ${deletedExerciseCount} soal latihan lama.`);
+
+          // 2. Hapus riwayat latihan siswa yang lebih tua dari 1 tahun
+          const oneYearAgo = new Date();
+          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+          const oneYearAgoTimestamp = Timestamp.fromDate(oneYearAgo);
+
+          const oldHistoryQuery = query(
+            collection(db, "student_exercise_history"),
+            where("timestamp", "<", oneYearAgoTimestamp)
+          );
+          const oldHistorySnapshot = await getDocs(oldHistoryQuery);
+
+          const deleteHistoryPromises = [];
+          oldHistorySnapshot.forEach((docToDelete) => {
+            deleteHistoryPromises.push(
+              deleteDoc(doc(db, "student_exercise_history", docToDelete.id))
+            );
+            deletedHistoryCount++;
+          });
+          await Promise.all(deleteHistoryPromises);
+          console.log(
+            `Dihapus ${deletedHistoryCount} riwayat latihan siswa lama.`
+          );
+
+          if (deletedExerciseCount > 0 || deletedHistoryCount > 0) {
+            showMessage(
+              "success",
+              `Pembersihan selesai: ${deletedExerciseCount} soal dan ${deletedHistoryCount} riwayat latihan dihapus.`,
+              "Pembersihan Data"
+            );
+          } else {
+            showMessage(
+              "info",
+              "Tidak ada data lama yang perlu dihapus.",
+              "Pembersihan Data"
+            );
+          }
+        } catch (error) {
+          console.error("Error cleaning old data:", error);
+          showMessage(
+            "error",
+            `Gagal membersihkan data lama: ${error.message}`,
+            "Pembersihan Data"
+          );
+        }
       }
 
       /**
