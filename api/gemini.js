@@ -63,19 +63,33 @@ module.exports = async (req, res) => {
 
     // Memanggil Gemini API dengan payload yang sudah disiapkan.
     const result = await model.generateContent(payload);
-    const response = await result.response;
-    const text = response.text(); // Mengambil teks hasil generate dari respons Gemini.
+    const geminiResponse = await result.response;
+    const geminiText = await geminiResponse.text(); // Mengambil teks mentah dari respons Gemini.
 
-    // Mengirim hasil kembali ke frontend dalam format JSON.
-    res.status(200).json({ text: text });
-  } catch (error) {
-    // Menangani error jika terjadi masalah saat memanggil Gemini API.
-    console.error("Error saat memanggil Gemini API dari fungsi Vercel:", error);
-    res
-      .status(500)
-      .json({
-        error: "Gagal menghasilkan konten dari Gemini API.",
-        details: error.message,
+    let parsedGeminiContent;
+    try {
+      // Mencoba mem-parsing teks mentah dari Gemini sebagai JSON.
+      // Ini penting jika Gemini diharapkan mengembalikan struktur JSON (misalnya array soal).
+      parsedGeminiContent = JSON.parse(geminiText);
+    } catch (parseError) {
+      // Jika respons Gemini bukan JSON yang valid, catat error dan kirimkan respons error JSON ke frontend.
+      console.error("Error parsing Gemini API response as JSON:", parseError);
+      return res.status(500).json({
+        error: "Invalid JSON response from Gemini API.",
+        details: parseError.message,
+        rawGeminiResponse: geminiText, // Sertakan respons mentah untuk debugging
       });
+    }
+
+    // Mengirimkan konten JSON yang sudah di-parsing secara langsung kembali ke frontend.
+    // Ini menghilangkan pembungkus { text: ... } yang sebelumnya menyebabkan masalah parsing di frontend.
+    res.status(200).json(parsedGeminiContent);
+  } catch (error) {
+    // Menangani error jika terjadi masalah saat memanggil Gemini API atau error lainnya.
+    console.error("Error saat memanggil Gemini API dari fungsi Vercel:", error);
+    res.status(500).json({
+      error: "Gagal menghasilkan konten dari Gemini API.",
+      details: error.message,
+    });
   }
 };

@@ -665,9 +665,7 @@
       let teacherData = null;
       let currentMainTeacherView = "dashboard"; // 'dashboard', 'soal', 'riwayat', 'manajemen-siswa', 'pengaturan'
       let currentDailyExerciseAdmin = null; // Stores the daily exercise fetched for admin view
-      let currentAIExerciseType = getDailyExerciseTypeForAI(
-        new Date().toISOString().slice(0, 10)
-      );
+      // currentAIExerciseType will be dynamically determined based on the current date
       let allGeneratedExercises = []; // For generated history tab
       let allStudents = []; // List of all students (role: 'student') for management
       let studentExerciseHistory = []; // To store all student exercise history for dashboard
@@ -692,7 +690,6 @@
       const VERCEL_GEMINI_API_ENDPOINT = "/api/gemini";
 
       // --- DOM Elements ---
-      // mainContent is no longer needed as a direct reference to the main container
       const bottomNav = document.getElementById("bottomNav");
       const loginView = document.getElementById("loginView");
       const appView = document.getElementById("appView");
@@ -857,15 +854,19 @@
         );
 
         // Listener for current day's AI exercise (for admin view)
+        // IMPORTANT: Calculate todayDate here to ensure it's always fresh when listener is set up
         const todayDate = new Date().toISOString().slice(0, 10);
         const dailyAIExerciseDocRef = doc(db, "daily_ai_exercises", todayDate);
+        console.log(`Listening for daily exercise on: ${todayDate}`); // Log for debugging
         unsubscribeDailyAIExercise = onSnapshot(
           dailyAIExerciseDocRef,
           async (docSnap) => {
             if (docSnap.exists()) {
               currentDailyExerciseAdmin = { id: docSnap.id, ...docSnap.data() };
+              console.log(`Daily exercise for ${todayDate} found.`);
             } else {
               currentDailyExerciseAdmin = null;
+              console.log(`No daily exercise for ${todayDate}.`);
               // NEW: Automatic generation if no exercise for today and not yet attempted
               if (
                 !hasAttemptedDailyGenerate &&
@@ -999,9 +1000,7 @@
           studentExerciseHistory = [];
           currentMainTeacherView = "dashboard";
           hasAttemptedDailyGenerate = false;
-          currentAIExerciseType = getDailyExerciseTypeForAI(
-            new Date().toISOString().slice(0, 10)
-          );
+          // currentAIExerciseType is now dynamically determined
           if (teacherLiterasiChart) {
             teacherLiterasiChart.destroy();
             teacherLiterasiChart = null;
@@ -1154,7 +1153,7 @@
             <div class="card bg-gradient-to-br from-purple-500 to-purple-600 text-white">
                 <p class="text-sm opacity-90">Rata-rata Nilai Kelas</p>
                 <p class="text-xl font-bold mt-2">Literasi: ${overallLiterasiAverageScore}</p>
-                <p class="text-xl font-1">Numerasi: ${overallNumerasiAverageScore}</p>
+                <p class="text-xl font-bold mt-1">Numerasi: ${overallNumerasiAverageScore}</p>
             </div>
         `;
         document.getElementById("dashboardStatsContainer").innerHTML =
@@ -2676,6 +2675,28 @@
         renderModals(); // Render the confirmation modal
         attachDynamicEventListeners(); // Re-attach listeners for the new modal
       }
+
+      // --- Date Change Detection and Listener Refresh ---
+      let lastCheckedDate = new Date().toISOString().slice(0, 10);
+
+      // Check for date change every minute
+      setInterval(() => {
+        const newTodayDate = new Date().toISOString().slice(0, 10);
+        if (newTodayDate !== lastCheckedDate) {
+          console.log(
+            "Date changed! Re-initializing Firestore listeners for new day."
+          );
+          lastCheckedDate = newTodayDate;
+          if (auth.currentUser) {
+            // Re-setup all listeners with the new date context
+            setupFirestoreListeners(auth.currentUser.uid);
+            // If the current view is 'soal', force a re-render to show the new daily exercise
+            if (currentMainTeacherView === "soal") {
+              renderSoalView();
+            }
+          }
+        }
+      }, 60 * 1000); // Check every 1 minute (60,000 milliseconds)
 
       // Initial render will be handled by onAuthStateChanged
     </script>
