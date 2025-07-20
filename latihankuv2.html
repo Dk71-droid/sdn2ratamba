@@ -1293,7 +1293,9 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           }
 
           const data = await response.json();
-          const aiMessage = data.text; // Ambil teks dari properti 'text' di respons Vercel
+          // Ambil teks dari properti 'text' di respons Vercel.
+          // Fungsi gemini.js yang telah diperbarui akan selalu mengembalikan { text: "..." } jika tidak ada responseSchema.
+          const aiMessage = data.text;
 
           if (auth.currentUser) {
             await setDoc(
@@ -1873,9 +1875,8 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
             );
           }
 
-          const data = await response.json();
-          // Karena serverless function mengembalikan objek { text: "JSON_STRING" }, kita perlu parse 'text' lagi
-          const gradingResult = JSON.parse(data.text);
+          // gemini.js yang telah diperbarui akan mengembalikan JSON yang sudah di-parse langsung
+          const gradingResult = await response.json();
 
           if (
             !gradingResult ||

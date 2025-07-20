@@ -66,24 +66,30 @@ module.exports = async (req, res) => {
     const geminiResponse = await result.response;
     const geminiText = await geminiResponse.text(); // Mengambil teks mentah dari respons Gemini.
 
-    let parsedGeminiContent;
-    try {
-      // Mencoba mem-parsing teks mentah dari Gemini sebagai JSON.
-      // Ini penting jika Gemini diharapkan mengembalikan struktur JSON (misalnya array soal).
-      parsedGeminiContent = JSON.parse(geminiText);
-    } catch (parseError) {
-      // Jika respons Gemini bukan JSON yang valid, catat error dan kirimkan respons error JSON ke frontend.
-      console.error("Error parsing Gemini API response as JSON:", parseError);
-      return res.status(500).json({
-        error: "Invalid JSON response from Gemini API.",
-        details: parseError.message,
-        rawGeminiResponse: geminiText, // Sertakan respons mentah untuk debugging
-      });
-    }
+    // Cek apakah frontend meminta respons JSON berdasarkan generationConfig
+    const expectsJson =
+      generationConfig &&
+      generationConfig.responseMimeType === "application/json";
 
-    // Mengirimkan konten JSON yang sudah di-parsing secara langsung kembali ke frontend.
-    // Ini menghilangkan pembungkus { text: ... } yang sebelumnya menyebabkan masalah parsing di frontend.
-    res.status(200).json(parsedGeminiContent);
+    if (expectsJson) {
+      try {
+        // Jika diharapkan JSON, coba parse teks mentah dari Gemini sebagai JSON.
+        const parsedGeminiContent = JSON.parse(geminiText);
+        // Mengirimkan konten JSON yang sudah di-parsing secara langsung kembali ke frontend.
+        res.status(200).json(parsedGeminiContent);
+      } catch (parseError) {
+        // Jika respons Gemini bukan JSON yang valid padahal diharapkan JSON, catat error.
+        console.error("Error parsing Gemini API response as JSON:", parseError);
+        return res.status(500).json({
+          error: "Invalid JSON response from Gemini API.",
+          details: parseError.message,
+          rawGeminiResponse: geminiText, // Sertakan respons mentah untuk debugging
+        });
+      }
+    } else {
+      // Jika tidak diharapkan JSON, kembalikan teks mentah Gemini dalam objek { text: ... }.
+      res.status(200).json({ text: geminiText });
+    }
   } catch (error) {
     // Menangani error jika terjadi masalah saat memanggil Gemini API atau error lainnya.
     console.error("Error saat memanggil Gemini API dari fungsi Vercel:", error);
