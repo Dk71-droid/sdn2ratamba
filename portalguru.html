@@ -2206,7 +2206,8 @@
               parsedResult = parseNumerasiContent(generatedContent);
             }
 
-            await docRef.set({
+            // FIX: Use setDoc function instead of docRef.set()
+            await setDoc(docRef, {
               date: targetDate,
               type: exerciseType,
               rawContent: generatedContent,
