@@ -167,7 +167,7 @@
         limit,
         serverTimestamp,
         getDocs,
-      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; // Pastikan getDocs diimpor
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
       // --- Firebase Configuration (sesuai dengan portalsiswa.html dan login.html) ---
       const firebaseConfig = {
@@ -356,7 +356,7 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              contents: chatHistoryForGemini, // Kirim seluruh array contents
+              chatHistory: chatHistoryForGemini, // <--- PERUBAHAN DI SINI: 'contents' diganti jadi 'chatHistory'
             }),
           });
 
@@ -555,7 +555,7 @@
             // Call Vercel serverless function
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: chatHistoryForGemini }),
+            body: JSON.stringify({ chatHistory: chatHistoryForGemini }), // <--- PERUBAHAN DI SINI: 'contents' diganti jadi 'chatHistory'
           });
 
           if (!response.ok) {
