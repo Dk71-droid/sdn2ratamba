@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halaman Diskusiku</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        color: #374151;
+      }
+      .container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background-color: #ffffff;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .chat-area {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        background-color: #f9fafb;
+        display: flex;
+        flex-direction: column;
+      }
+      .message {
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        max-width: 80%;
+        display: flex;
+        flex-direction: column;
+      }
+      .message.user {
+        background-color: #dbeafe; /* Blue-100 */
+        align-self: flex-end;
+        margin-left: auto;
+        border-left: 4px solid #3b82f6; /* Blue-500 */
+      }
+      .message.ai {
+        background-color: #dcfce7; /* Green-100 */
+        align-self: flex-start;
+        margin-right: auto;
+        border-left: 4px solid #22c55e; /* Green-500 */
+      }
+      .message.system {
+        background-color: #fef3c7; /* Yellow-100 */
+        align-self: center;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        font-style: italic;
+        color: #b45309; /* Yellow-700 */
+        border-left: 4px solid #f59e0b; /* Yellow-500 */
+      }
+      .message-sender {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #4b5563;
+      }
+      .message-text {
+        color: #1f2937;
+      }
+      .message-box {
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+      }
+      .loading-dots span {
+        animation: blink 1.4s infinite linear;
+      }
+      .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 0.2;
+        }
+        20% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body class="p-4">
+    <div class="container">
+      <h1
+        class="text-3xl font-bold text-center mb-6 text-indigo-700"
+        id="discussionTitle"
+      >
+        Diskusi Kritis: Fotosintesis
+      </h1>
+      <p class="text-center text-gray-600 mb-8" id="discussionSubTitle">
+        Mari kita jelajahi tema ini bersama AI Fasilitator!
+      </p>
+
+      <div id="chatArea" class="chat-area flex flex-col">
+        <div class="message system">Memuat diskusi...</div>
+      </div>
+
+      <div
+        id="loadingAiIndicator"
+        class="hidden text-center mt-4 text-green-600 font-medium"
+      >
+        AI sedang berpikir<span class="loading-dots"
+          ><span>.</span><span>.</span><span>.</span></span
+        >
+      </div>
+
+      <div class="flex mt-4 space-x-2">
+        <input
+          type="text"
+          id="messageInput"
+          class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Ketik pesan Anda..."
+        />
+        <button
+          id="sendMessageBtn"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+        >
+          Kirim
+        </button>
+        <button
+          id="endDiscussionBtn"
+          class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+        >
+          Akhiri Diskusi
+        </button>
+      </div>
+      <div id="messageBox" class="hidden message-box text-center"></div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        doc,
+        addDoc,
+        getDoc,
+        updateDoc,
+        setDoc,
+        deleteDoc,
+        query,
+        orderBy,
+        onSnapshot,
+        where,
+        limit,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+      // --- Firebase Configuration (sesuai dengan portalsiswa.html dan login.html) ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyBWTYZH2OZuyq_mnbbxiap7iBg-17II55A",
+        authDomain: "tabungansiswa-8bbd6.firebaseapp.com",
+        projectId: "tabungansiswa-8bbd6",
+        storageBucket: "tabungansiswa-8bbd6.firebasestorage.app",
+        messagingSenderId: "1068130708793",
+        appId: "1:1068130708793:web:d6afeed38a9d42dd034ce8",
+      };
+      const appId = firebaseConfig.projectId; // Menggunakan projectId sebagai appId
+
+      // Inisialisasi Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      // --- DOM Elements ---
+      const discussionTitle = document.getElementById("discussionTitle");
+      const discussionSubTitle = document.getElementById("discussionSubTitle");
+      const chatArea = document.getElementById("chatArea");
+      const messageInput = document.getElementById("messageInput");
+      const sendMessageBtn = document.getElementById("sendMessageBtn");
+      const endDiscussionBtn = document.getElementById("endDiscussionBtn");
+      const loadingAiIndicator = document.getElementById("loadingAiIndicator");
+      const messageBox = document.getElementById("messageBox");
+
+      // --- Global State Variables ---
+      let currentUserId = null;
+      let currentUserName = "Anonim"; // Default name, will be updated from studentData
+      let discussionState = null; // Stores AI turn, users tagged, etc.
+      let studentData = null; // Stores authenticated student's data
+      let unsubscribeChatSnapshot = null; // To store the unsubscribe function for chat listener
+      let unsubscribeDiscussionState = null; // To store the unsubscribe function for discussion state listener
+
+      // --- Constants ---
+      const DISCUSSION_THEME = "Fotosintesis";
+      const MAX_AI_TURNS = 15; // Jumlah maksimal giliran AI dalam satu diskusi
+      const AI_CONTEXT_MESSAGE_LIMIT = 20; // Jumlah pesan chat terbaru yang dikirim ke AI sebagai konteks
+
+      // --- Firebase Firestore References ---
+      const getChatCollectionRef = () =>
+        collection(db, `artifacts/${appId}/public/data/group_chats`);
+      const getDiscussionStateRef = () =>
+        doc(
+          db,
+          `artifacts/${appId}/public/data/discussion_state`,
+          "current_discussion"
+        );
+      const getUsersCollectionRef = () => collection(db, `users`);
+
+      // --- Utility Functions ---
+      function showMessage(message, type = "info") {
+        messageBox.textContent = message;
+        messageBox.classList.remove(
+          "hidden",
+          "bg-green-100",
+          "text-green-800",
+          "bg-red-100",
+          "text-red-800",
+          "bg-blue-100",
+          "text-blue-800"
+        );
+        if (type === "success") {
+          messageBox.classList.add("bg-green-100", "text-green-800");
+        } else if (type === "error") {
+          messageBox.classList.add("bg-red-100", "text-red-800");
+        } else {
+          messageBox.classList.add("bg-blue-100", "text-blue-800");
+        }
+        messageBox.classList.remove("hidden");
+        setTimeout(() => {
+          messageBox.classList.add("hidden");
+        }, 5000);
+      }
+
+      function displayMessage(msg) {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message");
+
+        if (msg.role === "user") {
+          msgDiv.classList.add("user");
+          msgDiv.innerHTML = `<div class="message-sender">${
+            msg.senderName || "Anonim"
+          } (${msg.senderId.substring(0, 6)}):</div><div class="message-text">${
+            msg.text
+          }</div>`;
+        } else if (msg.role === "ai") {
+          msgDiv.classList.add("ai");
+          msgDiv.innerHTML = `<div class="message-sender">AI Fasilitator:</div><div class="message-text">${msg.text}</div>`;
+        } else if (msg.role === "system") {
+          msgDiv.classList.add("system");
+          msgDiv.innerHTML = `<div class="message-text">${msg.text}</div>`;
+        }
+        chatArea.appendChild(msgDiv);
+        chatArea.scrollTop = chatArea.scrollHeight; // Auto-scroll
+      }
+
+      async function fetchRecentChatHistoryForAI() {
+        const q = query(
+          getChatCollectionRef(),
+          orderBy("timestamp", "desc"),
+          limit(AI_CONTEXT_MESSAGE_LIMIT)
+        );
+        const snapshot = await getDocs(q);
+        // Reverse to get chronological order for AI context
+        return snapshot.docs.map((doc) => doc.data()).reverse();
+      }
+
+      async function fetchAllChatHistoryForAI() {
+        const q = query(getChatCollectionRef(), orderBy("timestamp", "asc"));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map((doc) => doc.data());
+      }
+
+      async function triggerAiResponse(userMessageText = null) {
+        loadingAiIndicator.classList.remove("hidden");
+        sendMessageBtn.disabled = true; // Disable send button while AI thinks
+
+        try {
+          const recentChat = await fetchRecentChatHistoryForAI();
+          const allUsersSnapshot = await getDocs(getUsersCollectionRef());
+          const allStudentNames = allUsersSnapshot.docs
+            .filter((doc) => doc.data().role === "student")
+            .map((doc) => doc.data().name);
+
+          let chatHistoryForGemini = [];
+
+          // Add system instruction for AI's role and tone
+          chatHistoryForGemini.push({
+            role: "user",
+            parts: [
+              {
+                text: `Anda adalah AI fasilitator diskusi kritis untuk siswa SD kelas 4-6 (usia sekitar 9-12 tahun) dengan topik "${DISCUSSION_THEME}".
+                    Gaya bahasa Anda harus ramah anak, positif, mendorong, dan sedikit humoris, namun tetap fokus pada pemikiran kritis.
+                    
+                    Tugas Anda adalah:
+                    1.  Memancing siswa untuk berargumen, memberikan bukti, dan memikirkan perspektif lain.
+                    2.  Menjaga diskusi tetap terarah pada tema.
+                    3.  Mengajak siswa yang belum aktif. Jika ada siswa yang belum berbicara sama sekali atau sudah lama tidak berbicara (cek dari senderName di chatHistory), ajak mereka dengan menyebut nama mereka (misal: "Bagaimana menurutmu, [Nama Siswa]?"). Gunakan nama siswa dari daftar nama siswa berikut: ${allStudentNames.join(
+                      ", "
+                    )}. Jangan menandai nama yang tidak ada di daftar.
+                    4.  Memberikan rangkuman singkat atau pertanyaan pemicu setelah beberapa respons siswa atau jika diskusi mulai melambat.
+                    5.  Jangan langsung memberikan jawaban, selalu ajukan pertanyaan.
+                    6.  Batasi respons Anda tidak lebih dari 2-3 kalimat.
+                    7.  Anda sedang berada di giliran ke-${
+                      discussionState.currentAiTurn + 1
+                    } dari ${MAX_AI_TURNS} giliran. Pastikan diskusi terus bergerak maju.
+                    
+                    Riwayat diskusi terbaru:`,
+              },
+            ],
+          });
+
+          // Convert recentChat to Gemini API format
+          recentChat.forEach((msg) => {
+            chatHistoryForGemini.push({
+              role: msg.role === "ai" ? "assistant" : "user", // AI role is 'assistant' in Gemini API
+              parts: [
+                {
+                  text: `${msg.senderName} (${msg.senderId.substring(0, 6)}): ${
+                    msg.text
+                  }`,
+                },
+              ], // Sertakan nama pengirim untuk konteks AI
+            });
+          });
+
+          // Jika AI merespons karena pesan pengguna, tambahkan pesan tersebut sebagai bagian dari history
+          if (userMessageText) {
+            chatHistoryForGemini.push({
+              role: "user",
+              parts: [
+                {
+                  text: `${currentUserName} (${currentUserId.substring(
+                    0,
+                    6
+                  )}): ${userMessageText}`,
+                },
+              ],
+            });
+          }
+
+          // Call the Vercel serverless function
+          const response = await fetch("/api/gemini", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: chatHistoryForGemini, // Kirim seluruh array contents
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            let errorMessage =
+              errorData.error ||
+              `API Error: ${response.status} - ${response.statusText}`;
+            if (response.status === 401) {
+              errorMessage = `API Error: 401 Unauthorized. Pastikan serverless function Anda terkonfigurasi dengan benar.`;
+            } else if (response.status === 503) {
+              errorMessage = `API Error: 503 Service Unavailable. Server AI kelebihan beban. Mohon coba lagi nanti.`;
+            }
+            throw new Error(errorMessage);
+          }
+
+          const result = await response.json();
+          const aiText = result.text; // Ambil properti 'text' dari respons serverless function
+
+          if (aiText) {
+            await sendMessage(aiText, "ai", "AI Fasilitator");
+
+            // Update discussion state for next AI turn
+            const newAiTurn = discussionState.currentAiTurn + 1;
+            const newUsersRespondedToTag = {}; // Reset for new turn
+
+            await updateDoc(getDiscussionStateRef(), {
+              currentAiTurn: newAiTurn,
+              usersAITagged: [], // Clear tagged users for next turn
+              usersRespondedToTag: newUsersRespondedToTag,
+              lastAiResponseTime: serverTimestamp(),
+            });
+            console.log(`AI responded. Current AI turn: ${newAiTurn}`);
+            if (newAiTurn >= MAX_AI_TURNS) {
+              await endDiscussion(true); // End discussion if max turns reached
+            }
+          } else {
+            showMessage(
+              "Gagal mendapatkan respons dari AI. Respon kosong.",
+              "error"
+            );
+            console.error("Empty AI response:", result);
+          }
+        } catch (error) {
+          showMessage(
+            `Terjadi kesalahan saat memicu AI: ${error.message}. Coba lagi.`,
+            "error"
+          );
+          console.error("Error in triggerAiResponse:", error);
+        } finally {
+          loadingAiIndicator.classList.add("hidden");
+          sendMessageBtn.disabled = false; // Re-enable send button
+        }
+      }
+
+      async function sendMessage(text, role, senderName) {
+        if (!text.trim()) {
+          showMessage("Pesan tidak boleh kosong.", "info");
+          return;
+        }
+        if (!currentUserId) {
+          showMessage("Anda belum terautentikasi.", "error");
+          return;
+        }
+
+        try {
+          await addDoc(getChatCollectionRef(), {
+            text: text,
+            role: role,
+            senderId: currentUserId,
+            senderName: senderName,
+            timestamp: serverTimestamp(),
+          });
+          messageInput.value = ""; // Clear input after sending
+
+          if (role === "user") {
+            // Update discussion state when a user sends a message
+            const updatedUsersRespondedToTag = {
+              ...discussionState.usersRespondedToTag,
+            };
+            if (discussionState.usersAITagged.includes(currentUserId)) {
+              updatedUsersRespondedToTag[currentUserId] = true;
+            }
+
+            await updateDoc(getDiscussionStateRef(), {
+              lastUserMessageTime: serverTimestamp(),
+              usersRespondedToTag: updatedUsersRespondedToTag,
+            });
+            console.log(
+              `User ${senderName} sent message. Users responded:`,
+              updatedUsersRespondedToTag
+            );
+          }
+        } catch (error) {
+          showMessage(`Gagal mengirim pesan: ${error.message}`, "error");
+          console.error("Error sending message:", error);
+        }
+      }
+
+      async function initDiscussion() {
+        const docSnap = await getDoc(getDiscussionStateRef());
+        if (!docSnap.exists() || docSnap.data().isEnded) {
+          console.log(
+            "No active discussion found or previous discussion ended. Starting a new one."
+          );
+          // Clear previous chat history if starting a new discussion
+          const chatSnapshot = await getDocs(getChatCollectionRef());
+          const deletePromises = chatSnapshot.docs.map((d) =>
+            deleteDoc(doc(getChatCollectionRef(), d.id))
+          );
+          await Promise.all(deletePromises);
+          console.log("Previous chat history cleared.");
+
+          // Initialize discussion state
+          await setDoc(getDiscussionStateRef(), {
+            currentAiTurn: 0,
+            isEnded: false,
+            usersAITagged: [],
+            usersRespondedToTag: {},
+            lastAiResponseTime: null,
+            lastUserMessageTime: null,
+            startTime: serverTimestamp(),
+          });
+          console.log("New discussion state initialized.");
+          await sendMessage(
+            `Selamat datang di diskusi kritis tentang ${DISCUSSION_THEME}! Perkenalkan diri Anda dan mari kita mulai.`,
+            "ai",
+            "AI Fasilitator"
+          );
+        }
+        // Listen to discussion state changes
+        listenToDiscussionState();
+        // Listen to chat messages
+        listenForMessages();
+      }
+
+      async function endDiscussion(fromAI = false) {
+        if (discussionState.isEnded) {
+          showMessage("Diskusi sudah berakhir.", "info");
+          return;
+        }
+
+        // Update state to ended
+        await updateDoc(getDiscussionStateRef(), {
+          isEnded: true,
+          endTime: serverTimestamp(),
+        });
+
+        // Trigger final summary from AI
+        loadingAiIndicator.classList.remove("hidden");
+        sendMessageBtn.disabled = true;
+
+        try {
+          const fullChatHistory = await fetchAllChatHistoryForAI();
+          const allUsersSnapshot = await getDocs(getUsersCollectionRef());
+          const allStudentNames = allUsersSnapshot.docs
+            .filter((doc) => doc.data().role === "student")
+            .map((doc) => doc.data().name);
+
+          let chatHistoryForGemini = [];
+          // Add system instruction for AI's role and tone
+          chatHistoryForGemini.push({
+            role: "user",
+            parts: [
+              {
+                text: `Anda adalah AI fasilitator diskusi kritis untuk siswa SD kelas 4-6 (usia sekitar 9-12 tahun) dengan topik "${DISCUSSION_THEME}".
+                    Diskusi baru saja berakhir. Tugas Anda sekarang adalah memberikan rangkuman diskusi untuk siswa dan evaluasi singkat.
+                    
+                    Dalam rangkuman, sebutkan:
+                    1.  Poin-poin utama yang dibahas.
+                    2.  Kesimpulan atau pemahaman kunci yang mungkin telah dicapai.
+                    3.  Pentingnya tema ini.
+                    
+                    Dalam evaluasi singkat (kualitatif, bukan angka), berikan komentar positif tentang partisipasi dan pemikiran kritis yang ditunjukkan oleh siswa secara keseluruhan.
+                    Gunakan bahasa yang positif, memotivasi, dan mudah dipahami anak-anak SD. Batasi respons Anda sekitar 4-5 kalimat.
+                    
+                    Riwayat diskusi lengkap:`,
+              },
+            ],
+          });
+
+          fullChatHistory.forEach((msg) => {
+            chatHistoryForGemini.push({
+              role: msg.role === "ai" ? "assistant" : "user", // AI role is 'assistant' in Gemini API
+              parts: [
+                {
+                  text: `${msg.senderName} (${msg.senderId.substring(0, 6)}): ${
+                    msg.text
+                  }`,
+                },
+              ],
+            });
+          });
+
+          const response = await fetch("/api/gemini", {
+            // Call Vercel serverless function
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: chatHistoryForGemini }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.error ||
+                `API Error: ${response.status} - ${response.statusText}`
+            );
+          }
+
+          const result = await response.json();
+          const finalSummary = result.text;
+
+          if (finalSummary) {
+            await sendMessage(finalSummary, "system", "Sistem");
+            showMessage(
+              "Diskusi telah berakhir. AI telah memberikan rangkuman.",
+              "success"
+            );
+          } else {
+            showMessage(
+              "Gagal mendapatkan rangkuman diskusi dari AI.",
+              "error"
+            );
+          }
+        } catch (error) {
+          showMessage(
+            `Terjadi kesalahan saat mengakhiri diskusi: ${error.message}`,
+            "error"
+          );
+          console.error("Error ending discussion:", error);
+        } finally {
+          loadingAiIndicator.classList.add("hidden");
+          sendMessageBtn.disabled = true; // Keep disabled after discussion ends
+          messageInput.disabled = true; // Disable input
+        }
+      }
+
+      // --- Firebase Listeners ---
+      function listenForMessages() {
+        if (unsubscribeChatSnapshot) {
+          unsubscribeChatSnapshot(); // Unsubscribe previous listener if exists
+        }
+
+        const q = query(getChatCollectionRef(), orderBy("timestamp"));
+
+        unsubscribeChatSnapshot = onSnapshot(
+          q,
+          (snapshot) => {
+            chatArea.innerHTML = ""; // Clear existing messages
+            snapshot.docs.forEach((doc) => {
+              displayMessage(doc.data());
+            });
+          },
+          (error) => {
+            console.error("Error listening to messages: ", error);
+            showMessage(`Gagal memuat pesan: ${error.message}`, "error");
+          }
+        );
+      }
+
+      function listenToDiscussionState() {
+        if (unsubscribeDiscussionState) {
+          unsubscribeDiscussionState(); // Unsubscribe previous listener if exists
+        }
+
+        unsubscribeDiscussionState = onSnapshot(
+          getDiscussionStateRef(),
+          async (docSnap) => {
+            if (docSnap.exists()) {
+              discussionState = docSnap.data();
+              console.log("Discussion State Updated:", discussionState);
+
+              if (discussionState.isEnded) {
+                discussionTitle.textContent = `Diskusi Telah Berakhir`;
+                discussionSubTitle.textContent = `Terima kasih atas partisipasi Anda!`;
+                sendMessageBtn.disabled = true;
+                messageInput.disabled = true;
+                endDiscussionBtn.disabled = true;
+                loadingAiIndicator.classList.add("hidden");
+                showMessage("Diskusi telah selesai.", "info");
+              } else {
+                discussionTitle.textContent = `Diskusi Kritis: ${DISCUSSION_THEME}`;
+                discussionSubTitle.textContent = `Giliran AI ke-${
+                  discussionState.currentAiTurn + 1
+                }. Mari kita jelajahi tema ini bersama AI Fasilitator!`;
+                sendMessageBtn.disabled = false;
+                messageInput.disabled = false;
+                endDiscussionBtn.disabled = false;
+
+                // Check if AI needs to respond (after initial state or user message)
+                const now = Date.now();
+                const lastAiTime = discussionState.lastAiResponseTime
+                  ? discussionState.lastAiResponseTime.toDate().getTime()
+                  : 0;
+                const lastUserTime = discussionState.lastUserMessageTime
+                  ? discussionState.lastUserMessageTime.toDate().getTime()
+                  : 0;
+
+                // Initial AI message trigger
+                if (
+                  discussionState.currentAiTurn === 0 &&
+                  now - lastAiTime > 5000
+                ) {
+                  // 5s buffer after initial setup
+                  const chatDocs = await getDocs(getChatCollectionRef());
+                  if (chatDocs.empty) {
+                    // Only trigger if chat is truly empty (initial prompt not sent yet)
+                    await sendMessage(
+                      `Selamat datang di diskusi kritis tentang ${DISCUSSION_THEME}! Perkenalkan diri Anda dan mari kita mulai.`,
+                      "ai",
+                      "AI Fasilitator"
+                    );
+                  }
+                }
+
+                // AI response trigger after user messages, if not already handled
+                // And if not all tagged users have responded, AI waits
+                const allTaggedResponded =
+                  discussionState.usersAITagged.length === 0 ||
+                  discussionState.usersAITagged.every(
+                    (id) => discussionState.usersRespondedToTag[id]
+                  );
+
+                if (
+                  allTaggedResponded &&
+                  lastUserTime > lastAiTime &&
+                  !loadingAiIndicator.classList.contains("hidden")
+                ) {
+                  // AI is already thinking or has just responded
+                  // Do nothing, wait for AI to finish or next user message
+                } else if (allTaggedResponded && lastUserTime > lastAiTime) {
+                  // AI responds if all tagged users replied or no one was tagged and a user spoke
+                  // Only trigger if a user has spoken *since* the last AI response
+                  // And if AI is not already thinking
+                  triggerAiResponse();
+                }
+              }
+            } else {
+              // Discussion state document doesn't exist, meaning it's the very first time.
+              // Or if it was deleted, it implies starting fresh.
+              initDiscussion();
+            }
+          },
+          (error) => {
+            console.error("Error listening to discussion state: ", error);
+            showMessage(
+              `Gagal memuat status diskusi: ${error.message}`,
+              "error"
+            );
+          }
+        );
+      }
+
+      // --- Event Listeners ---
+      sendMessageBtn.addEventListener("click", () => {
+        if (messageInput.value.trim() && !sendMessageBtn.disabled) {
+          sendMessage(messageInput.value, "user", currentUserName);
+        }
+      });
+
+      messageInput.addEventListener("keypress", (e) => {
+        if (
+          e.key === "Enter" &&
+          messageInput.value.trim() &&
+          !sendMessageBtn.disabled
+        ) {
+          sendMessage(messageInput.value, "user", currentUserName);
+        }
+      });
+
+      endDiscussionBtn.addEventListener("click", () => {
+        if (!discussionState.isEnded) {
+          const confirmEnd = confirm(
+            "Apakah Anda yakin ingin mengakhiri diskusi?"
+          );
+          if (confirmEnd) {
+            endDiscussion();
+          }
+        } else {
+          showMessage("Diskusi sudah berakhir.", "info");
+        }
+      });
+
+      // --- Firebase Authentication ---
+      onAuthStateChanged(auth, async (user) => {
+        const studentAppIdFromLocalStorage = localStorage.getItem(
+          "currentStudentAppId"
+        );
+
+        if (user && studentAppIdFromLocalStorage) {
+          currentUserId = user.uid; // Set currentUserId from authenticated user
+          const studentDocRef = doc(
+            getUsersCollectionRef(),
+            studentAppIdFromLocalStorage
+          );
+          try {
+            const docSnap = await getDoc(studentDocRef);
+            if (docSnap.exists() && docSnap.data().role === "student") {
+              studentData = { id: docSnap.id, ...docSnap.data() };
+              currentUserName = studentData.name; // Set currentUserName from student data
+              console.log("Authenticated student:", currentUserName);
+              initDiscussion(); // Inisialisasi atau lanjutkan diskusi
+            } else {
+              console.warn(
+                "Invalid student ID in localStorage or role mismatch. Redirecting to login."
+              );
+              localStorage.removeItem("currentStudentAppId");
+              window.location.href = "login.html";
+            }
+          } catch (error) {
+            console.error("Error fetching student data:", error);
+            showMessage(`Gagal memuat data siswa: ${error.message}`, "error");
+            localStorage.removeItem("currentStudentAppId");
+            window.location.href = "login.html";
+          }
+        } else {
+          console.warn(
+            "No active Firebase session or student ID. Redirecting to login."
+          );
+          localStorage.removeItem("currentStudentAppId");
+          window.location.href = "login.html";
+        }
+      });
+
+      // Hentikan listener saat halaman ditutup
+      window.addEventListener("beforeunload", () => {
+        if (unsubscribeChatSnapshot) {
+          unsubscribeChatSnapshot();
+          console.log("Unsubscribed from chat updates.");
+        }
+        if (unsubscribeDiscussionState) {
+          unsubscribeDiscussionState();
+          console.log("Unsubscribed from discussion state updates.");
+        }
+      });
+    </script>
+  </body>
+</html>
