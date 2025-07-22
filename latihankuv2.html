@@ -578,13 +578,13 @@
         where,
         doc,
         getDoc,
-        setDoc, // Import setDoc
+        setDoc,
         updateDoc,
         addDoc,
         onSnapshot,
         serverTimestamp,
         getDocs,
-        deleteDoc, // Import deleteDoc untuk menghapus mapping saat logout
+        deleteDoc,
       } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
       // --- Firebase Configuration ---
@@ -775,11 +775,7 @@
 
       // --- Firebase Auth State Listener ---
       onAuthStateChanged(auth, async (user) => {
-        // Hapus penggunaan localStorage.getItem("currentStudentAppId")
-        // const studentAppIdFromLocalStorage = localStorage.getItem("currentStudentAppId");
-
         if (user) {
-          // Firebase user exists. Sekarang, verifikasi mapping ke studentId.
           const mappingDocRef = doc(
             db,
             "firebase_user_to_student_map",
@@ -794,30 +790,26 @@
               const docSnap = await getDoc(studentDocRef);
 
               if (docSnap.exists() && docSnap.data().role === "student") {
-                // Valid session: Firebase user exists AND custom student ID is valid
                 studentData = { id: docSnap.id, ...docSnap.data() };
                 setupFirestoreListeners(user.uid, studentData.id);
                 renderMainContent();
                 portalTitle.innerText = `Halo, ${studentData.name}!`;
-                appView.classList.remove("hidden"); // Make it visible
-                appView.classList.add("fade-in"); // Trigger fade-in
+                appView.classList.remove("hidden");
+                appView.classList.add("fade-in");
               } else {
-                // Mapping exists but student data invalid or role mismatch
                 console.warn(
                   "Mapped student ID invalid or role mismatch. Forcing Firebase logout and redirecting to login."
                 );
-                // Hapus mapping yang tidak valid
-                await deleteDoc(mappingDocRef); // Hapus mapping yang rusak
-                await signOut(auth); // Force Firebase logout
-                window.location.href = "login.html"; // Redirect to login
+                await deleteDoc(mappingDocRef);
+                await signOut(auth);
+                window.location.href = "login.html";
               }
             } else {
-              // Firebase user exists, but no mapping to a student ID.
               console.warn(
                 "Firebase user active but no student ID mapping. Forcing Firebase logout and redirecting to login."
               );
-              await signOut(auth); // Force Firebase logout
-              window.location.href = "login.html"; // Redirect to login
+              await signOut(auth);
+              window.location.href = "login.html";
             }
           } catch (error) {
             console.error(
@@ -828,9 +820,7 @@
             window.location.href = "login.html";
           }
         } else {
-          // No Firebase user. Pastikan tidak ada mapping dan redirect ke login.
           console.warn("No Firebase user active. Redirecting to login.");
-          // Tidak perlu menghapus mapping di sini karena user sudah null
           window.location.href = "login.html";
         }
       });
@@ -995,10 +985,6 @@
           showMessage("loading", "Sedang logout...");
           try {
             studentData = null;
-            // Hapus penggunaan localStorage.removeItem("currentStudentAppId");
-            // localStorage.removeItem("currentStudentAppId"); // Clear custom student ID from localStorage
-
-            // Hapus mapping dari Firestore saat logout
             if (auth.currentUser) {
               await deleteDoc(
                 doc(db, "firebase_user_to_student_map", auth.currentUser.uid)
@@ -1009,7 +995,7 @@
               );
             }
 
-            await signOut(auth); // Sign out from Firebase
+            await signOut(auth);
 
             studentMotivation = {
               message: null,
@@ -1024,7 +1010,6 @@
               studentPerformanceChart = null;
             }
 
-            // Clear modal states
             showConfirmationModal = false;
             confirmationMessage = "";
             confirmationAction = null;
@@ -1034,7 +1019,6 @@
             showExerciseDetailsModal = false;
             exerciseDetailsData = null;
 
-            // Unsubscribe all listeners
             if (unsubscribeStudentProfile) unsubscribeStudentProfile();
             if (unsubscribeDailyExercise) unsubscribeDailyExercise();
             if (unsubscribeStudentExerciseHistory)
@@ -1042,10 +1026,10 @@
             if (unsubscribeStudentMotivation) unsubscribeStudentMotivation();
 
             showMessage("success", "Berhasil logout.");
-            appView.classList.add("fade-out"); // Apply fade-out before redirect
+            appView.classList.add("fade-out");
             setTimeout(() => {
-              window.location.href = "login.html"; // Redirect to login portal
-            }, 300); // Match CSS transition duration
+              window.location.href = "login.html";
+            }, 300);
           } catch (error) {
             console.error("Logout error:", error);
             showMessage("error", "Gagal logout: " + error.message);
@@ -1053,20 +1037,15 @@
         });
       }
 
-      // --- Main Content Renderer ---
       function renderMainContent() {
-        // In latihankuv2.html, we assume the user is already authenticated or will be redirected.
-        // So, we directly show the appView and its content.
-        bottomNav.style.display = "flex"; // Ensure bottom nav is visible
+        bottomNav.style.display = "flex";
 
-        // Hide all internal tab content sections within appView first
         document
           .querySelectorAll("#appView .tab-content-section")
           .forEach((section) => {
             section.classList.remove("active");
           });
 
-        // Show the current active internal tab content section
         const activeViewElement = document.getElementById(
           `${currentStudentView}View`
         );
@@ -1074,7 +1053,6 @@
           activeViewElement.classList.add("active");
         }
 
-        // Set active class for bottom navigation buttons
         document.querySelectorAll(".bottom-nav button").forEach((button) => {
           if (button.dataset.view === currentStudentView) {
             button.classList.add("active");
@@ -1083,7 +1061,6 @@
           }
         });
 
-        // Call specific render function for the active view
         switch (currentStudentView) {
           case "dashboard":
             renderDashboardView();
@@ -1102,7 +1079,6 @@
         attachDynamicEventListeners();
       }
 
-      // --- Sub-renderers for each view ---
       function renderDashboardView() {
         const dashboardViewElement = document.getElementById("dashboardView");
         if (!dashboardViewElement) return;
@@ -1291,8 +1267,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
 `;
 
         try {
-          // Panggil endpoint Vercel Anda, bukan langsung API Gemini
-          const payload = { prompt: prompt }; // Sesuaikan payload dengan yang diharapkan oleh fungsi Vercel Anda
+          const payload = { prompt: prompt };
           const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1309,7 +1284,6 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           }
 
           const data = await response.json();
-          // Asumsikan fungsi Vercel mengembalikan { generatedText: "..." }
           const aiMessage = data.generatedText;
 
           if (auth.currentUser) {
@@ -1566,7 +1540,6 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           .getElementById("resetSettings")
           ?.addEventListener("click", resetSettings);
 
-        // Attach logout button listener (now in settings)
         document
           .getElementById("logoutButton")
           ?.removeEventListener("click", handleLogout);
@@ -1575,18 +1548,12 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           ?.addEventListener("click", handleLogout);
       }
 
-      // --- Attach Event Listeners for Dynamically Rendered Content ---
       function attachDynamicEventListeners() {
         document.querySelectorAll(".bottom-nav button").forEach((button) => {
           button.removeEventListener("click", handleNavButtonClick);
           button.addEventListener("click", handleNavButtonClick);
         });
 
-        // Logout button listener is now handled in renderSettingsView
-        // document.getElementById("logoutButton")?.removeEventListener("click", handleLogout);
-        // document.getElementById("logoutButton")?.addEventListener("click", handleLogout);
-
-        // New: Back button listener
         backButton?.removeEventListener("click", handleBackButtonClick);
         backButton?.addEventListener("click", handleBackButtonClick);
 
@@ -1627,12 +1594,11 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         renderMainContent();
       }
 
-      // New: Handle back button click
       function handleBackButtonClick() {
-        appView.classList.add("fade-out"); // Apply fade-out effect
+        appView.classList.add("fade-out");
         setTimeout(() => {
-          window.location.href = "portalsiswa.html"; // Navigate back to portalsiswa.html
-        }, 300); // Match CSS transition duration
+          window.location.href = "portalsiswa.html";
+        }, 300);
       }
 
       function handleCancelConfirm() {
@@ -1664,7 +1630,6 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         renderModals();
       }
 
-      // --- Chart Rendering for Dashboard ---
       function renderStudentPerformanceChart() {
         const chartCtx = document.getElementById("studentPerformanceChart");
         if (!chartCtx) return;
@@ -1764,10 +1729,6 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         }
       }
 
-      /**
-       * Submits the student's answers to the daily exercise.
-       * @param {Event} e - The form submission event.
-       */
       async function handleSubmitExercise(e) {
         e.preventDefault();
         showMessage("loading", "Mengirim jawaban dan mengevaluasi...");
@@ -1829,8 +1790,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         `;
 
         try {
-          // Panggil endpoint Vercel Anda, bukan langsung API Gemini
-          const payload = { prompt: prompt }; // Sesuaikan payload dengan yang diharapkan oleh fungsi Vercel Anda
+          const payload = { prompt: prompt };
           const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1847,7 +1807,6 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           }
 
           const data = await response.json();
-          // Asumsikan fungsi Vercel mengembalikan { generatedText: "..." }
           const aiEvaluationText = data.generatedText;
 
           const lines = aiEvaluationText

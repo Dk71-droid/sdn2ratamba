@@ -215,7 +215,7 @@
         getDocs,
         doc,
         getDoc,
-        setDoc, // Import setDoc untuk menyimpan mapping
+        setDoc,
       } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
       // --- Firebase Configuration ---
@@ -395,12 +395,6 @@
             loadingScreen.classList.add("hidden");
             return;
           }
-
-          // *** HAPUS pengalihan langsung di sini. Biarkan onAuthStateChanged yang menangani. ***
-          // showMessage("success", `Selamat datang, ${studentDataFromDb.name}! Mengarahkan...`);
-          // setTimeout(() => {
-          //   window.location.href = "portalsiswa.html";
-          // }, 1000);
         } catch (error) {
           console.error("Login siswa error:", error);
           showMessage("error", `Gagal login: ${error.message}`);
@@ -411,9 +405,6 @@
       // --- Initial Load and Auth Check ---
       onAuthStateChanged(auth, async (user) => {
         // This listener fires on page load and on auth state changes
-        // Hapus penggunaan localStorage.getItem("currentStudentAppId") di sini
-        // const studentAppIdFromLocalStorage = localStorage.getItem("currentStudentAppId");
-
         if (user) {
           // Firebase user exists. Sekarang, verifikasi mapping ke studentId.
           const mappingDocRef = doc(
@@ -438,7 +429,7 @@
                 );
                 setTimeout(() => {
                   window.location.href = "portalsiswa.html";
-                }, 500); // Short delay for message and smooth transition
+                }, 500); // Short delay for message
                 return; // Stop execution here
               } else {
                 // Mapping exists but student data invalid or role mismatch

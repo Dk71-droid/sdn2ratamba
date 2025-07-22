@@ -220,7 +220,8 @@
         border-color: #64748b;
         color: #e2e8f0;
       }
-      body.dark-mode input::placeholder {
+      body.dark-mode input::placeholder,
+      body.dark-mode textarea::placeholder {
         color: #a0aec0;
       }
       body.dark-mode #globalMessage.bg-blue-100 {
@@ -375,6 +376,7 @@
         getFirestore,
         doc,
         getDoc,
+        deleteDoc, // Import deleteDoc
       } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
       // --- Firebase Configuration ---
@@ -420,11 +422,7 @@
         showConfirmModal("Apakah Anda yakin ingin keluar?", async () => {
           showMessage("loading", "Sedang logout...");
           try {
-            await signOut(auth);
             studentData = null;
-            // Hapus penggunaan localStorage.removeItem("currentStudentAppId");
-            // localStorage.removeItem("currentStudentAppId"); // Clear student ID from localStorage
-
             // Hapus mapping dari Firestore saat logout
             if (auth.currentUser) {
               await deleteDoc(
@@ -435,6 +433,8 @@
                 auth.currentUser.uid
               );
             }
+
+            await signOut(auth); // Sign out from Firebase
 
             showMessage(
               "success",
@@ -645,18 +645,17 @@
           document.body.classList.remove("dark-mode");
         }
 
-        // Apply reading mode setting if it exists (though not fully implemented in portalsiswa)
-        const readingMode = localStorage.getItem("studentReadingMode"); // Using 'studentReadingMode' from latihankuv2
+        const readingMode = localStorage.getItem("studentReadingMode");
         const toggleReadingModeCheckbox =
           document.getElementById("toggleReadingMode");
-        if (toggleReadingModeCheckbox) {
-          if (readingMode === "true") {
-            document.body.classList.add("reading-mode");
+        if (readingMode === "true") {
+          document.body.classList.add("reading-mode");
+          if (toggleReadingModeCheckbox)
             toggleReadingModeCheckbox.checked = true;
-          } else {
-            document.body.classList.remove("reading-mode");
+        } else {
+          document.body.classList.remove("reading-mode");
+          if (toggleReadingModeCheckbox)
             toggleReadingModeCheckbox.checked = false;
-          }
         }
       }
 
@@ -683,7 +682,7 @@
           "Apakah Anda yakin ingin mereset semua pengaturan tampilan ke default?",
           () => {
             localStorage.removeItem("portalTheme");
-            localStorage.removeItem("studentReadingMode"); // Also reset reading mode
+            localStorage.removeItem("studentReadingMode");
             applySavedSettings();
             showMessage("success", "Pengaturan telah direset.");
           }
@@ -692,11 +691,7 @@
 
       // --- Firebase Auth State Listener ---
       onAuthStateChanged(auth, async (user) => {
-        // Hapus penggunaan localStorage.getItem("currentStudentAppId") di sini
-        // const studentAppIdFromLocalStorage = localStorage.getItem("currentStudentAppId");
-
         if (user) {
-          // Firebase user exists. Sekarang, verifikasi mapping ke studentId.
           const mappingDocRef = doc(
             db,
             "firebase_user_to_student_map",
@@ -712,54 +707,46 @@
 
               if (docSnap.exists() && docSnap.data().role === "student") {
                 studentData = { id: docSnap.id, ...docSnap.data() };
+                renderMainContent();
                 portalTitle.innerText = `Halo, ${studentData.name}!`;
-                // Fade in the app view after successful authentication
-                appView.classList.remove("hidden"); // Ensure display is not 'none'
+                appView.classList.remove("hidden");
                 appView.classList.add("fade-in");
-                renderMainContent(); // Pindahkan panggilan ini ke sini
               } else {
-                // Mapping exists but student data invalid or role mismatch
                 console.warn(
                   "Mapped student ID invalid or role mismatch. Redirecting to login."
                 );
-                // Hapus mapping yang tidak valid
-                await deleteDoc(mappingDocRef); // Hapus mapping yang rusak
-                await signOut(auth); // Force Firebase logout
-                window.location.href = "login.html"; // Redirect to login
-                return; // Stop execution
+                await deleteDoc(mappingDocRef);
+                await signOut(auth);
+                window.location.href = "login.html";
+                return;
               }
             } else {
-              // Firebase user exists, but no mapping to a student ID.
-              // This means the Firebase session is active but our custom user isn't linked.
-              // Force Firebase logout and redirect to login.
               console.warn(
                 "Firebase user active but no student ID mapping. Forcing Firebase logout and redirecting to login."
               );
-              await signOut(auth); // Force Firebase logout
+              await signOut(auth);
               window.location.href = "login.html";
-              return; // Stop execution
+              return;
             }
           } catch (error) {
-            console.error("Error verifying student data or mapping:", error);
-            await signOut(auth); // Force Firebase logout
+            console.error(
+              "Error fetching student data from Firestore or mapping:",
+              error
+            );
+            await signOut(auth);
             window.location.href = "login.html";
-            return; // Stop execution
+            return;
           }
         } else {
-          // No Firebase user. Pastikan tidak ada mapping dan redirect ke login.
           console.warn("No Firebase user active. Redirecting to login.");
-          // Tidak perlu menghapus mapping di sini karena user sudah null
           window.location.href = "login.html";
-          return; // Stop execution
+          return;
         }
-
-        // renderMainContent(); // Hapus panggilan ini dari sini
       });
 
       // --- Main Content Renderer ---
       function renderMainContent() {
         if (studentData && auth.currentUser) {
-          // Ensure only default view is active on the main page
           document
             .querySelectorAll("#appView .tab-content-section")
             .forEach((section) => {
@@ -767,8 +754,8 @@
             });
           document.getElementById("defaultView").classList.add("active");
 
-          renderModals(); // Render any active modals
-          attachDynamicEventListeners(); // Attach listeners for all dynamic elements
+          renderModals();
+          attachDynamicEventListeners();
         } else {
           window.location.href = "login.html";
         }
@@ -776,17 +763,14 @@
 
       // --- Attach Event Listeners for Dynamically Rendered Content ---
       function attachDynamicEventListeners() {
-        // Attach event listeners for navigation cards
         document.querySelectorAll(".nav-card").forEach((card) => {
-          card.removeEventListener("click", handleNavCardClick); // Prevent duplicates
+          card.removeEventListener("click", handleNavCardClick);
           card.addEventListener("click", handleNavCardClick);
         });
 
-        // Settings Icon Button
         settingsIconBtn?.removeEventListener("click", handleSettingsIconClick);
         settingsIconBtn?.addEventListener("click", handleSettingsIconClick);
 
-        // Modal specific listeners (must be re-attached if modal content changes)
         if (showConfirmationModal) {
           document
             .getElementById("cancelConfirm")
@@ -810,7 +794,6 @@
             ?.addEventListener("click", handleClosePlaceholderModal);
         }
         if (showSettingsModal) {
-          // Close button for settings modal
           document
             .getElementById("closeSettingsModal")
             ?.removeEventListener("click", handleCloseSettingsModal);
@@ -818,7 +801,6 @@
             .getElementById("closeSettingsModal")
             ?.addEventListener("click", handleCloseSettingsModal);
 
-          // Theme buttons inside settings modal
           document
             .getElementById("setLightMode")
             ?.removeEventListener("click", setLightMode);
@@ -833,7 +815,6 @@
             .getElementById("setDarkMode")
             ?.addEventListener("click", setDarkMode);
 
-          // Reading mode toggle inside settings modal
           document
             .getElementById("toggleReadingMode")
             ?.removeEventListener("change", toggleReadingMode);
@@ -841,7 +822,6 @@
             .getElementById("toggleReadingMode")
             ?.addEventListener("change", toggleReadingMode);
 
-          // Reset settings button inside settings modal
           document
             .getElementById("resetSettings")
             ?.removeEventListener("click", resetSettings);
@@ -849,7 +829,6 @@
             .getElementById("resetSettings")
             ?.addEventListener("click", resetSettings);
 
-          // Logout button inside settings modal
           document
             .getElementById("logoutButtonModal")
             ?.removeEventListener("click", handleLogout);
@@ -862,28 +841,26 @@
       function handleNavCardClick(e) {
         e.preventDefault();
         const targetUrl = e.currentTarget.dataset.targetUrl;
-        const featureName = e.currentTarget.dataset.featureName; // Get the feature name
+        const featureName = e.currentTarget.dataset.featureName;
 
         if (targetUrl) {
-          // If data-target-url is present, redirect to that URL
           appView.classList.add("fade-out");
           setTimeout(() => {
             window.location.href = targetUrl;
-          }, 300); // Match CSS transition duration
+          }, 300);
         } else {
-          // If no target URL, it's a placeholder feature, show modal
           showPlaceholderModal = true;
           placeholderFeatureName = featureName;
           renderModals();
-          attachDynamicEventListeners(); // Re-attach listeners for the new modal
+          attachDynamicEventListeners();
         }
       }
 
       function handleSettingsIconClick() {
         showSettingsModal = true;
         renderModals();
-        applySavedSettings(); // Apply settings to modal content
-        attachDynamicEventListeners(); // Re-attach listeners for the new modal
+        applySavedSettings();
+        attachDynamicEventListeners();
       }
 
       function handleClosePlaceholderModal() {
@@ -897,9 +874,7 @@
         renderModals();
       }
 
-      // Initial application of settings (before any rendering)
       applySavedSettings();
-      // Initial render will be handled by onAuthStateChanged
     </script>
   </body>
 </html>
