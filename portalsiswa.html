@@ -349,16 +349,6 @@
                 <span>Nilai Rapor</span>
               </div>
 
-              <!-- NEW: Navigation Card: Halaman Diskusiku (redirects to diskusi-siswa.html) -->
-              <div
-                class="nav-card"
-                data-target-url="diskusi-siswa.html"
-                data-feature-name="Halaman Diskusiku"
-              >
-                <i class="fas fa-comments"></i>
-                <span>Halaman Diskusiku</span>
-              </div>
-
               <!-- "Pengaturan" card is removed from here -->
             </div>
           </div>
@@ -705,6 +695,7 @@
               // Fade in the app view after successful authentication
               appView.classList.remove("hidden"); // Ensure display is not 'none'
               appView.classList.add("fade-in");
+              renderMainContent(); // Pindahkan panggilan ini ke sini
             } else {
               // studentAppId in localStorage is invalid or student data not found/role incorrect
               console.warn(
@@ -732,7 +723,7 @@
           return; // Stop execution
         }
 
-        renderMainContent(); // Render content only once after auth state is determined
+        // renderMainContent(); // Hapus panggilan ini dari sini
       });
 
       // --- Main Content Renderer ---
