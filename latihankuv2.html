@@ -975,6 +975,12 @@
                 id: doc.id,
                 ...doc.data(),
               }));
+              // --- LOGGING UNTUK DIAGNOSA ---
+              console.log(
+                "Fetched studentExerciseHistory:",
+                studentExerciseHistory
+              );
+              // --- END LOGGING ---
               studentExerciseHistory.sort((a, b) => {
                 const timestampA = a.timestamp
                   ? a.timestamp.toDate
@@ -1113,17 +1119,17 @@
         if (!dashboardViewElement) return;
 
         const totalLiterasiScores = studentExerciseHistory
-          .filter((h) => h.exerciseType === "Literasi")
+          .filter((h) => (h.exerciseType || "").toLowerCase() === "literasi") // Penanganan defensif
           .reduce((sum, h) => sum + (h.score || 0), 0);
         const totalLiterasiCount = studentExerciseHistory.filter(
-          (h) => h.exerciseType === "Literasi"
+          (h) => (h.exerciseType || "").toLowerCase() === "literasi" // Penanganan defensif
         ).length;
 
         const totalNumerasiScores = studentExerciseHistory
-          .filter((h) => h.exerciseType === "Numerasi")
+          .filter((h) => (h.exerciseType || "").toLowerCase() === "numerasi") // Penanganan defensif
           .reduce((sum, h) => sum + (h.score || 0), 0);
         const totalNumerasiCount = studentExerciseHistory.filter(
-          (h) => h.exerciseType === "Numerasi"
+          (h) => (h.exerciseType || "").toLowerCase() === "numerasi" // Penanganan defensif
         ).length;
 
         const overallAverageScore = (
@@ -1157,7 +1163,9 @@
                         (activity) => `
                             <tr>
                                 <td>${activity.exerciseDate}</td>
-                                <td>${activity.type}</td>
+                                <td>${
+                                  activity.exerciseType || "N/A"
+                                }</td> <!-- Penanganan defensif -->
                                 <td>${
                                   activity.score !== undefined
                                     ? activity.score
@@ -1280,7 +1288,7 @@
           .slice(0, 5)
           .map((h) => {
             return `Tanggal: ${h.exerciseDate}, Jenis: ${
-              h.exerciseType
+              h.exerciseType || "N/A" // Penanganan defensif
             }, Nilai: ${h.score}, Saran Sebelumnya: ${
               h.aiSuggestions || "Tidak ada saran."
             }`;
@@ -1701,7 +1709,9 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
                     (history) => `
                   <tr>
                     <td>${history.exerciseDate}</td>
-                    <td>${history.exerciseType}</td>
+                    <td>${
+                      history.exerciseType || "N/A"
+                    }</td> <!-- Penanganan defensif -->
                     <td>${
                       history.score !== undefined ? history.score : "N/A"
                     }</td>
@@ -1880,10 +1890,10 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         if (!chartCtx) return;
 
         const literasiHistory = studentExerciseHistory.filter(
-          (h) => h.exerciseType === "Literasi"
+          (h) => (h.exerciseType || "").toLowerCase() === "literasi" // Penanganan defensif
         );
         const numerasiHistory = studentExerciseHistory.filter(
-          (h) => h.exerciseType === "Numerasi"
+          (h) => (h.exerciseType || "").toLowerCase() === "numerasi" // Penanganan defensif
         );
 
         const latestLiterasiScores = literasiHistory
@@ -2140,6 +2150,12 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
               ? (sumScores / updatedAnswers.length).toFixed(0)
               : 0;
 
+          // --- LOGGING UNTUK DIAGNOSA ---
+          console.log(
+            "Saving student exercise history with type:",
+            dailyExercise.type
+          );
+          // --- END LOGGING ---
           // Simpan hasil ke Firestore
           await addDoc(collection(db, "student_exercise_history"), {
             studentId: studentData.id,
@@ -2208,10 +2224,10 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
                     </div>
                     <div class="exercise-info text-gray-700 mb-4 text-sm">
                         <p><strong>Topik:</strong> ${
-                          exerciseDetailsData.topic
+                          exerciseDetailsData.topic || "N/A" // Penanganan defensif
                         }</p>
                         <p><strong>Jenis:</strong> ${
-                          exerciseDetailsData.exerciseType
+                          exerciseDetailsData.exerciseType || "N/A" // Penanganan defensif
                         }</p>
                         <p><strong>Tanggal:</strong> ${
                           exerciseDetailsData.exerciseDate
