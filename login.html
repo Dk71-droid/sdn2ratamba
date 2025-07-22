@@ -205,7 +205,6 @@
         getAuth,
         signInAnonymously,
         onAuthStateChanged,
-        signOut,
       } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
       import {
         getFirestore,
@@ -215,7 +214,6 @@
         getDocs,
         doc,
         getDoc,
-        setDoc,
       } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
       // --- Firebase Configuration ---
@@ -368,33 +366,19 @@
             return;
           }
 
-          // Successfully authenticated custom user.
-          // Sign in anonymously to Firebase.
-          await signInAnonymously(auth);
+          // Successfully authenticated custom user. Now sign in anonymously to Firebase.
+          // Store student ID in localStorage before redirecting
+          localStorage.setItem("currentStudentAppId", studentDoc.id);
+          await signInAnonymously(auth); // This will trigger onAuthStateChanged
 
-          // Setelah berhasil signInAnonymously, simpan mapping studentId ke Firebase UID
-          if (auth.currentUser) {
-            await setDoc(
-              doc(db, "firebase_user_to_student_map", auth.currentUser.uid),
-              {
-                studentId: studentDoc.id,
-                lastLogin: new Date().toISOString(), // Opsional: untuk tracking
-              }
-            );
-            console.log(
-              "Mapping studentId to Firebase UID saved:",
-              auth.currentUser.uid,
-              studentDoc.id
-            );
-          } else {
-            // Ini seharusnya tidak terjadi jika signInAnonymously berhasil
-            console.error(
-              "Firebase user not available after anonymous sign-in."
-            );
-            showMessage("error", "Gagal menginisialisasi sesi Firebase.");
-            loadingScreen.classList.add("hidden");
-            return;
-          }
+          showMessage(
+            "success",
+            `Selamat datang, ${studentDataFromDb.name}! Mengarahkan...`
+          );
+          // Redirect to portalsiswa.html after a short delay for message to be seen
+          setTimeout(() => {
+            window.location.href = "portalsiswa.html";
+          }, 1000);
         } catch (error) {
           console.error("Login siswa error:", error);
           showMessage("error", `Gagal login: ${error.message}`);
@@ -405,53 +389,39 @@
       // --- Initial Load and Auth Check ---
       onAuthStateChanged(auth, async (user) => {
         // This listener fires on page load and on auth state changes
-        if (user) {
-          // Firebase user exists. Sekarang, verifikasi mapping ke studentId.
-          const mappingDocRef = doc(
-            db,
-            "firebase_user_to_student_map",
-            user.uid
-          );
+        const studentAppIdFromLocalStorage = localStorage.getItem(
+          "currentStudentAppId"
+        );
+
+        if (user && studentAppIdFromLocalStorage) {
+          // If Firebase user exists and we have a stored student ID, verify it
+          const studentDocRef = doc(db, "users", studentAppIdFromLocalStorage);
           try {
-            const mappingDocSnap = await getDoc(mappingDocRef);
-
-            if (mappingDocSnap.exists()) {
-              const studentAppId = mappingDocSnap.data().studentId;
-              const studentDocRef = doc(db, "users", studentAppId);
-              const docSnap = await getDoc(studentDocRef);
-
-              if (docSnap.exists() && docSnap.data().role === "student") {
-                // Valid session, redirect to portalsiswa.html
-                showMessage(
-                  "success",
-                  "Sesi aktif ditemukan. Mengarahkan ke portal siswa...",
-                  "Memuat..."
-                );
-                setTimeout(() => {
-                  window.location.href = "portalsiswa.html";
-                }, 500); // Short delay for message
-                return; // Stop execution here
-              } else {
-                // Mapping exists but student data invalid or role mismatch
-                console.warn(
-                  "Mapped student ID invalid or role mismatch. Forcing re-login."
-                );
-                // Hapus mapping yang tidak valid
-                await signOut(auth); // Ensure Firebase state is clean
-                showMessage("info", "Sesi tidak valid. Silakan login.");
-              }
-            } else {
-              // Firebase user exists, but no mapping to a student ID.
-              // This means the Firebase session is active but our custom user isn't linked.
-              console.warn(
-                "Firebase user active but no student ID mapping. Forcing Firebase logout and redirecting to login."
+            const docSnap = await getDoc(studentDocRef);
+            if (docSnap.exists() && docSnap.data().role === "student") {
+              // Valid session, redirect to portalsiswa.html
+              showMessage(
+                "info",
+                "Sesi aktif ditemukan. Mengarahkan ke portal siswa...",
+                "Memuat..."
               );
-              await signOut(auth); // Force Firebase logout
-              showMessage("info", "Sesi tidak valid. Silakan login."); // Tampilkan pesan sebelum menampilkan form login
+              setTimeout(() => {
+                window.location.href = "portalsiswa.html";
+              }, 500); // Short delay for message
+              return; // Stop execution here
+            } else {
+              // Invalid student ID or role, force logout and show login form
+              console.warn(
+                "Invalid student ID in localStorage or role mismatch. Forcing re-login."
+              );
+              localStorage.removeItem("currentStudentAppId");
+              await auth.signOut(); // Ensure Firebase state is clean
+              showMessage("info", "Sesi tidak valid. Silakan login.");
             }
           } catch (error) {
-            console.error("Error verifying student data or mapping:", error);
-            await signOut(auth);
+            console.error("Error verifying student data:", error);
+            localStorage.removeItem("currentStudentAppId");
+            await auth.signOut();
             showMessage("error", "Gagal memverifikasi sesi. Silakan login.");
           }
         }
