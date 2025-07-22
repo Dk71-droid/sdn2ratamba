@@ -587,22 +587,23 @@
       } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
       // --- Firebase Configuration ---
+      // PENTING: Ganti dengan konfigurasi Firebase Anda yang sebenarnya!
       const firebaseConfig = {
-        apiKey: "AIzaSyBWTYZH2OZuyq_mnbbxiap7iBg-17II55A",
-        authDomain: "tabungansiswa-8bbd6.firebaseapp.com",
-        projectId: "tabungansiswa-8bbd6",
-        storageBucket: "tabungansiswa-8bbd6.firebaseastorage.app",
-        messagingSenderId: "1068130708793",
-        appId: "1:1068130708793:web:d6afeed38a9d42dd034ce8",
+        apiKey: "YOUR_FIREBASE_API_KEY", // Ganti dengan kunci API Firebase Anda
+        authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+        projectId: "YOUR_FIREBASE_PROJECT_ID",
+        storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+        appId: "YOUR_FIREBASE_APP_ID",
       };
 
-      // Inisialisasi Firebase
+      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
       // --- Global State Variables ---
-      let studentData = null; // Akan diisi dari Firestore berdasarkan ID di localStorage
+      let studentData = null; // Will be populated from Firestore based on localStorage ID
       let studentMotivation = {
         message: null,
         lastGenerated: null,
@@ -612,9 +613,8 @@
       let dailyExercise = null;
       let studentExerciseHistory = [];
       let studentPerformanceChart = null;
-      let hasAttemptedDailyGenerateStudent = false; // Flag to prevent multiple auto-generations per session
 
-      // State untuk Modals
+      // State for Modals
       let showConfirmationModal = false;
       let confirmationMessage = "";
       let confirmationAction = null;
@@ -624,11 +624,7 @@
       let showExerciseDetailsModal = false;
       let exerciseDetailsData = null;
 
-      // --- VERCEL SERVERLESS FUNCTION ENDPOINT ---
-      // Ganti dengan URL deployment Vercel-mu.
-      // Jika file gemini.js ada di folder 'api' di root proyek Vercel yang sama,
-      // maka kamu bisa menggunakan path relatif '/api/gemini'.
-      // Contoh: 'https://namaprojekmu.vercel.app/api/gemini'
+      // Endpoint Vercel untuk API Gemini
       const VERCEL_GEMINI_API_ENDPOINT = "/api/gemini";
 
       // --- DOM Elements ---
@@ -783,7 +779,7 @@
         );
 
         if (user) {
-          // Pengguna Firebase ada. Sekarang, verifikasi ID siswa kustom kita di localStorage.
+          // Firebase user exists. Now, verify our custom student ID in localStorage.
           if (studentAppIdFromLocalStorage) {
             const studentDocRef = doc(
               db,
@@ -793,48 +789,45 @@
             try {
               const docSnap = await getDoc(studentDocRef);
               if (docSnap.exists() && docSnap.data().role === "student") {
-                // Sesi valid: Pengguna Firebase ada DAN ID siswa kustom valid
+                // Valid session: Firebase user exists AND custom student ID is valid
                 studentData = { id: docSnap.id, ...docSnap.data() };
                 setupFirestoreListeners(user.uid, studentData.id);
                 renderMainContent();
                 portalTitle.innerText = `Halo, ${studentData.name}!`;
-                appView.classList.remove("hidden"); // Buat terlihat
-                appView.classList.add("fade-in"); // Picu fade-in
+                appView.classList.remove("hidden"); // Make it visible
+                appView.classList.add("fade-in"); // Trigger fade-in
               } else {
-                // Pengguna Firebase ada, tapi ID siswa kustom tidak valid atau peran tidak sesuai
+                // Firebase user exists, but custom student ID is invalid or role mismatch
                 console.warn(
-                  "ID siswa tidak valid di localStorage atau peran tidak sesuai. Memaksa logout Firebase dan mengarahkan ke login."
+                  "Invalid student ID in localStorage or role mismatch. Forcing Firebase logout and redirecting to login."
                 );
-                localStorage.removeItem("currentStudentAppId"); // Hapus data tidak valid
-                await signOut(auth); // Paksa logout Firebase
-                window.location.href =
-                  "login.html?redirect_to=latihankuv2.html"; // Arahkan ke login
+                localStorage.removeItem("currentStudentAppId"); // Clear invalid data
+                await signOut(auth); // Force Firebase logout
+                window.location.href = "login.html"; // Redirect to login
               }
             } catch (error) {
               console.error(
-                "Error mengambil data siswa dari Firestore:",
+                "Error fetching student data from Firestore:",
                 error
               );
               localStorage.removeItem("currentStudentAppId");
               await signOut(auth);
-              window.location.href = "login.html?redirect_to=latihankuv2.html";
+              window.location.href = "login.html";
             }
           } else {
-            // Pengguna Firebase ada, tapi tidak ada ID siswa kustom di localStorage.
-            // Ini berarti sesi Firebase aktif tetapi pengguna kustom kita tidak terhubung.
+            // Firebase user exists, but no custom student ID in localStorage.
+            // This means the Firebase session is active but our custom user isn't linked.
             console.warn(
-              "Pengguna Firebase aktif tetapi tidak ada ID siswa di localStorage. Memaksa logout Firebase dan mengarahkan ke login."
+              "Firebase user active but no student ID in localStorage. Forcing Firebase logout and redirecting to login."
             );
-            await signOut(auth); // Paksa logout Firebase
-            window.location.href = "login.html?redirect_to=latihankuv2.html"; // Arahkan ke login
+            await signOut(auth); // Force Firebase logout
+            window.location.href = "login.html"; // Redirect to login
           }
         } else {
-          // Tidak ada pengguna Firebase. Pastikan localStorage bersih dan arahkan ke login.
-          console.warn(
-            "Tidak ada pengguna Firebase aktif. Mengarahkan ke login."
-          );
+          // No Firebase user. Ensure localStorage is clear and redirect to login.
+          console.warn("No Firebase user active. Redirecting to login.");
           localStorage.removeItem("currentStudentAppId");
-          window.location.href = "login.html?redirect_to=latihankuv2.html";
+          window.location.href = "login.html";
         }
       });
 
@@ -845,14 +838,14 @@
       let unsubscribeStudentMotivation;
 
       function setupFirestoreListeners(firebaseAuthUid, studentAppId) {
-        // Berhenti berlangganan dari listener sebelumnya untuk mencegah kebocoran memori dan pembaruan duplikat
+        // Unsubscribe from previous listeners to prevent memory leaks and duplicate updates
         if (unsubscribeStudentProfile) unsubscribeStudentProfile();
         if (unsubscribeDailyExercise) unsubscribeDailyExercise();
         if (unsubscribeStudentExerciseHistory)
           unsubscribeStudentExerciseHistory();
         if (unsubscribeStudentMotivation) unsubscribeStudentMotivation();
 
-        // Listener untuk profil siswa sendiri (koleksi users)
+        // Listener for student's own profile (users collection)
         if (studentAppId) {
           const studentDocRef = doc(db, "users", studentAppId);
           unsubscribeStudentProfile = onSnapshot(
@@ -873,23 +866,23 @@
                 portalTitle.innerText = `Halo, ${studentData.name}!`;
               } else {
                 console.log(
-                  "Tidak ada data siswa ditemukan untuk pengguna saat ini atau peran bukan siswa, atau ID tidak cocok! Memaksa logout."
+                  "No student data found for current user or role is not student, or ID mismatch! Forcing logout."
                 );
                 signOut(auth);
               }
             },
             (error) => {
-              console.error("Error mengambil data siswa:", error);
+              console.error("Error fetching student data:", error);
               showMessage("error", "Gagal memuat data profil siswa.");
             }
           );
         } else {
           console.warn(
-            "setupFirestoreListeners dipanggil untuk profil siswa tanpa studentAppId yang valid."
+            "setupFirestoreListeners called for student profile without valid studentAppId."
           );
         }
 
-        // Listener untuk pesan motivasi siswa (menggunakan UID Firebase Auth sebagai ID dokumen)
+        // Listener for student's motivation messages (uses Firebase Auth UID as document ID)
         if (firebaseAuthUid) {
           const studentMotivationDocRef = doc(
             db,
@@ -913,56 +906,41 @@
               }
             },
             (error) => {
-              console.error("Error mengambil pesan motivasi siswa:", error);
+              console.error(
+                "Error fetching student motivation message:",
+                error
+              );
               showMessage("error", "Gagal memuat pesan motivasi AI.");
             }
           );
         } else {
           console.warn(
-            "setupFirestoreListeners dipanggil untuk motivasi tanpa firebaseAuthUid yang valid."
+            "setupFirestoreListeners called for motivation without valid firebaseAuthUid."
           );
         }
 
-        // Listener untuk latihan AI hari ini (tidak bergantung pada ID siswa)
+        // Listener for current day's AI exercise (does not depend on student ID)
         const todayDate = new Date().toISOString().slice(0, 10);
         const dailyExerciseDocRef = doc(db, "daily_ai_exercises", todayDate);
         unsubscribeDailyExercise = onSnapshot(
           dailyExerciseDocRef,
-          async (docSnap) => {
+          (docSnap) => {
             if (docSnap.exists()) {
               dailyExercise = { id: docSnap.id, ...docSnap.data() };
             } else {
               dailyExercise = null;
-              // NEW: Automatic generation if no exercise for today and not yet attempted by this student
-              if (
-                !hasAttemptedDailyGenerateStudent &&
-                studentData && // Ensure studentData is loaded
-                auth.currentUser // Ensure Firebase user is authenticated
-              ) {
-                hasAttemptedDailyGenerateStudent = true; // Set flag to prevent re-triggering
-                showMessage(
-                  "info",
-                  "Latihan harian untuk hari ini belum ada. Mencoba menggenerate otomatis..."
-                );
-                const dailyTypeForToday = getDailyExerciseTypeForAI(todayDate);
-                await generateAndSaveDailyExercise(
-                  todayDate,
-                  dailyTypeForToday,
-                  true // isAutoGenerate set to true
-                );
-              }
             }
             if (currentStudentView === "dailyExercise") {
               renderDailyExerciseView();
             }
           },
           (error) => {
-            console.error("Error mengambil latihan harian:", error);
+            console.error("Error fetching daily exercise:", error);
             showMessage("error", "Gagal memuat soal latihan harian.");
           }
         );
 
-        // Listener untuk riwayat latihan siswa (menggunakan studentAppId)
+        // Listener for student's exercise history (uses studentAppId)
         if (studentAppId) {
           const studentHistoryQuery = query(
             collection(db, "student_exercise_history"),
@@ -975,12 +953,6 @@
                 id: doc.id,
                 ...doc.data(),
               }));
-              // --- LOGGING UNTUK DIAGNOSA ---
-              console.log(
-                "Fetched studentExerciseHistory:",
-                studentExerciseHistory
-              );
-              // --- END LOGGING ---
               studentExerciseHistory.sort((a, b) => {
                 const timestampA = a.timestamp
                   ? a.timestamp.toDate
@@ -1003,13 +975,13 @@
               }
             },
             (error) => {
-              console.error("Error mengambil riwayat latihan siswa:", error);
+              console.error("Error fetching student exercise history:", error);
               showMessage("error", "Gagal memuat riwayat latihan Anda.");
             }
           );
         } else {
           console.warn(
-            "setupFirestoreListeners dipanggil untuk riwayat latihan tanpa studentAppId yang valid."
+            "setupFirestoreListeners called for exercise history without valid studentAppId."
           );
         }
       }
@@ -1020,7 +992,7 @@
           try {
             await signOut(auth);
             studentData = null;
-            localStorage.removeItem("currentStudentAppId"); // Hapus ID siswa kustom dari localStorage
+            localStorage.removeItem("currentStudentAppId"); // Clear custom student ID from localStorage
             studentMotivation = {
               message: null,
               lastGenerated: null,
@@ -1029,13 +1001,12 @@
             dailyExercise = null;
             studentExerciseHistory = [];
             currentStudentView = "dashboard";
-            hasAttemptedDailyGenerateStudent = false; // Reset flag
             if (studentPerformanceChart) {
               studentPerformanceChart.destroy();
               studentPerformanceChart = null;
             }
 
-            // Bersihkan status modal
+            // Clear modal states
             showConfirmationModal = false;
             confirmationMessage = "";
             confirmationAction = null;
@@ -1045,7 +1016,7 @@
             showExerciseDetailsModal = false;
             exerciseDetailsData = null;
 
-            // Berhenti berlangganan semua listener
+            // Unsubscribe all listeners
             if (unsubscribeStudentProfile) unsubscribeStudentProfile();
             if (unsubscribeDailyExercise) unsubscribeDailyExercise();
             if (unsubscribeStudentExerciseHistory)
@@ -1053,12 +1024,12 @@
             if (unsubscribeStudentMotivation) unsubscribeStudentMotivation();
 
             showMessage("success", "Berhasil logout.");
-            appView.classList.add("fade-out"); // Terapkan fade-out sebelum pengalihan
+            appView.classList.add("fade-out"); // Apply fade-out before redirect
             setTimeout(() => {
-              window.location.href = "portalsiswa.html"; // Arahkan ke portal login
-            }, 300); // Sesuaikan dengan durasi transisi CSS
+              window.location.href = "portalsiswa.html"; // Redirect to login portal
+            }, 300); // Match CSS transition duration
           } catch (error) {
-            console.error("Error logout:", error);
+            console.error("Logout error:", error);
             showMessage("error", "Gagal logout: " + error.message);
           }
         });
@@ -1066,18 +1037,18 @@
 
       // --- Main Content Renderer ---
       function renderMainContent() {
-        // Di latihankuv2.html, kita berasumsi pengguna sudah terautentikasi atau akan diarahkan.
-        // Jadi, kita langsung menampilkan appView dan kontennya.
-        bottomNav.style.display = "flex"; // Pastikan navigasi bawah terlihat
+        // In latihankuv2.html, we assume the user is already authenticated or will be redirected.
+        // So, we directly show the appView and its content.
+        bottomNav.style.display = "flex"; // Ensure bottom nav is visible
 
-        // Sembunyikan semua bagian konten tab internal di dalam appView terlebih dahulu
+        // Hide all internal tab content sections within appView first
         document
           .querySelectorAll("#appView .tab-content-section")
           .forEach((section) => {
             section.classList.remove("active");
           });
 
-        // Tampilkan bagian konten tab internal yang aktif saat ini
+        // Show the current active internal tab content section
         const activeViewElement = document.getElementById(
           `${currentStudentView}View`
         );
@@ -1085,7 +1056,7 @@
           activeViewElement.classList.add("active");
         }
 
-        // Atur kelas aktif untuk tombol navigasi bawah
+        // Set active class for bottom navigation buttons
         document.querySelectorAll(".bottom-nav button").forEach((button) => {
           if (button.dataset.view === currentStudentView) {
             button.classList.add("active");
@@ -1094,7 +1065,7 @@
           }
         });
 
-        // Panggil fungsi render spesifik untuk tampilan aktif
+        // Call specific render function for the active view
         switch (currentStudentView) {
           case "dashboard":
             renderDashboardView();
@@ -1113,23 +1084,23 @@
         attachDynamicEventListeners();
       }
 
-      // --- Sub-renderers untuk setiap tampilan ---
+      // --- Sub-renderers for each view ---
       function renderDashboardView() {
         const dashboardViewElement = document.getElementById("dashboardView");
         if (!dashboardViewElement) return;
 
         const totalLiterasiScores = studentExerciseHistory
-          .filter((h) => (h.exerciseType || "").toLowerCase() === "literasi") // Penanganan defensif
+          .filter((h) => h.exerciseType === "Literasi")
           .reduce((sum, h) => sum + (h.score || 0), 0);
         const totalLiterasiCount = studentExerciseHistory.filter(
-          (h) => (h.exerciseType || "").toLowerCase() === "literasi" // Penanganan defensif
+          (h) => h.exerciseType === "Literasi"
         ).length;
 
         const totalNumerasiScores = studentExerciseHistory
-          .filter((h) => (h.exerciseType || "").toLowerCase() === "numerasi") // Penanganan defensif
+          .filter((h) => h.exerciseType === "Numerasi")
           .reduce((sum, h) => sum + (h.score || 0), 0);
         const totalNumerasiCount = studentExerciseHistory.filter(
-          (h) => (h.exerciseType || "").toLowerCase() === "numerasi" // Penanganan defensif
+          (h) => h.exerciseType === "Numerasi"
         ).length;
 
         const overallAverageScore = (
@@ -1163,9 +1134,7 @@
                         (activity) => `
                             <tr>
                                 <td>${activity.exerciseDate}</td>
-                                <td>${
-                                  activity.exerciseType || "N/A"
-                                }</td> <!-- Penanganan defensif -->
+                                <td>${activity.exerciseType}</td>
                                 <td>${
                                   activity.score !== undefined
                                     ? activity.score
@@ -1288,60 +1257,48 @@
           .slice(0, 5)
           .map((h) => {
             return `Tanggal: ${h.exerciseDate}, Jenis: ${
-              h.exerciseType || "N/A" // Penanganan defensif
+              h.exerciseType
             }, Nilai: ${h.score}, Saran Sebelumnya: ${
               h.aiSuggestions || "Tidak ada saran."
             }`;
           })
           .join("\n");
 
-        // --- START OF PROMPT MODIFICATION ---
-        const prompt = `Sebagai seorang teman atau kakak yang peduli, tolong berikan pesan motivasi dan saran singkat (maksimal 3-4 kalimat) kepada siswa ini. Gunakan bahasa sehari-hari yang santai, akrab, dan dekat dengan siswa. Pesan harus berdasarkan riwayat latihan terakhirnya (dalam 1 bulan terakhir, maksimal 5 entri) dan rata-rata nilai.
-        
-        Penting: Nilai yang diberikan adalah dalam rentang 1-100.
-        
-        Kriteria Penilaian:
-        - Nilai 0-49: Perlu banyak peningkatan.
-        - Nilai 50-69: Perlu peningkatan.
-        - Nilai 70-84: Baik.
-        - Nilai 85-100: Sangat Baik.
-
-        Fokus pada semangat untuk terus belajar dan berkembang, dan sebutkan secara umum area yang bisa ditingkatkan kalau ada pola dari saran-saran sebelumnya. Sesuaikan nada motivasi berdasarkan rata-rata nilai keseluruhan siswa.
+        const prompt = `Sebagai seorang teman atau kakak yang peduli, tolong berikan pesan motivasi dan saran singkat (maksimal 3-4 kalimat) kepada siswa ini. Gunakan bahasa sehari-hari yang santai, akrab, dan dekat dengan siswa. Pesan harus berdasarkan riwayat latihan terakhirnya (dalam 1 bulan terakhir, maksimal 5 entri) dan rata-rata nilai. Fokus pada semangat untuk terus belajar dan berkembang, dan sebutkan secara umum area yang bisa ditingkatkan kalau ada pola dari saran-saran sebelumnya.
 
 Riwayat Latihan Terakhir (dalam 1 bulan, maksimal 5 entri):
 ${recentHistorySummary || "Belum ada riwayat latihan dalam 1 bulan terakhir."}
 
 Rata-rata Nilai Keseluruhan: ${overallAverageScore}
 `;
-        // --- END OF PROMPT MODIFICATION ---
 
         try {
-          // Panggil serverless function di Vercel
+          // Panggil endpoint Vercel Anda, bukan langsung API Gemini
+          const payload = { prompt: prompt }; // Sesuaikan payload dengan yang diharapkan oleh fungsi Vercel Anda
           const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
-            method: "POST", // PASTIKAN INI ADA DAN BENAR
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: prompt }),
+            body: JSON.stringify(payload),
           });
 
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(
-              `Panggilan API gagal dengan status ${response.status}: ${
-                errorData.error || "Kesalahan tidak diketahui"
+              `HTTP error! status: ${response.status} - ${
+                errorData.message || "Unknown error"
               }`
             );
           }
 
           const data = await response.json();
-          // Ambil teks dari properti 'text' di respons Vercel.
-          // Fungsi gemini.js yang telah diperbarui akan selalu mengembalikan { text: "..." } jika tidak ada responseSchema.
-          const aiMessage = data.text;
+          // Asumsikan fungsi Vercel mengembalikan { generatedText: "..." }
+          const aiMessage = data.generatedText;
 
           if (auth.currentUser) {
             await setDoc(
               doc(db, "student_motivation_messages", auth.currentUser.uid),
               {
-                message: aiMessage || "", // Pastikan tidak undefined
+                message: aiMessage,
                 lastGenerated: serverTimestamp(),
                 studentAppId: studentData.id,
               },
@@ -1349,210 +1306,17 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
             );
           } else {
             throw new Error(
-              "Tidak ada pengguna Firebase yang terautentikasi untuk menyimpan pesan motivasi."
+              "No authenticated Firebase user found to save motivation message."
             );
           }
         } catch (error) {
           console.error(
-            "Error menghasilkan dan menyimpan pesan motivasi AI:",
+            "Error generating and saving AI motivation message:",
             error
           );
           aiMotivationContentDiv.innerHTML = `<p class="text-red-500 text-sm">Gagal memuat saran AI: ${error.message}</p>`;
         } finally {
           studentMotivation.isGenerating = false;
-        }
-      }
-
-      /**
-       * Determines the daily exercise type for AI app based on a given date.
-       * This is a helper for the AI app admin view.
-       * @param {string} dateString - Date in YYYY-MM-DD format.
-       * @returns {string} 'Literasi' atau 'Numerasi'.
-       */
-      function getDailyExerciseTypeForAI(dateString) {
-        const date = new Date(dateString);
-        return date.getDate() % 2 === 0 ? "Literasi" : "Numerasi";
-      }
-
-      /**
-       * Parses the raw content generated by the Gemini API for Literasi exercises.
-       * @param {string} generatedContent - The raw text content from Gemini.
-       * @returns {{readingText: string, questions: Array<Object>}} - Parsed reading text and questions.
-       */
-      function parseLiterasiContent(generatedContent) {
-        let readingText = "";
-        const questions = [];
-
-        // Split content into parts based on "Soal X:" pattern
-        const parts = generatedContent.split(/Soal \d+:\s*/).filter(Boolean); // Filter out empty strings
-
-        // First part should be the reading text
-        const readingMatch = parts[0].match(/Bacaan:\s*([\s\S]*)/i);
-        if (readingMatch && readingMatch[1]) {
-          readingText = readingMatch[1].trim();
-        } else {
-          // Fallback: If "Bacaan:" not found, assume the first part is the reading text
-          readingText = parts[0].trim();
-        }
-
-        // Subsequent parts are questions
-        for (let i = 1; i < parts.length; i++) {
-          const blockContent = parts[i];
-          if (blockContent) {
-            const questionLines = blockContent
-              .split("\n")
-              .map((line) => line.trim())
-              .filter(Boolean);
-            const questionText = questionLines[0]; // First line is the question
-
-            let minWords = 0;
-            const minWordsLine = questionLines.find((line) =>
-              line.includes("Minimal Kata Jawaban:")
-            );
-            if (minWordsLine) {
-              const minWordsMatch = minWordsLine.match(
-                /Minimal Kata Jawaban:\s*(\d+)/
-              );
-              if (minWordsMatch && minWordsMatch[1]) {
-                minWords = parseInt(minWordsMatch[1]);
-              }
-            }
-            if (isNaN(minWords) || minWords <= 0) {
-              minWords = 10; // Default minimum words
-            }
-            questions.push({ question: questionText, minWords: minWords });
-          }
-        }
-        return { readingText, questions };
-      }
-
-      /**
-       * Parses the raw content generated by the Gemini API for Numerasi exercises.
-       * @param {string} generatedContent - The raw text content from Gemini.
-       * @returns {{questions: Array<Object>}} - Parsed questions.
-       */
-      function parseNumerasiContent(generatedContent) {
-        const questions = [];
-        // Use regex to find all lines starting with "Soal X:"
-        const questionMatches = generatedContent.match(/Soal \d+:\s*([^\n]+)/g);
-
-        if (questionMatches) {
-          questionMatches.forEach((match) => {
-            const questionText = match.replace(/Soal \d+:\s*/, "").trim();
-            if (questionText) {
-              questions.push({ question: questionText });
-            }
-          });
-        }
-        return { questions };
-      }
-
-      /**
-       * Generates and saves a daily exercise for students using Gemini API via a backend endpoint.
-       * This is triggered automatically when a student views the daily exercise page and no exercise exists for today.
-       * @param {string} targetDate - The date for which to generate the exercise (YYYY-MM-DD).
-       * @param {string} exerciseType - The type of exercise to generate ('Literasi' or 'Numerasi').
-       */
-      async function generateAndSaveDailyExercise(
-        targetDate,
-        exerciseType,
-        isAutoGenerate = false
-      ) {
-        showMessage(
-          "loading",
-          `Mencoba menggenerate soal AI ${exerciseType} untuk ${targetDate} secara otomatis...`
-        );
-
-        const docRef = doc(db, "daily_ai_exercises", targetDate);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          // If it already exists, another user might have generated it concurrently.
-          // Just update the dailyExercise state and return.
-          dailyExercise = { id: docSnap.id, ...docSnap.data() };
-          showMessage(
-            "info",
-            `Soal ${dailyExercise.type} untuk ${targetDate} sudah tersedia.`
-          );
-          renderDailyExerciseView();
-          return;
-        }
-
-        let prompt = "";
-        if (exerciseType === "Literasi") {
-          prompt = `Buatlah 1 bacaan pendek yang cocok untuk siswa SD kelas 5 (sekitar 150-200 kata) terdiri dari 3 paragraf. Gunakan bahasa yang sederhana dan mudah dipahami. Tema bacaan bisa berupa cerita fiksi, pengetahuan umum, atau deskripsi tentang sesuatu yang menarik bagi anak-anak.
-                Setelah bacaan, buat 3 soal terbuka yang memantik pemikiran kritis dan meningkatkan pemahaman literasi siswa.
-                - Soal 1: Mudah (pertanyaan langsung dari teks)
-                - Soal 2: Sedang (membutuhkan sedikit penalaran atau inferensi)
-                - Soal 3: Sulit (membutuhkan pemikiran mendalam, analisis, atau menghubungkan ide)
-                Sertakan juga di akhir setiap setiap soal, "Minimal Kata Jawaban: [jumlah angka, misal 15]".
-                Format output:
-                Bacaan: [isi bacaan paragraf 1]
-                [isi bacaan paragraf 2]
-                [isi bacaan paragraf 3]
-                Soal 1: [pertanyaan mudah]
-                Minimal Kata Jawaban: [jumlah kata]
-                Soal 2: [pertanyaan sedang]
-                Minimal Kata Jawaban: [jumlah kata]
-                Soal 3: [pertanyaan sulit]
-                Minimal Kata Jawaban: [jumlah kata]
-                `;
-        } else {
-          // Numerasi
-          prompt = `Buatlah 5 soal cerita matematika untuk siswa SD kelas 3-4. Soal melibatkan operasi dasar (penjumlahan, pengurangan, perkalian, pembagian) dan sederhana. Jangan berikan jawaban atau penjelasan. Format output:
-                Soal 1: [soal cerita]
-                Soal 2: [soal cerita]
-                Soal 3: [soal cerita]
-                Soal 4: [soal cerita]
-                Soal 5: [soal cerita]
-                `;
-        }
-
-        try {
-          const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: prompt }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(
-              `HTTP error! status: ${response.status}, message: ${
-                errorData.error || "Unknown error"
-              }`
-            );
-          }
-
-          const data = await response.json();
-          const generatedContent = data.text;
-
-          let parsedResult;
-          if (exerciseType === "Literasi") {
-            parsedResult = parseLiterasiContent(generatedContent);
-          } else {
-            parsedResult = parseNumerasiContent(generatedContent);
-          }
-
-          await setDoc(doc(db, "daily_ai_exercises", targetDate), {
-            date: targetDate,
-            type: exerciseType,
-            rawContent: generatedContent,
-            readingText: parsedResult.readingText || "",
-            questions: parsedResult.questions,
-            generatedBy: "system-student-trigger", // Mark as generated by student trigger
-            generatedByName: "Sistem Otomatis",
-            timestamp: serverTimestamp(),
-          });
-
-          showMessage(
-            "success",
-            `Soal ${exerciseType} untuk ${targetDate} berhasil digenerate dan disimpan!`
-          );
-          // Listener akan secara otomatis memperbarui dailyExercise dan me-render ulang
-        } catch (error) {
-          console.error("Error generating and saving daily exercise:", error);
-          showMessage("error", `Gagal generate soal AI: ${error.message}`);
         }
       }
 
@@ -1676,7 +1440,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         } else {
           dailyExerciseContentDiv.innerHTML = `
             <p class="text-gray-600">Belum ada latihan harian yang tersedia untuk hari ini.</p>
-            <p class="text-sm text-gray-500 mt-2">Sistem akan mencoba menggenerate soal otomatis. Jika tidak muncul, silakan hubungi guru Anda.</p>
+            <p class="text-sm text-gray-500 mt-2">Silakan hubungi guru Anda jika Anda merasa ini adalah kesalahan.</p>
           `;
         }
       }
@@ -1709,9 +1473,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
                     (history) => `
                   <tr>
                     <td>${history.exerciseDate}</td>
-                    <td>${
-                      history.exerciseType || "N/A"
-                    }</td> <!-- Penanganan defensif -->
+                    <td>${history.exerciseType}</td>
                     <td>${
                       history.score !== undefined ? history.score : "N/A"
                     }</td>
@@ -1786,7 +1548,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           .getElementById("resetSettings")
           ?.addEventListener("click", resetSettings);
 
-        // Lampirkan listener tombol logout (sekarang di pengaturan)
+        // Attach logout button listener (now in settings)
         document
           .getElementById("logoutButton")
           ?.removeEventListener("click", handleLogout);
@@ -1795,18 +1557,18 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           ?.addEventListener("click", handleLogout);
       }
 
-      // --- Lampirkan Event Listener untuk Konten yang Dirender Secara Dinamis ---
+      // --- Attach Event Listeners for Dynamically Rendered Content ---
       function attachDynamicEventListeners() {
         document.querySelectorAll(".bottom-nav button").forEach((button) => {
           button.removeEventListener("click", handleNavButtonClick);
           button.addEventListener("click", handleNavButtonClick);
         });
 
-        // Listener tombol logout sekarang ditangani di renderSettingsView
+        // Logout button listener is now handled in renderSettingsView
         // document.getElementById("logoutButton")?.removeEventListener("click", handleLogout);
         // document.getElementById("logoutButton")?.addEventListener("click", handleLogout);
 
-        // Baru: Listener tombol kembali
+        // New: Back button listener
         backButton?.removeEventListener("click", handleBackButtonClick);
         backButton?.addEventListener("click", handleBackButtonClick);
 
@@ -1847,12 +1609,12 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         renderMainContent();
       }
 
-      // Baru: Tangani klik tombol kembali
+      // New: Handle back button click
       function handleBackButtonClick() {
-        appView.classList.add("fade-out"); // Terapkan efek fade-out
+        appView.classList.add("fade-out"); // Apply fade-out effect
         setTimeout(() => {
-          window.location.href = "portalsiswa.html"; // Arahkan kembali ke portalsiswa.html
-        }, 300); // Sesuaikan dengan durasi transisi CSS
+          window.location.href = "portalsiswa.html"; // Navigate back to portalsiswa.html
+        }, 300); // Match CSS transition duration
       }
 
       function handleCancelConfirm() {
@@ -1884,16 +1646,16 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         renderModals();
       }
 
-      // --- Rendering Chart untuk Dashboard ---
+      // --- Chart Rendering for Dashboard ---
       function renderStudentPerformanceChart() {
         const chartCtx = document.getElementById("studentPerformanceChart");
         if (!chartCtx) return;
 
         const literasiHistory = studentExerciseHistory.filter(
-          (h) => (h.exerciseType || "").toLowerCase() === "literasi" // Penanganan defensif
+          (h) => h.exerciseType === "Literasi"
         );
         const numerasiHistory = studentExerciseHistory.filter(
-          (h) => (h.exerciseType || "").toLowerCase() === "numerasi" // Penanganan defensif
+          (h) => h.exerciseType === "Numerasi"
         );
 
         const latestLiterasiScores = literasiHistory
@@ -1938,12 +1700,10 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
         };
 
         if (studentPerformanceChart) {
-          // Mengubah scoreChart menjadi studentPerformanceChart
           studentPerformanceChart.data = data;
           studentPerformanceChart.update();
         } else {
           studentPerformanceChart = new Chart(chartCtx, {
-            // Mengubah scoreChart menjadi studentPerformanceChart
             type: "line",
             data: data,
             options: {
@@ -1953,11 +1713,6 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
                 legend: {
                   display: true,
                   position: "top",
-                  labels: {
-                    color: document.body.classList.contains("dark-mode")
-                      ? "#e2e8f0"
-                      : "#334155",
-                  },
                 },
                 title: {
                   display: true,
@@ -1965,9 +1720,6 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
                   font: {
                     size: 16,
                   },
-                  color: document.body.classList.contains("dark-mode")
-                    ? "#e2e8f0"
-                    : "#334155",
                 },
               },
               scales: {
@@ -1976,30 +1728,16 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
                   max: 100,
                   ticks: {
                     stepSize: 10,
-                    color: document.body.classList.contains("dark-mode")
-                      ? "#cbd5e1"
-                      : "#475569",
                   },
                   title: {
                     display: true,
                     text: "Nilai (0-100)",
-                    color: document.body.classList.contains("dark-mode")
-                      ? "#e2e8f0"
-                      : "#334155",
                   },
                 },
                 x: {
-                  ticks: {
-                    color: document.body.classList.contains("dark-mode")
-                      ? "#cbd5e1"
-                      : "#475569",
-                  },
                   title: {
                     display: true,
                     text: "Urutan Latihan",
-                    color: document.body.classList.contains("dark-mode")
-                      ? "#e2e8f0"
-                      : "#334155",
                   },
                 },
               },
@@ -2009,8 +1747,8 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
       }
 
       /**
-       * Mengirim jawaban siswa ke latihan harian.
-       * @param {Event} e - Event pengiriman formulir.
+       * Submits the student's answers to the daily exercise.
+       * @param {Event} e - The form submission event.
        */
       async function handleSubmitExercise(e) {
         e.preventDefault();
@@ -2033,6 +1771,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           };
         });
 
+        let totalScore = 0;
         let evaluationPrompt = `Sebagai seorang guru, evaluasi jawaban siswa berikut untuk latihan ${
           dailyExercise.type
         } pada tanggal ${
@@ -2059,142 +1798,130 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
           .map((ans, index) => `Jawaban Soal ${index + 1}: ${ans.answer}`)
           .join("\n")}
 
-        Format respons dalam JSON object dengan properti "gradedQuestions" (array of objects) dan "overallSuggestions" (string).
-        Setiap objek di "gradedQuestions" harus memiliki "questionIndex" (int, dimulai dari 0), "score" (int, 0-100), dan "aiSuggestion" (string).
-        Contoh:
-        {
-          "gradedQuestions": [
-            { "questionIndex": 0, "score": 80, "aiSuggestion": "Perlu lebih detail pada bagian X." },
-            { "questionIndex": 1, "score": 100, "aiSuggestion": "Bagus sekali!" }
-          ],
-          "overallSuggestions": "Secara keseluruhan, pemahaman Anda baik, namun perlu fokus pada konsep Y."
-        }
+        Format output harus sebagai berikut:
+        Nilai Soal 1: [Nilai 0-100]
+        Saran Soal 1: [Saran spesifik dan membangun]
+
+        Nilai Soal 2: [Nilai 0-100]
+        Saran Soal 2: [Saran spesifik dan membangun]
+
+        ...dan seterusnya untuk semua soal.
+        Di akhir, berikan ringkasan saran umum untuk seluruh latihan.
+        Ringkasan Saran: [Saran umum untuk seluruh latihan]
         `;
 
         try {
-          // --- LOGGING WAKTU: Mulai panggilan API Gemini ---
-          console.time("Gemini API Call Duration");
+          // Panggil endpoint Vercel Anda, bukan langsung API Gemini
+          const payload = { prompt: evaluationPrompt }; // Sesuaikan payload dengan yang diharapkan oleh fungsi Vercel Anda
           const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
-            method: "POST", // PASTIKAN INI ADA DAN BENAR
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              prompt: evaluationPrompt,
-              generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                  type: "OBJECT",
-                  properties: {
-                    gradedQuestions: {
-                      type: "ARRAY",
-                      items: {
-                        type: "OBJECT",
-                        properties: {
-                          questionIndex: { type: "NUMBER" },
-                          score: { type: "NUMBER" },
-                          aiSuggestion: { type: "STRING" },
-                        },
-                      },
-                    },
-                    overallSuggestions: { type: "STRING" },
-                  },
-                },
-              },
-            }),
+            body: JSON.stringify(payload),
           });
-          console.timeEnd("Gemini API Call Duration"); // --- LOGGING WAKTU: Akhir panggilan API Gemini ---
 
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(
-              `Panggilan API gagal dengan status ${response.status}: ${
-                errorData.error || "Kesalahan tidak diketahui"
+              `HTTP error! status: ${response.status} - ${
+                errorData.message || "Unknown error"
               }`
             );
           }
 
-          // gemini.js yang telah diperbarui akan mengembalikan JSON yang sudah di-parse langsung
-          const gradingResult = await response.json();
+          const data = await response.json();
+          // Asumsikan fungsi Vercel mengembalikan { generatedText: "..." }
+          const aiEvaluationText = data.generatedText;
 
-          if (
-            !gradingResult ||
-            !gradingResult.gradedQuestions ||
-            !Array.isArray(gradingResult.gradedQuestions)
-          ) {
-            throw new Error("Format respons penilaian AI tidak valid.");
-          }
+          const lines = aiEvaluationText
+            .split("\n")
+            .filter((line) => line.trim() !== "");
+          let currentQuestionIndex = -1;
+          let parsedScores = [];
+          let parsedSuggestions = [];
+          let overallSuggestion = "";
 
-          let updatedAnswers = dailyExercise.questions.map((q, index) => {
-            const studentAnswer = answers.find(
-              (ans) => ans.question === q.question
-            );
-            const gradedQ = gradingResult.gradedQuestions.find(
-              (gQ) => gQ.questionIndex === index
-            );
-
-            return {
-              question: q.question,
-              answer: studentAnswer ? studentAnswer.answer : "", // Jawaban siswa
-              score: gradedQ && gradedQ.score !== undefined ? gradedQ.score : 0, // Pastikan score tidak undefined
-              aiSuggestion:
-                gradedQ && gradedQ.aiSuggestion !== undefined
-                  ? gradedQ.aiSuggestion
-                  : "", // Pastikan aiSuggestion tidak undefined
-              minWords: q.minWords || 0,
-            };
+          lines.forEach((line) => {
+            if (line.startsWith("Nilai Soal ")) {
+              const match = line.match(/Nilai Soal (\d+):\s*(\d+)/);
+              if (match) {
+                currentQuestionIndex = parseInt(match[1]) - 1;
+                parsedScores[currentQuestionIndex] = parseInt(match[2]);
+              }
+            } else if (line.startsWith("Saran Soal ")) {
+              const match = line.match(/Saran Soal (\d+):\s*(.*)/);
+              if (match) {
+                const index = parseInt(match[1]) - 1;
+                parsedSuggestions[index] = match[2].trim();
+              }
+              if (!parsedSuggestions[currentQuestionIndex]) {
+                parsedSuggestions[currentQuestionIndex] =
+                  "Tidak ada saran spesifik.";
+              }
+            } else if (line.startsWith("Ringkasan Saran:")) {
+              overallSuggestion = line.replace("Ringkasan Saran:", "").trim();
+            }
           });
 
-          let sumScores = updatedAnswers.reduce(
-            (sum, ans) => sum + ans.score,
-            0
-          );
-          const totalScore =
-            updatedAnswers.length > 0
-              ? (sumScores / updatedAnswers.length).toFixed(0)
-              : 0;
+          totalScore =
+            parsedScores.reduce((sum, score) => sum + (score || 0), 0) /
+            (parsedScores.length || 1);
+          totalScore = Math.round(totalScore);
 
-          // --- LOGGING WAKTU: Mulai penyimpanan Firestore ---
-          console.time("Firestore Save Duration");
-          console.log(
-            "Saving student exercise history with type:",
-            dailyExercise.type
-          );
+          const answersWithSuggestions = answers.map((ans, index) => ({
+            ...ans,
+            score: parsedScores[index] || 0,
+            aiSuggestion:
+              parsedSuggestions[index] || "Tidak ada saran spesifik.",
+          }));
+
           await addDoc(collection(db, "student_exercise_history"), {
             studentId: studentData.id,
+            exerciseId: dailyExercise.id,
             exerciseDate: dailyExercise.date,
             exerciseType: dailyExercise.type,
-            score: parseInt(totalScore),
-            answers: updatedAnswers,
-            aiSuggestions: gradingResult.overallSuggestions || "", // Pastikan overallSuggestions tidak undefined
+            answers: answersWithSuggestions,
+            score: totalScore,
+            aiSuggestions: overallSuggestion,
             timestamp: serverTimestamp(),
           });
-          console.timeEnd("Firestore Save Duration"); // --- LOGGING WAKTU: Akhir penyimpanan Firestore ---
 
           showMessage(
             "success",
-            "Penilaian selesai! Hasil telah disimpan.",
-            "Berhasil!"
+            `Jawaban berhasil dikirim! Nilai Anda: ${totalScore}.`
           );
-          // Render ulang tampilan latihan harian untuk menunjukkan hasil
+
           renderDailyExerciseView();
+
+          studentMotivation.message = null;
         } catch (error) {
-          console.error("Error menilai jawaban:", error);
-          showMessage("error", `Gagal menilai jawaban: ${error.message}`);
+          console.error("Error submitting exercise:", error);
+          showMessage("error", `Gagal mengirim jawaban: ${error.message}`);
         }
       }
 
       function renderModals() {
+        if (!modalContainer) {
+          modalContainer = document.createElement("div");
+          modalContainer.id = "modal-container";
+          document.body.appendChild(modalContainer);
+        }
+
         let modalHtml = "";
 
         if (showConfirmationModal) {
           modalHtml += `
-            <div class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi</h3>
-                    <p class="text-gray-700 mb-6">${confirmationMessage}</p>
-                    <div class="flex justify-center space-x-4">
-                        <button id="cancelConfirm" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-200">Batal</button>
-                        <button id="executeConfirm" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl transition duration-200">Ya, Lanjutkan</button>
-                    </div>
+            <div id="confirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[100] modal-overlay">
+                <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center">
+                <h3 class="text-xl font-bold text-red-700 mb-4">Konfirmasi Aksi</h3>
+                <p class="text-gray-700 mb-6">${confirmationMessage}</p>
+                <div class="flex justify-center space-x-4">
+                    <button type="button" id="cancelConfirm" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition duration-200">
+                    Batal
+                    </button>
+                    <button type="button" id="executeConfirm" class="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition duration-200">
+                    Lanjutkan
+                    </button>
+                </div>
                 </div>
             </div>
             `;
@@ -2202,11 +1929,11 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
 
         if (showAISuggestionsModal) {
           modalHtml += `
-            <div class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
+            <div id="aiSuggestionsModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-[1000] modal-overlay">
+                <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-bold text-cyan-700">${aiSuggestionsTitle}</h3>
-                        <button id="closeAISuggestionsModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                        <button id="closeAISuggestionsModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
                     </div>
                     <div class="ai-reading-text">
                         <p>${aiSuggestionsContent.replace(/\n/g, "<br>")}</p>
@@ -2218,38 +1945,38 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
 
         if (showExerciseDetailsModal && exerciseDetailsData) {
           modalHtml += `
-            <div class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div id="exerciseDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-[1000] modal-overlay">
+                <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-cyan-700">Detail Latihan</h3>
-                        <button id="closeExerciseDetailsModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                        <h3 class="text-xl font-bold text-cyan-700">Detail Latihan (${
+                          exerciseDetailsData.exerciseType
+                        })</h3>
+                        <button id="closeExerciseDetailsModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
                     </div>
-                    <div class="exercise-info text-gray-700 mb-4 text-sm">
-                        <p><strong>Topik:</strong> ${
-                          exerciseDetailsData.topic || "N/A" // Penanganan defensif
-                        }</p>
-                        <p><strong>Jenis:</strong> ${
-                          exerciseDetailsData.exerciseType || "N/A" // Penanganan defensif
-                        }</p>
-                        <p><strong>Tanggal:</strong> ${
-                          exerciseDetailsData.exerciseDate
-                        }</p>
-                        ${
-                          exerciseDetailsData.score !== undefined
-                            ? `<p><strong>Nilai Total:</strong> <span class="text-cyan-600 font-bold">${exerciseDetailsData.score}</span></p>`
-                            : ""
-                        }
-                    </div>
-                    <div class="answer-section">
-                        <h4 class="text-lg font-semibold text-cyan-700 mb-3">Pertanyaan & Jawaban Anda</h4>
-                        <div class="graded-answers space-y-4">
-                            ${exerciseDetailsData.answers
-                              .map(
-                                (ans, index) => `
-                            <div class="ai-question-item p-3">
-                                <p class="font-semibold text-gray-800"><strong>Soal ${
-                                  index + 1
-                                }:</strong> ${ans.question}</p>
+                    <p class="text-gray-600 mb-4">Tanggal: ${
+                      exerciseDetailsData.exerciseDate
+                    } | Nilai: <strong>${
+            exerciseDetailsData.score !== undefined
+              ? exerciseDetailsData.score
+              : "N/A"
+          }</strong></p>
+                    ${
+                      exerciseDetailsData.dailyExercise?.readingText
+                        ? `<div class="ai-reading-text mb-4"><h4 class="font-semibold text-cyan-700 mb-2">Bacaan:</h4><p>${exerciseDetailsData.dailyExercise.readingText.replace(
+                            /\n/g,
+                            "<br>"
+                          )}</p></div>`
+                        : ""
+                    }
+                    <div>
+                        <h4 class="font-semibold text-cyan-700 mb-2">Soal & Jawaban Anda:</h4>
+                        ${exerciseDetailsData.answers
+                          .map(
+                            (ans, index) => `
+                            <div class="ai-question-item">
+                                <p><strong>Soal ${index + 1}:</strong> ${
+                              ans.question
+                            }</p>
                                 <p class="text-gray-700">Jawaban Anda: ${
                                   ans.answer
                                 }</p>
@@ -2263,8 +1990,8 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
                                 }
                             </div>
                         `
-                              )
-                              .join("")}
+                          )
+                          .join("")}
                     </div>
                     ${
                       exerciseDetailsData.aiSuggestions
