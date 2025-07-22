@@ -584,17 +584,18 @@
         onSnapshot,
         serverTimestamp,
         getDocs,
+        deleteDoc, // Import deleteDoc untuk menghapus mapping saat logout
       } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
       // --- Firebase Configuration ---
       // PENTING: Ganti dengan konfigurasi Firebase Anda yang sebenarnya!
       const firebaseConfig = {
-        apiKey: "YOUR_FIREBASE_API_KEY", // Ganti dengan kunci API Firebase Anda
-        authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-        projectId: "YOUR_FIREBASE_PROJECT_ID",
-        storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-        appId: "YOUR_FIREBASE_APP_ID",
+        apiKey: "AIzaSyBWTYZH2OZuyq_mnbbxiap7iBg-17II55A",
+        authDomain: "tabungansiswa-8bbd6.firebaseapp.com",
+        projectId: "tabungansiswa-8bbd6",
+        storageBucket: "tabungansiswa-8bbd6.firebasestorage.app",
+        messagingSenderId: "1068130708793",
+        appId: "1:1068130708793:web:d6afeed38a9d42dd034ce8",
       };
 
       // Initialize Firebase
@@ -603,7 +604,7 @@
       const db = getFirestore(app);
 
       // --- Global State Variables ---
-      let studentData = null; // Will be populated from Firestore based on localStorage ID
+      let studentData = null; // Will be populated from Firestore based on Firebase UID mapping
       let studentMotivation = {
         message: null,
         lastGenerated: null,
@@ -774,20 +775,24 @@
 
       // --- Firebase Auth State Listener ---
       onAuthStateChanged(auth, async (user) => {
-        const studentAppIdFromLocalStorage = localStorage.getItem(
-          "currentStudentAppId"
-        );
+        // Hapus penggunaan localStorage.getItem("currentStudentAppId")
+        // const studentAppIdFromLocalStorage = localStorage.getItem("currentStudentAppId");
 
         if (user) {
-          // Firebase user exists. Now, verify our custom student ID in localStorage.
-          if (studentAppIdFromLocalStorage) {
-            const studentDocRef = doc(
-              db,
-              "users",
-              studentAppIdFromLocalStorage
-            );
-            try {
+          // Firebase user exists. Sekarang, verifikasi mapping ke studentId.
+          const mappingDocRef = doc(
+            db,
+            "firebase_user_to_student_map",
+            user.uid
+          );
+          try {
+            const mappingDocSnap = await getDoc(mappingDocRef);
+
+            if (mappingDocSnap.exists()) {
+              const studentAppId = mappingDocSnap.data().studentId;
+              const studentDocRef = doc(db, "users", studentAppId);
               const docSnap = await getDoc(studentDocRef);
+
               if (docSnap.exists() && docSnap.data().role === "student") {
                 // Valid session: Firebase user exists AND custom student ID is valid
                 studentData = { id: docSnap.id, ...docSnap.data() };
@@ -797,36 +802,35 @@
                 appView.classList.remove("hidden"); // Make it visible
                 appView.classList.add("fade-in"); // Trigger fade-in
               } else {
-                // Firebase user exists, but custom student ID is invalid or role mismatch
+                // Mapping exists but student data invalid or role mismatch
                 console.warn(
-                  "Invalid student ID in localStorage or role mismatch. Forcing Firebase logout and redirecting to login."
+                  "Mapped student ID invalid or role mismatch. Forcing Firebase logout and redirecting to login."
                 );
-                localStorage.removeItem("currentStudentAppId"); // Clear invalid data
+                // Hapus mapping yang tidak valid
+                await deleteDoc(mappingDocRef); // Hapus mapping yang rusak
                 await signOut(auth); // Force Firebase logout
                 window.location.href = "login.html"; // Redirect to login
               }
-            } catch (error) {
-              console.error(
-                "Error fetching student data from Firestore:",
-                error
+            } else {
+              // Firebase user exists, but no mapping to a student ID.
+              console.warn(
+                "Firebase user active but no student ID mapping. Forcing Firebase logout and redirecting to login."
               );
-              localStorage.removeItem("currentStudentAppId");
-              await signOut(auth);
-              window.location.href = "login.html";
+              await signOut(auth); // Force Firebase logout
+              window.location.href = "login.html"; // Redirect to login
             }
-          } else {
-            // Firebase user exists, but no custom student ID in localStorage.
-            // This means the Firebase session is active but our custom user isn't linked.
-            console.warn(
-              "Firebase user active but no student ID in localStorage. Forcing Firebase logout and redirecting to login."
+          } catch (error) {
+            console.error(
+              "Error fetching student data from Firestore or mapping:",
+              error
             );
-            await signOut(auth); // Force Firebase logout
-            window.location.href = "login.html"; // Redirect to login
+            await signOut(auth);
+            window.location.href = "login.html";
           }
         } else {
-          // No Firebase user. Ensure localStorage is clear and redirect to login.
+          // No Firebase user. Pastikan tidak ada mapping dan redirect ke login.
           console.warn("No Firebase user active. Redirecting to login.");
-          localStorage.removeItem("currentStudentAppId");
+          // Tidak perlu menghapus mapping di sini karena user sudah null
           window.location.href = "login.html";
         }
       });
@@ -990,9 +994,23 @@
         showConfirmModal("Apakah Anda yakin ingin keluar?", async () => {
           showMessage("loading", "Sedang logout...");
           try {
-            await signOut(auth);
             studentData = null;
-            localStorage.removeItem("currentStudentAppId"); // Clear custom student ID from localStorage
+            // Hapus penggunaan localStorage.removeItem("currentStudentAppId");
+            // localStorage.removeItem("currentStudentAppId"); // Clear custom student ID from localStorage
+
+            // Hapus mapping dari Firestore saat logout
+            if (auth.currentUser) {
+              await deleteDoc(
+                doc(db, "firebase_user_to_student_map", auth.currentUser.uid)
+              );
+              console.log(
+                "Mapping deleted for Firebase UID:",
+                auth.currentUser.uid
+              );
+            }
+
+            await signOut(auth); // Sign out from Firebase
+
             studentMotivation = {
               message: null,
               lastGenerated: null,
@@ -1026,7 +1044,7 @@
             showMessage("success", "Berhasil logout.");
             appView.classList.add("fade-out"); // Apply fade-out before redirect
             setTimeout(() => {
-              window.location.href = "portalsiswa.html"; // Redirect to login portal
+              window.location.href = "login.html"; // Redirect to login portal
             }, 300); // Match CSS transition duration
           } catch (error) {
             console.error("Logout error:", error);
@@ -1812,7 +1830,7 @@ Rata-rata Nilai Keseluruhan: ${overallAverageScore}
 
         try {
           // Panggil endpoint Vercel Anda, bukan langsung API Gemini
-          const payload = { prompt: evaluationPrompt }; // Sesuaikan payload dengan yang diharapkan oleh fungsi Vercel Anda
+          const payload = { prompt: prompt }; // Sesuaikan payload dengan yang diharapkan oleh fungsi Vercel Anda
           const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json" },

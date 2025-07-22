@@ -220,8 +220,7 @@
         border-color: #64748b;
         color: #e2e8f0;
       }
-      body.dark-mode input::placeholder,
-      body.dark-mode textarea::placeholder {
+      body.dark-mode input::placeholder {
         color: #a0aec0;
       }
       body.dark-mode #globalMessage.bg-blue-100 {
@@ -423,7 +422,20 @@
           try {
             await signOut(auth);
             studentData = null;
-            localStorage.removeItem("currentStudentAppId"); // Clear student ID from localStorage
+            // Hapus penggunaan localStorage.removeItem("currentStudentAppId");
+            // localStorage.removeItem("currentStudentAppId"); // Clear student ID from localStorage
+
+            // Hapus mapping dari Firestore saat logout
+            if (auth.currentUser) {
+              await deleteDoc(
+                doc(db, "firebase_user_to_student_map", auth.currentUser.uid)
+              );
+              console.log(
+                "Mapping deleted for Firebase UID:",
+                auth.currentUser.uid
+              );
+            }
+
             showMessage(
               "success",
               "Berhasil logout. Mengarahkan ke halaman login..."
@@ -680,45 +692,63 @@
 
       // --- Firebase Auth State Listener ---
       onAuthStateChanged(auth, async (user) => {
-        const studentAppIdFromLocalStorage = localStorage.getItem(
-          "currentStudentAppId"
-        );
+        // Hapus penggunaan localStorage.getItem("currentStudentAppId") di sini
+        // const studentAppIdFromLocalStorage = localStorage.getItem("currentStudentAppId");
 
-        if (user && studentAppIdFromLocalStorage) {
-          // Firebase user is authenticated. Now, verify our custom student ID in localStorage.
-          const studentDocRef = doc(db, "users", studentAppIdFromLocalStorage);
+        if (user) {
+          // Firebase user exists. Sekarang, verifikasi mapping ke studentId.
+          const mappingDocRef = doc(
+            db,
+            "firebase_user_to_student_map",
+            user.uid
+          );
           try {
-            const docSnap = await getDoc(studentDocRef);
-            if (docSnap.exists() && docSnap.data().role === "student") {
-              studentData = { id: docSnap.id, ...docSnap.data() };
-              portalTitle.innerText = `Halo, ${studentData.name}!`;
-              // Fade in the app view after successful authentication
-              appView.classList.remove("hidden"); // Ensure display is not 'none'
-              appView.classList.add("fade-in");
-              renderMainContent(); // Pindahkan panggilan ini ke sini
+            const mappingDocSnap = await getDoc(mappingDocRef);
+
+            if (mappingDocSnap.exists()) {
+              const studentAppId = mappingDocSnap.data().studentId;
+              const studentDocRef = doc(db, "users", studentAppId);
+              const docSnap = await getDoc(studentDocRef);
+
+              if (docSnap.exists() && docSnap.data().role === "student") {
+                studentData = { id: docSnap.id, ...docSnap.data() };
+                portalTitle.innerText = `Halo, ${studentData.name}!`;
+                // Fade in the app view after successful authentication
+                appView.classList.remove("hidden"); // Ensure display is not 'none'
+                appView.classList.add("fade-in");
+                renderMainContent(); // Pindahkan panggilan ini ke sini
+              } else {
+                // Mapping exists but student data invalid or role mismatch
+                console.warn(
+                  "Mapped student ID invalid or role mismatch. Redirecting to login."
+                );
+                // Hapus mapping yang tidak valid
+                await deleteDoc(mappingDocRef); // Hapus mapping yang rusak
+                await signOut(auth); // Force Firebase logout
+                window.location.href = "login.html"; // Redirect to login
+                return; // Stop execution
+              }
             } else {
-              // studentAppId in localStorage is invalid or student data not found/role incorrect
+              // Firebase user exists, but no mapping to a student ID.
+              // This means the Firebase session is active but our custom user isn't linked.
+              // Force Firebase logout and redirect to login.
               console.warn(
-                "Invalid student ID in localStorage or role mismatch. Redirecting to login."
+                "Firebase user active but no student ID mapping. Forcing Firebase logout and redirecting to login."
               );
-              localStorage.removeItem("currentStudentAppId"); // Clear invalid data
               await signOut(auth); // Force Firebase logout
-              window.location.href = "login.html"; // Redirect to login
+              window.location.href = "login.html";
               return; // Stop execution
             }
           } catch (error) {
-            console.error("Error fetching student data from Firestore:", error);
-            localStorage.removeItem("currentStudentAppId"); // Clear potentially problematic data
+            console.error("Error verifying student data or mapping:", error);
             await signOut(auth); // Force Firebase logout
-            window.location.href = "login.html"; // Redirect to login
+            window.location.href = "login.html";
             return; // Stop execution
           }
         } else {
-          // No Firebase user or no custom student ID in localStorage, redirect to login
-          console.warn(
-            "No active Firebase session or student ID. Redirecting to login."
-          );
-          localStorage.removeItem("currentStudentAppId");
+          // No Firebase user. Pastikan tidak ada mapping dan redirect ke login.
+          console.warn("No Firebase user active. Redirecting to login.");
+          // Tidak perlu menghapus mapping di sini karena user sudah null
           window.location.href = "login.html";
           return; // Stop execution
         }
