@@ -28,85 +28,90 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 // Ini adalah fungsi handler utama untuk serverless function.
 // Vercel secara otomatis akan memanggil fungsi ini saat endpoint diakses.
 module.exports = async (req, res) => {
-  // Mengatur header CORS (Cross-Origin Resource Sharing).
-  // Ini penting agar frontend (yang mungkin berada di domain berbeda) bisa mengakses fungsi ini.
-  // Untuk keamanan lebih, ganti '*' dengan domain spesifik frontend-mu (misal: 'https://namaprojekmu.vercel.app').
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // Metode HTTP yang diizinkan
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // Header yang diizinkan
-
-  // Tangani preflight request dari browser (OPTIONS method)
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  // Pastikan metode request adalah POST
+  // Pastikan ini adalah permintaan POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Metode tidak diizinkan." });
   }
 
-  // Pastikan ada payload JSON
-  if (!req.body) {
-    return res.status(400).json({ error: "Body request kosong." });
-  }
-
-  const { prompt, generationConfig } = req.body;
-
-  if (!prompt) {
+  // Pastikan ada 'prompt' di body permintaan
+  if (!req.body.prompt) {
     return res.status(400).json({ error: "Parameter 'prompt' diperlukan." });
   }
 
-  try {
-    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+  const prompt = req.body.prompt;
+  const generationConfig = req.body.generationConfig || {}; // Ambil generationConfig jika ada
 
-    // Jika generationConfig disediakan, tambahkan ke payload
-    if (generationConfig) {
+  try {
+    const chatHistory = [];
+    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+    const payload = { contents: chatHistory };
+
+    // Jika ada generationConfig, tambahkan ke payload
+    if (Object.keys(generationConfig).length > 0) {
       payload.generationConfig = generationConfig;
     }
 
     const result = await model.generateContent(payload);
-    const geminiResponse = await result.response;
-    const geminiText = await geminiResponse.text(); // Mengambil teks mentah dari respons Gemini.
+    const geminiResponse = result.response;
 
-    // Cek apakah frontend meminta respons JSON berdasarkan generationConfig
-    const expectsJson =
-      generationConfig &&
-      generationConfig.responseMimeType === "application/json";
+    // Cek apakah ada kandidat dan konten
+    if (
+      !geminiResponse ||
+      !geminiResponse.candidates ||
+      geminiResponse.candidates.length === 0 ||
+      !geminiResponse.candidates[0].content ||
+      !geminiResponse.candidates[0].content.parts ||
+      geminiResponse.candidates[0].content.parts.length === 0
+    ) {
+      console.error("Respons Gemini tidak memiliki struktur yang diharapkan.");
+      return res.status(500).json({
+        error: "Respons Gemini tidak memiliki struktur yang diharapkan.",
+        details: "Tidak ada kandidat atau konten yang ditemukan.",
+      });
+    }
 
-    if (expectsJson) {
+    const geminiText = geminiResponse.candidates[0].content.parts[0].text;
+
+    // Jika frontend meminta JSON, coba parse
+    if (generationConfig.responseMimeType === "application/json") {
       try {
-        // Jika diharapkan JSON, coba parse teks mentah dari Gemini sebagai JSON.
-        const parsedGeminiContent = JSON.parse(geminiText);
-        // Mengirimkan konten JSON yang sudah di-parsing secara langsung kembali ke frontend.
-        res.status(200).json(parsedGeminiContent);
+        // Log respons mentah dari Gemini untuk debugging
+        console.log("Raw Gemini Text received:", geminiText);
+        const jsonResponse = JSON.parse(geminiText);
+        res.status(200).json(jsonResponse);
       } catch (parseError) {
-        // Jika respons Gemini bukan JSON yang valid padahal diharapkan JSON, catat error.
-        console.error("Error parsing Gemini API response as JSON:", parseError);
+        // Jika parsing gagal, log error dan kirim respons JSON fallback
+        console.error("Error parsing Gemini JSON response:", parseError);
+        console.error("Text that failed to parse:", geminiText); // Penting untuk melihat teks yang gagal
         return res.status(500).json({
           error: "Invalid JSON response from Gemini API.",
-          details: parseError.message,
-          rawGeminiResponse: geminiText, // Sertakan respons mentah untuk debugging
+          details:
+            "AI gagal menghasilkan JSON yang valid. Mungkin ada masalah dengan prompt atau respons AI. Teks mentah: " +
+            geminiText.substring(0, 200) +
+            "...", // Sertakan sebagian teks mentah untuk debugging
+          gradedQuestions: [], // Fallback kosong
+          overallSuggestions:
+            "Maaf, AI gagal mengevaluasi jawaban Anda secara terstruktur. Silakan coba lagi atau hubungi administrator.",
         });
       }
     } else {
       // Jika tidak diharapkan JSON, kembalikan teks mentah Gemini dalam objek { text: ... }
-      // Ini penting agar frontend selalu menerima objek yang bisa di-parse, bukan string mentah.
       res.status(200).json({ text: geminiText });
     }
   } catch (error) {
     // Menangani error jika terjadi masalah saat memanggil Gemini API atau error lainnya.
     console.error("Error saat memanggil Gemini API dari fungsi Vercel:", error);
-    // Log objek error lengkap untuk debugging yang lebih baik
     console.error("Objek error lengkap:", JSON.stringify(error, null, 2));
 
     let errorMessage = "Gagal menghasilkan konten dari Gemini API.";
     let statusCode = 500;
 
-    // Coba ekstrak pesan error yang lebih spesifik dari objek error Gemini
     if (error.status) {
       statusCode = error.status;
       if (error.status === 429) {
-        errorMessage = "Anda telah melebihi kuota Gemini API harian Anda. Silakan coba lagi nanti atau tingkatkan kuota Anda.";
+        errorMessage =
+          "Anda telah melebihi kuota Gemini API harian Anda. Silakan coba lagi nanti atau tingkatkan kuota Anda.";
       } else if (error.statusText) {
         errorMessage = `Panggilan API gagal dengan status ${error.status}: ${error.statusText}`;
       }
@@ -116,8 +121,7 @@ module.exports = async (req, res) => {
 
     res.status(statusCode).json({
       error: errorMessage,
-      details: error.message, // Sertakan pesan error asli untuk debugging
-      rawError: JSON.stringify(error), // Sertakan seluruh objek error sebagai string
+      details: error.message,
     });
   }
 };
