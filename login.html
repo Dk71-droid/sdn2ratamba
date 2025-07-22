@@ -375,10 +375,10 @@
             "success",
             `Selamat datang, ${studentDataFromDb.name}! Mengarahkan...`
           );
-          // Redirect to portalsiswa.html after a short delay for message to be seen
-          setTimeout(() => {
-            window.location.href = "portalsiswa.html";
-          }, 1000);
+          // *** HAPUS pengalihan langsung di sini. Biarkan onAuthStateChanged yang menangani. ***
+          // setTimeout(() => {
+          //   window.location.href = "portalsiswa.html";
+          // }, 1000);
         } catch (error) {
           console.error("Login siswa error:", error);
           showMessage("error", `Gagal login: ${error.message}`);
