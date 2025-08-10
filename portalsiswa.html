@@ -3,15 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal Siswa</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Portal Siswa: Belajar & Latihan</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <!-- Poppins font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
       rel="stylesheet"
@@ -20,56 +17,148 @@
       /* Base styles for light mode */
       body {
         font-family: "Poppins", sans-serif;
-        background-color: #f0f4f8; /* Light blue-gray background */
+        background-color: #ffffff; /* Ubah menjadi warna putih */
         color: #334155; /* Slate-700 text */
         margin: 0;
         padding: 0;
         min-height: 100vh;
-        display: flex; /* Make body a flex container */
-        flex-direction: column; /* Stack children vertically */
-        font-size: 0.875rem; /* Significantly smaller base font size (14px) */
-        overflow-x: hidden; /* Prevent horizontal scroll */
+        display: flex;
+        flex-direction: column;
+        font-size: 1rem;
       }
 
       .container {
-        max-width: 960px; /* Max width for larger screens */
+        max-width: 960px;
         margin: 0 auto;
-        padding: 1.25rem; /* Reduced default padding for desktop */
-        width: 100%; /* Ensure container takes full width of its parent */
+        padding: 1.5rem;
       }
 
-      /* Responsive adjustments for container */
-      @media (max-width: 767px) {
-        /* For mobile devices */
-        .container {
-          padding: 0.5rem; /* Further reduced padding on small screens */
-        }
+      /* Sidebar styles (similar to teacher, but for student) */
+      .sidebar {
+        width: 250px;
+        background-color: #ffffff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 20;
+      }
+
+      .sidebar-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .sidebar-header .logo {
+        width: 80px;
+        height: 80px;
+        background-color: #e0f2fe; /* Light blue-100 */
+        border-radius: 50%;
+        margin: 0 auto 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #0ea5e9; /* Sky-500 */
+      }
+
+      .sidebar-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 0.75rem;
+        color: #475569;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .sidebar-nav-item:hover {
+        background-color: #e0f2fe; /* Light blue-100 */
+        color: #0c4a6e; /* Cyan-800 */
+      }
+
+      .sidebar-nav-item.active {
+        background-color: #0ea5e9; /* Sky-500 */
+        color: #ffffff;
+        box-shadow: 0 4px 8px rgba(14, 165, 233, 0.2);
+      }
+
+      .sidebar-nav-item.active .fas {
+        color: #ffffff;
+      }
+
+      .sidebar-nav-item .fas {
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+        color: #64748b; /* Slate-500 */
+        transition: color 0.2s ease;
+      }
+
+      /* Main content styles */
+      .main-content {
+        flex-grow: 1;
+        padding: 1.5rem; /* Default padding for desktop */
+      }
+
+      .main-header .greeting {
+        font-weight: 700;
+        color: #1e293b; /* Slate-800 */
       }
 
       /* Card styles */
       .card {
-        background-color: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        padding: 0.8rem; /* Reduced padding for mobile cards */
-        margin-bottom: 1.2rem; /* Reduced margin */
-      }
-      @media (min-width: 768px) {
-        /* Apply larger padding for desktop */
-        .card {
-          padding: 1.25rem; /* desktop card padding */
-        }
-      }
-      .card-header {
-        font-size: 1rem; /* Smaller card header font size */
-        font-weight: 600;
-        color: #06b6d4; /* Cyan-700 */
-        margin-bottom: 0.8rem; /* Reduced margin */
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
 
-      /* Modal styles */
+      .card-header {
+        font-weight: 700;
+        color: #1e293b; /* Slate-800 */
+        margin-bottom: 1rem;
+      }
+
+      /* Data table styles */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0; /* Slate-200 */
+      }
+
+      .data-table th {
+        background-color: #f8fafc; /* Slate-50 */
+        font-weight: 600;
+        color: #475569; /* Slate-700 */
+        font-size: 0.875rem;
+      }
+
+      .data-table tbody tr:hover {
+        background-color: #f0f4f8; /* Light blue-gray */
+      }
+
+      .data-table .actions-col {
+        width: 1%; /* Make action column compact */
+        white-space: nowrap; /* Prevent wrapping */
+      }
+
+      /* Modals */
       .modal-overlay {
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.3); /* Slightly lighter dimming */
         position: fixed;
         top: 0;
         left: 0;
@@ -78,807 +167,395 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 100;
+        z-index: 5000; /* Ensure it's on top */
       }
-      .modal-overlay .max-w-md {
-        max-width: 95%; /* Make modals take up more width on small screens */
+
+      .modal-overlay > div {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        color: #334155;
+        width: calc(100% - 2rem);
+        margin: 1rem;
+        max-height: calc(100vh - 10rem);
+        overflow-y: auto;
       }
+
+      /* Global Message */
       #globalMessage {
         position: fixed;
-        top: 0.75rem; /* Reduced top position */
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10000;
-        padding: 0.6rem 0.8rem; /* Further reduced padding */
+        top: 1rem;
+        right: 1rem;
+        z-index: 5000;
+        width: calc(100% - 2rem);
+        max-width: 400px;
         border-radius: 0.5rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        max-width: 90%;
-        width: 260px; /* Even narrower */
-        text-align: left;
-        font-size: 0.8rem; /* Even smaller font for messages */
-      }
-      #globalMessage.hidden {
-        display: none;
-      }
-      #globalMessage.bg-green-100 {
-        background-color: #d1fae5;
-        border-color: #34d399;
-        color: #065f46;
-      }
-      #globalMessage.bg-red-100 {
-        background-color: #fee2e2;
-        border-color: #ef4444;
-        color: #991b1b;
-      }
-      #globalMessage.bg-blue-100 {
-        background-color: #dbeafe;
-        border-color: #3b82f6;
-        color: #1e40af;
-      }
-      #globalMessage .font-bold {
-        font-weight: 700;
-        font-size: 0.85rem; /* Even smaller title */
-      }
-      #globalMessage #messageCloseBtn {
-        cursor: pointer;
-        font-size: 1rem; /* Adjust close button size */
-      }
-
-      /* Main App View - Initially hidden, fades in */
-      #appView {
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out; /* Smooth fade-in */
-        display: flex; /* Flex container for content */
-        flex-direction: column; /* Stack children vertically */
-        flex-grow: 1; /* Take up remaining space */
-        width: 100%; /* Ensure it takes full width */
-      }
-      #appView.fade-in {
-        opacity: 1;
-      }
-      #appView.fade-out {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out; /* Faster fade-out */
-      }
-
-      /* Main Content Area */
-      #mainContentArea {
-        flex-grow: 1; /* Take remaining space */
-        display: flex;
-        flex-direction: column;
-      }
-
-      /* Navigation Cards */
-      .nav-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
         padding: 1rem;
-        background-color: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        cursor: pointer;
-        min-height: 120px; /* Ensure cards have a minimum height */
-      }
-      .nav-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-      }
-      .nav-card i {
-        font-size: 2.5rem; /* Larger icons */
-        margin-bottom: 0.5rem;
-        color: #06b6d4; /* Cyan-500 */
-      }
-      .nav-card span {
-        font-weight: 600;
-        color: #334155; /* Slate-700 */
-        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
       }
 
-      /* Settings Icon Button */
-      #settingsIconBtn {
-        background: none;
-        border: none;
-        color: #334155; /* Slate-700 */
-        font-size: 1.8rem; /* Larger icon */
-        cursor: pointer;
-        transition: color 0.2s ease;
-      }
-      #settingsIconBtn:hover {
-        color: #06b6d4; /* Cyan-500 on hover */
+      #globalMessage.hidden {
+        opacity: 0;
+        pointer-events: none;
       }
 
-      /* Portal Title (h1) adjustments */
-      #portalTitle {
-        font-size: 1.8rem; /* Default for desktop */
-      }
+      /* Responsive adjustments */
       @media (max-width: 767px) {
-        #portalTitle {
-          font-size: 0.875rem; /* Significantly smaller for mobile (14px) */
+        body {
+          font-size: 0.875rem;
+        }
+        .sidebar {
+          display: none; /* Hide sidebar on mobile */
+        }
+
+        .main-content {
+          padding: 0.75rem;
+          padding-top: 3.5rem;
+          padding-bottom: 4rem;
+        }
+
+        .main-header .greeting {
+          margin-bottom: 0.5rem;
+          font-size: 1rem;
+        }
+
+        .card-header {
+          font-size: 1rem;
+        }
+
+        .bottom-nav {
+          display: flex;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          background-color: #ffffff;
+          box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+          justify-content: space-around;
+          padding: 0.5rem 0;
+          z-index: 1000;
+        }
+
+        .bottom-nav button {
+          background: none;
+          border: none;
+          color: #64748b; /* Slate-500 */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex-grow: 1;
+          font-size: 0.75rem;
+          padding: 0.5rem 0.25rem;
+          border-radius: 0.5rem;
+          transition: all 0.2s ease;
+        }
+
+        .bottom-nav button .fas {
+          font-size: 1.1rem;
+          margin-bottom: 0.15rem;
+        }
+
+        .bottom-nav button.active {
+          color: #0ea5e9; /* Sky-500 */
+          background-color: #e0f2fe; /* Light blue-100 */
+        }
+
+        .modal-overlay > div {
+          padding: 0.75rem;
+          max-height: calc(100vh - 14rem);
         }
       }
 
-      /* Dark Mode Styles */
-      body.dark-mode {
-        background-color: #1a202c; /* Dark background */
-        color: #e2e8f0; /* Light text */
+      @media (min-width: 768px) {
+        .app-container {
+          display: flex;
+        }
+        .bottom-nav {
+          display: none; /* Hide bottom nav on desktop */
+        }
+        .main-content {
+          margin-left: 250px;
+          padding-top: 0.75rem;
+        }
       }
-      body.dark-mode .card,
-      body.dark-mode .nav-card {
-        background-color: #2d3748; /* Darker card background */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+      /* Custom styles for input/textarea */
+      input[type="text"],
+      input[type="password"],
+      input[type="email"],
+      input[type="number"],
+      textarea,
+      select {
+        @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-base;
       }
-      body.dark-mode .card-header {
-        color: #4fd1c5; /* Teal-400 for headers */
+
+      /* Specific adjustment for button padding/font */
+      .btn-primary {
+        @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm;
       }
-      body.dark-mode input,
-      body.dark-mode textarea {
-        background-color: #4a5568;
-        border-color: #64748b;
-        color: #e2e8f0;
+
+      .btn-danger {
+        @apply bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm;
       }
-      body.dark-mode input::placeholder,
-      body.dark-mode textarea::placeholder {
-        color: #a0aec0;
+
+      /* Specific styles for tab content sections */
+      .tab-content-section {
+        display: none; /* Hidden by default */
       }
-      body.dark-mode #globalMessage.bg-blue-100 {
-        background-color: #2c5282;
-        border-color: #4299e1;
-        color: #ebf8ff;
+
+      .tab-content-section.active {
+        display: block; /* Shown when active */
       }
-      body.dark-mode #globalMessage.bg-green-100 {
-        background-color: #2f855a;
-        border-color: #48bb78;
-        color: #ebf8ff;
+
+      /* Inline Error Message Style */
+      .input-error-message {
+        @apply text-red-500 text-xs mt-1 ml-1;
       }
-      body.dark-mode #globalMessage.bg-red-100 {
-        background-color: #9b2c2c;
-        border-color: #e53e3e;
-        color: #fed7d7;
-      }
-      body.dark-mode .nav-card i {
-        color: #4fd1c5; /* Teal-400 for icons in dark mode */
-      }
-      body.dark-mode .nav-card span {
-        color: #e2e8f0; /* Light text for card labels in dark mode */
-      }
-      body.dark-mode #settingsIconBtn {
-        color: #e2e8f0; /* Light text for icon in dark mode */
-      }
-      body.dark-mode #settingsIconBtn:hover {
-        color: #4fd1c5; /* Teal-400 on hover in dark mode */
-      }
-      body.dark-mode .modal-overlay .bg-white {
-        background-color: #2d3748; /* Darker modal background */
-        color: #e2e8f0; /* Light text */
-      }
-      body.dark-mode .modal-overlay h3 {
-        color: #4fd1c5; /* Teal-400 for modal headers */
-      }
-      body.dark-mode .modal-overlay .text-gray-700 {
-        color: #e2e8f0; /* Light text */
-      }
-      body.dark-mode .modal-overlay .text-gray-500 {
-        color: #a0aec0; /* Lighter gray text */
+
+      /* Custom style for header title shadow */
+      .app-title-shadow {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
       }
     </style>
   </head>
   <body>
-    <!-- Global Message Component -->
-    <div
-      id="globalMessage"
-      class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] p-4 rounded-md shadow-lg hidden max-w-sm w-full"
-      role="alert"
-    >
-      <div class="flex justify-between items-center">
-        <p id="messageTitle" class="font-bold"></p>
-        <button id="messageCloseBtn" class="text-current text-lg font-bold">
-          ×
-        </button>
-      </div>
-      <p id="messageText"></p>
-    </div>
-
-    <!-- Main App View - Initially hidden (opacity 0), fades in after auth -->
-    <div id="appView" class="hidden">
-      <!-- Main Content Area -->
-      <div id="mainContentArea" class="flex-grow">
-        <div id="headerSection" class="container pt-4 md:pt-6">
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="font-bold text-slate-800" id="portalTitle">
-              Portal Siswa
-            </h1>
-            <!-- Settings Icon Button -->
-            <button id="settingsIconBtn" class="focus:outline-none">
-              <i class="fas fa-cog"></i>
-            </button>
+    <div class="app-container">
+      <!-- Sidebar (Desktop) -->
+      <aside class="sidebar hidden md:flex flex-shrink-0">
+        <div>
+          <div class="sidebar-header">
+            <div class="logo">🧑‍🎓</div>
+            <h2 class="text-xl font-bold text-slate-800">AI Tutor Siswa</h2>
           </div>
+          <nav class="sidebar-nav">
+            <button class="sidebar-nav-item active" data-view="dashboard">
+              <i class="fas fa-chart-pie"></i>
+              <span>Dashboard</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="soal-harian">
+              <i class="fas fa-pencil-alt"></i>
+              <span>Latihan Harian</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="materi">
+              <i class="fas fa-book"></i>
+              <span>Materi</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="jadwal-tugas">
+              <i class="fas fa-calendar-check"></i>
+              <span>Jadwal Tugas</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="pengaturan">
+              <i class="fas fa-cog"></i>
+              <span>Pengaturan</span>
+            </button>
+          </nav>
+        </div>
+        <button id="logoutButtonDesktop" class="btn-danger w-fit mx-auto">
+          <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+        </button>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="main-content flex-grow min-w-0">
+        <!-- Mobile Header (Visible only on mobile) -->
+        <header
+          class="fixed top-0 left-0 z-10 w-full flex md:hidden items-center p-2"
+          style="background-color: #f0f4f8"
+        >
+          <div
+            class="flex items-center space-x-2 text-cyan-700 font-bold text-lg"
+          >
+            <div class="text-pink-500 text-xl">🧑‍🎓</div>
+            <h1 class="app-title-shadow text-lg">AI Tutor Siswa</h1>
+          </div>
+        </header>
+
+        <!-- Global Message Display -->
+        <div
+          id="globalMessage"
+          class="hidden bg-blue-100 border-blue-500 text-blue-700"
+        >
+          <div>
+            <p id="messageTitle" class="font-bold">Informasi</p>
+            <p id="messageText" class="text-sm">Pesan Anda di sini.</p>
+          </div>
+          <button id="messageCloseBtn" class="text-xl font-bold ml-4">
+            &times;
+          </button>
         </div>
 
-        <main class="container flex-grow pb-8">
-          <!-- Default content for portalsiswa.html after login -->
-          <div id="defaultView" class="tab-content-section active">
-            <div class="card mb-6">
-              <h2 class="card-header">Selamat Datang di Portal Siswa!</h2>
-              <p class="text-gray-600">
-                Jelajahi fitur-fitur yang tersedia di bawah ini.
-              </p>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <!-- Navigation Card: Latihanku (redirects to latihankuv2.html) -->
-              <div
-                class="nav-card"
-                data-target-url="latihankuv2.html"
-                data-feature-name="Latihanku"
-              >
-                <i class="fas fa-book-open"></i>
-                <span>Latihanku</span>
-              </div>
-
-              <!-- Navigation Card: Hafalanku (opens modal) -->
-              <div
-                class="nav-card"
-                data-view="placeholder"
-                data-feature-name="Hafalanku"
-              >
-                <i class="fas fa-brain"></i>
-                <span>Hafalanku</span>
-              </div>
-
-              <!-- Navigation Card: Tabunganku (opens modal) -->
-              <div
-                class="nav-card"
-                data-view="placeholder"
-                data-feature-name="Tabunganku"
-              >
-                <i class="fas fa-wallet"></i>
-                <span>Tabunganku</span>
-              </div>
-
-              <!-- Navigation Card: Nilai Rapor (opens modal) -->
-              <div
-                class="nav-card"
-                data-view="placeholder"
-                data-feature-name="Nilai Rapor"
-              >
-                <i class="fas fa-clipboard-list"></i>
-                <span>Nilai Rapor</span>
-              </div>
-
-              <!-- NEW: Navigation Card: Halaman Diskusiku (redirects to diskusi-siswa.html) -->
-              <div
-                class="nav-card"
-                data-target-url="diskusi-siswa.html"
-                data-feature-name="Halaman Diskusiku"
-              >
-                <i class="fas fa-comments"></i>
-                <span>Halaman Diskusiku</span>
-              </div>
-
-              <!-- "Pengaturan" card is removed from here -->
+        <!-- Dynamic App Views -->
+        <main id="appView" class="hidden">
+          <!-- Dashboard View -->
+          <div id="dashboardView" class="tab-content-section active">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Student Info Card -->
             </div>
           </div>
 
-          <!-- Placeholder for Settings Modal Content (will be rendered into modal-container) -->
-          <!-- This div is kept for structure, but its content will be dynamically loaded into the modal -->
-          <div id="settingsView" class="hidden">
-            <!-- Content will be generated by renderSettingsModalContent() -->
+          <!-- Bagian ini berada di dalam <div id="mainContentContainer"> di portalsiswa.html -->
+          <div id="materiView" class="tab-content-section hidden">
+            <div id="materialsListContainer">
+              <p class="text-gray-600 text-center py-8">
+                Memuat daftar materi...
+              </p>
+            </div>
+            <div id="materialContentDisplay" class="hidden mt-6">
+              <div id="materialDetailContent"></div>
+            </div>
+          </div>
+
+          <!-- Jadwal Tugas View -->
+          <div id="jadwal-tugasView" class="tab-content-section hidden">
+            <div class="card">
+              <h2 class="card-header">Jadwal Tugas Anda</h2>
+              <div id="scheduledTasksListContainer">
+                <p class="text-gray-600 text-center py-8">
+                  Memuat jadwal tugas...
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pengaturan View -->
+          <div id="pengaturanView" class="tab-content-section hidden">
+            <div class="card mb-6">
+              <h2 class="card-header">Profil Anda</h2>
+              <form id="profileEditForm" class="space-y-4 mb-6">
+                <div>
+                  <label
+                    for="studentName"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Nama Lengkap</label
+                  >
+                  <input
+                    type="text"
+                    id="studentName"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label
+                    for="studentUsername"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Username</label
+                  >
+                  <input
+                    type="text"
+                    id="studentUsername"
+                    class="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label
+                    for="studentClass"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Kelas</label
+                  >
+                  <input
+                    type="text"
+                    id="studentClass"
+                    class="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                    disabled
+                  />
+                </div>
+              </form>
+            </div>
+
+            <div class="card mt-6">
+              <h2 class="card-header">Ubah Kata Sandi</h2>
+              <form id="passwordChangeForm" class="space-y-4">
+                <div>
+                  <label
+                    for="newPassword"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Kata Sandi Baru</label
+                  >
+                  <input
+                    type="password"
+                    id="newPassword"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                  <div
+                    id="newPassword-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <div>
+                  <label
+                    for="confirmNewPassword"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Konfirmasi Kata Sandi Baru</label
+                  >
+                  <input
+                    type="password"
+                    id="confirmNewPassword"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                  <div
+                    id="confirmNewPassword-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <button
+                  type="submit"
+                  class="btn-primary w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <i class="fas fa-key mr-2"></i> Ubah Kata Sandi
+                </button>
+              </form>
+            </div>
+
+            <div class="card mt-6">
+              <h2 class="card-header">Keluar</h2>
+              <p class="text-gray-600 mb-4">
+                Klik tombol di bawah untuk keluar dari akun Anda.
+              </p>
+              <button id="logoutButtonDesktop" class="btn-danger w-full">
+                <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+              </button>
+            </div>
           </div>
         </main>
       </div>
     </div>
 
-    <!-- Modal Container (for all modals) -->
-    <div id="modal-container"></div>
+    <!-- Fixed Bottom Navigation (Mobile only) -->
+    <nav class="bottom-nav" id="bottomNav">
+      <button id="navDashboardMobile" data-view="dashboard" class="active">
+        <i class="fas fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </button>
+      <button id="navMateriMobile" data-view="materi">
+        <i class="fas fa-book"></i>
+        <span>Materi</span>
+      </button>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signOut,
-      } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-      import {
-        getFirestore,
-        doc,
-        getDoc,
-      } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+      <button id="navPengaturanMobile" data-view="pengaturan">
+        <i class="fas fa-cog"></i>
+        <span>Pengaturan</span>
+      </button>
+    </nav>
 
-      // --- Firebase Configuration ---
-      const firebaseConfig = {
-        apiKey: "AIzaSyBWTYZH2OZuyq_mnbbxiap7iBg-17II55A",
-        authDomain: "tabungansiswa-8bbd6.firebaseapp.com",
-        projectId: "tabungansiswa-8bbd6",
-        storageBucket: "tabungansiswa-8bbd6.firebasestorage.app",
-        messagingSenderId: "1068130708793",
-        appId: "1:1068130708793:web:d6afeed38a9d42dd034ce8",
-      };
+    <!-- Modal Container -->
+    <div id="modal-container">
+      <!-- Modals will be rendered here dynamically by app_siswa.js -->
+    </div>
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-
-      // --- Global State Variables ---
-      let studentData = null;
-
-      // State for Modals
-      let showConfirmationModal = false;
-      let confirmationMessage = "";
-      let confirmationAction = null;
-      let showPlaceholderModal = false; // New state for placeholder modals
-      let placeholderFeatureName = ""; // To store the name of the feature for placeholder modal
-      let showSettingsModal = false; // New state for settings modal
-      let modalContainer = document.getElementById("modal-container");
-
-      // --- DOM Elements ---
-      const appView = document.getElementById("appView");
-      const portalTitle = document.getElementById("portalTitle");
-      const settingsIconBtn = document.getElementById("settingsIconBtn"); // New settings icon button
-
-      // Global Message Component
-      const globalMessage = document.getElementById("globalMessage");
-      const messageTitle = document.getElementById("messageTitle");
-      const messageText = document.getElementById("messageText");
-      const messageCloseBtn = document.getElementById("messageCloseBtn");
-
-      // --- Authentication Functions ---
-      async function handleLogout() {
-        showConfirmModal("Apakah Anda yakin ingin keluar?", async () => {
-          showMessage("loading", "Sedang logout...");
-          try {
-            await signOut(auth);
-            studentData = null;
-            localStorage.removeItem("currentStudentAppId"); // Clear student ID from localStorage
-            showMessage(
-              "success",
-              "Berhasil logout. Mengarahkan ke halaman login..."
-            );
-            // Apply fade-out before redirect
-            appView.classList.add("fade-out");
-            setTimeout(() => {
-              window.location.href = "login.html"; // Redirect to login page
-            }, 300); // Match CSS transition duration
-          } catch (error) {
-            console.error("Logout error:", error);
-            showMessage("error", "Gagal logout: " + error.message);
-          }
-        });
-      }
-
-      // --- Global Message Component Functions ---
-      const showMessage = (type, text, titleOverride = null) => {
-        globalMessage.classList.remove(
-          "hidden",
-          "bg-blue-100",
-          "border-blue-500",
-          "text-blue-700",
-          "bg-green-100",
-          "border-green-500",
-          "text-green-700",
-          "bg-red-100",
-          "border-red-500",
-          "text-red-700",
-          "bg-gray-100",
-          "border-gray-500",
-          "text-gray-700"
-        );
-
-        let bgColor, borderColor, textColor, title;
-        let duration = 3000;
-
-        switch (type) {
-          case "loading":
-            bgColor = "bg-blue-100";
-            borderColor = "border-blue-500";
-            textColor = "text-blue-700";
-            title = "Memuat...";
-            break;
-          case "success":
-            bgColor = "bg-green-100";
-            borderColor = "border-green-500";
-            textColor = "text-green-700";
-            title = "Berhasil!";
-            break;
-          case "error":
-            bgColor = "bg-red-100";
-            borderColor = "border-red-500";
-            textColor = "text-red-700";
-            title = "Terjadi Kesalahan!";
-            duration = 5000;
-            break;
-          case "info":
-            bgColor = "bg-blue-100";
-            borderColor = "border-blue-500";
-            textColor = "text-blue-700";
-            title = "Informasi";
-            break;
-          default:
-            bgColor = "bg-gray-100";
-            borderColor = "border-gray-500";
-            textColor = "text-gray-700";
-            title = "";
-        }
-
-        messageTitle.innerText = titleOverride || title;
-        globalMessage.classList.add(
-          bgColor,
-          `border-l-4`,
-          borderColor,
-          textColor
-        );
-        messageText.innerText = text;
-        globalMessage.classList.remove("hidden");
-
-        if (type !== "loading") {
-          setTimeout(() => globalMessage.classList.add("hidden"), duration);
-        }
-
-        messageCloseBtn.onclick = () => globalMessage.classList.add("hidden");
-      };
-
-      // --- Confirmation Modal Functions ---
-      function showConfirmModal(message, action) {
-        confirmationMessage = message;
-        confirmationAction = action;
-        showConfirmationModal = true;
-        renderModals();
-        attachDynamicEventListeners(); // Re-attach listeners for modal buttons
-      }
-
-      function handleCancelConfirm() {
-        showConfirmationModal = false;
-        confirmationMessage = "";
-        confirmationAction = null;
-        renderModals();
-      }
-
-      function handleExecuteConfirm() {
-        if (confirmationAction) {
-          confirmationAction();
-        }
-        showConfirmationModal = false;
-        confirmationMessage = "";
-        confirmationAction = null;
-        renderModals();
-      }
-
-      // --- Modal Rendering Functions ---
-      function renderModals() {
-        if (!modalContainer) {
-          modalContainer = document.createElement("div");
-          modalContainer.id = "modal-container";
-          document.body.appendChild(modalContainer);
-        }
-
-        let modalHtml = "";
-
-        // Confirmation Modal
-        if (showConfirmationModal) {
-          modalHtml += `
-            <div id="confirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[100] modal-overlay">
-                <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center">
-                <h3 class="text-xl font-bold text-red-700 mb-4">Konfirmasi Aksi</h3>
-                <p class="text-gray-700 mb-6">${confirmationMessage}</p>
-                <div class="flex justify-center space-x-4">
-                    <button type="button" id="cancelConfirm" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition duration-200">
-                    Batal
-                    </button>
-                    <button type="button" id="executeConfirm" class="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition duration-200">
-                    Lanjutkan
-                    </button>
-                </div>
-                </div>
-            </div>
-            `;
-        }
-
-        // Placeholder Feature Modal (Hafalanku, Tabunganku, Nilai Rapor)
-        if (showPlaceholderModal) {
-          modalHtml += `
-            <div id="placeholderModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-[1000] modal-overlay">
-                <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-cyan-700">${placeholderFeatureName}</h3>
-                        <button id="closePlaceholderModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
-                    </div>
-                    <p class="text-gray-600">Fitur ${placeholderFeatureName} akan segera hadir di sini!</p>
-                    <p class="text-sm text-gray-500 mt-2">Nantikan pembaruan selanjutnya.</p>
-                </div>
-            </div>
-            `;
-        }
-
-        // Settings Modal
-        if (showSettingsModal) {
-          modalHtml += `
-            <div id="settingsModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-[1000] modal-overlay">
-                <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-cyan-700">Pengaturan Tampilan</h3>
-                        <button id="closeSettingsModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
-                    </div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span>Mode Gelap:</span>
-                        <div class="flex space-x-2">
-                            <button id="setLightMode" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-200">
-                                Terang
-                            </button>
-                            <button id="setDarkMode" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-xl transition duration-200">
-                                Gelap
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span>Mode Membaca:</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleReadingMode" class="sr-only peer" />
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
-                        </label>
-                    </div>
-                    <button id="resetSettings" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mb-4">
-                        Reset Pengaturan
-                    </button>
-                    <button id="logoutButtonModal" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-sign-out-alt mr-2"></i> Keluar
-                    </button>
-                </div>
-            </div>
-            `;
-        }
-
-        modalContainer.innerHTML = modalHtml;
-      }
-
-      // --- Theme Settings ---
-      function applySavedSettings() {
-        const theme = localStorage.getItem("portalTheme");
-        if (theme === "dark") {
-          document.body.classList.add("dark-mode");
-        } else {
-          document.body.classList.remove("dark-mode");
-        }
-
-        // Apply reading mode setting if it exists (though not fully implemented in portalsiswa)
-        const readingMode = localStorage.getItem("studentReadingMode"); // Using 'studentReadingMode' from latihankuv2
-        const toggleReadingModeCheckbox =
-          document.getElementById("toggleReadingMode");
-        if (toggleReadingModeCheckbox) {
-          if (readingMode === "true") {
-            document.body.classList.add("reading-mode");
-            toggleReadingModeCheckbox.checked = true;
-          } else {
-            document.body.classList.remove("reading-mode");
-            toggleReadingModeCheckbox.checked = false;
-          }
-        }
-      }
-
-      function setLightMode() {
-        localStorage.setItem("portalTheme", "light");
-        applySavedSettings();
-      }
-
-      function setDarkMode() {
-        localStorage.setItem("portalTheme", "dark");
-        applySavedSettings();
-      }
-
-      function toggleReadingMode() {
-        const isReadingMode = document.body.classList.toggle("reading-mode");
-        localStorage.setItem(
-          "studentReadingMode",
-          isReadingMode ? "true" : "false"
-        );
-      }
-
-      function resetSettings() {
-        showConfirmModal(
-          "Apakah Anda yakin ingin mereset semua pengaturan tampilan ke default?",
-          () => {
-            localStorage.removeItem("portalTheme");
-            localStorage.removeItem("studentReadingMode"); // Also reset reading mode
-            applySavedSettings();
-            showMessage("success", "Pengaturan telah direset.");
-          }
-        );
-      }
-
-      // --- Firebase Auth State Listener ---
-      onAuthStateChanged(auth, async (user) => {
-        const studentAppIdFromLocalStorage = localStorage.getItem(
-          "currentStudentAppId"
-        );
-
-        if (user && studentAppIdFromLocalStorage) {
-          // Firebase user is authenticated. Now, verify our custom student ID in localStorage.
-          const studentDocRef = doc(db, "users", studentAppIdFromLocalStorage);
-          try {
-            const docSnap = await getDoc(studentDocRef);
-            if (docSnap.exists() && docSnap.data().role === "student") {
-              studentData = { id: docSnap.id, ...docSnap.data() };
-              portalTitle.innerText = `Halo, ${studentData.name}!`;
-              // Fade in the app view after successful authentication
-              appView.classList.remove("hidden"); // Ensure display is not 'none'
-              appView.classList.add("fade-in");
-            } else {
-              // studentAppId in localStorage is invalid or student data not found/role incorrect
-              console.warn(
-                "Invalid student ID in localStorage or role mismatch. Redirecting to login."
-              );
-              localStorage.removeItem("currentStudentAppId"); // Clear invalid data
-              await signOut(auth); // Force Firebase logout
-              window.location.href = "login.html"; // Redirect to login
-              return; // Stop execution
-            }
-          } catch (error) {
-            console.error("Error fetching student data from Firestore:", error);
-            localStorage.removeItem("currentStudentAppId"); // Clear potentially problematic data
-            await signOut(auth); // Force Firebase logout
-            window.location.href = "login.html"; // Redirect to login
-            return; // Stop execution
-          }
-        } else {
-          // No Firebase user or no custom student ID in localStorage, redirect to login
-          console.warn(
-            "No active Firebase session or student ID. Redirecting to login."
-          );
-          localStorage.removeItem("currentStudentAppId");
-          window.location.href = "login.html";
-          return; // Stop execution
-        }
-
-        renderMainContent(); // Render content only once after auth state is determined
-      });
-
-      // --- Main Content Renderer ---
-      function renderMainContent() {
-        if (studentData && auth.currentUser) {
-          // Ensure only default view is active on the main page
-          document
-            .querySelectorAll("#appView .tab-content-section")
-            .forEach((section) => {
-              section.classList.remove("active");
-            });
-          document.getElementById("defaultView").classList.add("active");
-
-          renderModals(); // Render any active modals
-          attachDynamicEventListeners(); // Attach listeners for all dynamic elements
-        } else {
-          window.location.href = "login.html";
-        }
-      }
-
-      // --- Attach Event Listeners for Dynamically Rendered Content ---
-      function attachDynamicEventListeners() {
-        // Attach event listeners for navigation cards
-        document.querySelectorAll(".nav-card").forEach((card) => {
-          card.removeEventListener("click", handleNavCardClick); // Prevent duplicates
-          card.addEventListener("click", handleNavCardClick);
-        });
-
-        // Settings Icon Button
-        settingsIconBtn?.removeEventListener("click", handleSettingsIconClick);
-        settingsIconBtn?.addEventListener("click", handleSettingsIconClick);
-
-        // Modal specific listeners (must be re-attached if modal content changes)
-        if (showConfirmationModal) {
-          document
-            .getElementById("cancelConfirm")
-            ?.removeEventListener("click", handleCancelConfirm);
-          document
-            .getElementById("cancelConfirm")
-            ?.addEventListener("click", handleCancelConfirm);
-          document
-            .getElementById("executeConfirm")
-            ?.removeEventListener("click", handleExecuteConfirm);
-          document
-            .getElementById("executeConfirm")
-            ?.addEventListener("click", handleExecuteConfirm);
-        }
-        if (showPlaceholderModal) {
-          document
-            .getElementById("closePlaceholderModal")
-            ?.removeEventListener("click", handleClosePlaceholderModal);
-          document
-            .getElementById("closePlaceholderModal")
-            ?.addEventListener("click", handleClosePlaceholderModal);
-        }
-        if (showSettingsModal) {
-          // Close button for settings modal
-          document
-            .getElementById("closeSettingsModal")
-            ?.removeEventListener("click", handleCloseSettingsModal);
-          document
-            .getElementById("closeSettingsModal")
-            ?.addEventListener("click", handleCloseSettingsModal);
-
-          // Theme buttons inside settings modal
-          document
-            .getElementById("setLightMode")
-            ?.removeEventListener("click", setLightMode);
-          document
-            .getElementById("setLightMode")
-            ?.addEventListener("click", setLightMode);
-
-          document
-            .getElementById("setDarkMode")
-            ?.removeEventListener("click", setDarkMode);
-          document
-            .getElementById("setDarkMode")
-            ?.addEventListener("click", setDarkMode);
-
-          // Reading mode toggle inside settings modal
-          document
-            .getElementById("toggleReadingMode")
-            ?.removeEventListener("change", toggleReadingMode);
-          document
-            .getElementById("toggleReadingMode")
-            ?.addEventListener("change", toggleReadingMode);
-
-          // Reset settings button inside settings modal
-          document
-            .getElementById("resetSettings")
-            ?.removeEventListener("click", resetSettings);
-          document
-            .getElementById("resetSettings")
-            ?.addEventListener("click", resetSettings);
-
-          // Logout button inside settings modal
-          document
-            .getElementById("logoutButtonModal")
-            ?.removeEventListener("click", handleLogout);
-          document
-            .getElementById("logoutButtonModal")
-            ?.addEventListener("click", handleLogout);
-        }
-      }
-
-      function handleNavCardClick(e) {
-        e.preventDefault();
-        const targetUrl = e.currentTarget.dataset.targetUrl;
-        const featureName = e.currentTarget.dataset.featureName; // Get the feature name
-
-        if (targetUrl) {
-          // If data-target-url is present, redirect to that URL
-          appView.classList.add("fade-out");
-          setTimeout(() => {
-            window.location.href = targetUrl;
-          }, 300); // Match CSS transition duration
-        } else {
-          // If no target URL, it's a placeholder feature, show modal
-          showPlaceholderModal = true;
-          placeholderFeatureName = featureName;
-          renderModals();
-          attachDynamicEventListeners(); // Re-attach listeners for the new modal
-        }
-      }
-
-      function handleSettingsIconClick() {
-        showSettingsModal = true;
-        renderModals();
-        applySavedSettings(); // Apply settings to modal content
-        attachDynamicEventListeners(); // Re-attach listeners for the new modal
-      }
-
-      function handleClosePlaceholderModal() {
-        showPlaceholderModal = false;
-        placeholderFeatureName = "";
-        renderModals();
-      }
-
-      function handleCloseSettingsModal() {
-        showSettingsModal = false;
-        renderModals();
-      }
-
-      // Initial application of settings (before any rendering)
-      applySavedSettings();
-      // Initial render will be handled by onAuthStateChanged
-    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/soal_siswa.js"></script>
+    <script type="module" src="js/materi_siswa.js"></script>
+    <script type="module" src="js/jadwal_siswa.js"></script>
+    <script type="module" src="js/app_siswa.js"></script>
   </body>
 </html>

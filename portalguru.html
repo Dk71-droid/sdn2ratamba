@@ -15,7 +15,7 @@
       rel="stylesheet"
     />
     <style>
-      /* Base styles for light mode - Adjusted to match portalsiswa.html */
+      /* Base styles for light mode */
       body {
         font-family: "Poppins", sans-serif;
         background-color: #f0f4f8; /* Light blue-gray background */
@@ -23,50 +23,158 @@
         margin: 0;
         padding: 0;
         min-height: 100vh;
-        display: flex; /* Make body a flex container */
-        flex-direction: column; /* Stack children vertically */
-        font-size: 0.875rem; /* Significantly smaller base font size (14px) */
+        display: flex;
+        flex-direction: column;
+        font-size: 1rem; /* Default font size to base for better readability */
       }
 
       .container {
-        max-width: 960px; /* Max width for larger screens */
+        max-width: 960px;
         margin: 0 auto;
-        padding: 1.25rem; /* Reduced default padding for desktop */
-        width: 100%; /* Ensure container takes full width of its parent */
+        padding: 1.5rem;
       }
 
-      /* Responsive adjustments for container */
-      @media (max-width: 767px) {
-        /* For mobile devices */
-        .container {
-          padding: 0.5rem; /* Further reduced padding on small screens */
-        }
+      /* Sidebar styles */
+      .sidebar {
+        width: 250px;
+        background-color: #ffffff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100vh; /* Mengubah min-height menjadi height */
+        position: fixed; /* Membuat sidebar tetap */
+        top: 0; /* Memposisikan sidebar di bagian atas */
+        left: 0; /* Memposisikan sidebar di bagian kiri */
+        z-index: 20; /* Pastikan sidebar di atas konten lain */
       }
 
-      /* Card styles - Adjusted to match portalsiswa.html */
-      .card {
-        background-color: white;
+      .sidebar-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .sidebar-header .logo {
+        width: 80px;
+        height: 80px;
+        background-color: #cbd5e1;
+        border-radius: 50%;
+        margin: 0 auto 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #475569;
+      }
+
+      .sidebar-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
         border-radius: 0.75rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        padding: 0.8rem; /* Reduced padding for mobile cards */
-        margin-bottom: 1.2rem; /* Reduced margin */
-      }
-      @media (min-width: 768px) {
-        /* Apply larger padding for desktop */
-        .card {
-          padding: 1.25rem; /* desktop card padding */
-        }
-      }
-      .card-header {
-        font-size: 1rem; /* Smaller card header font size */
+        color: #475569;
         font-weight: 600;
-        color: #06b6d4; /* Cyan-700 */
-        margin-bottom: 0.8rem; /* Reduced margin */
+        transition: all 0.2s ease;
+        cursor: pointer;
       }
 
-      /* Modal styles - Adjusted to match portalsiswa.html */
+      .sidebar-nav-item:hover {
+        background-color: #e0f2fe; /* Light blue-100 */
+        color: #0c4a6e; /* Cyan-800 */
+      }
+
+      .sidebar-nav-item.active {
+        background-color: #0ea5e9; /* Sky-500 */
+        color: #ffffff;
+        box-shadow: 0 4px 8px rgba(14, 165, 233, 0.2);
+      }
+
+      .sidebar-nav-item.active .fas {
+        color: #ffffff;
+      }
+
+      .sidebar-nav-item .fas {
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+        color: #64748b; /* Slate-500 */
+        transition: color 0.2s ease;
+      }
+
+      /* Main content styles */
+      .main-content {
+        flex-grow: 1;
+        padding: 1.5rem; /* Default padding for desktop */
+      }
+
+      /* Removed .main-header styles as the header is removed */
+
+      .main-header .greeting {
+        font-weight: 700;
+        color: #1e293b; /* Slate-800 */
+      }
+
+      .main-header .logout-btn {
+        background-color: #ef4444; /* Red-500 */
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+      }
+
+      .main-header .logout-btn:hover {
+        background-color: #dc2626; /* Red-600 */
+      }
+
+      /* Card styles */
+      .card {
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .card-header {
+        font-weight: 700;
+        color: #1e293b; /* Slate-800 */
+        margin-bottom: 1rem;
+      }
+
+      /* Data table styles */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0; /* Slate-200 */
+      }
+
+      .data-table th {
+        background-color: #f8fafc; /* Slate-50 */
+        font-weight: 600;
+        color: #475569; /* Slate-700 */
+        font-size: 0.875rem;
+      }
+
+      .data-table tbody tr:hover {
+        background-color: #f0f4f8; /* Light blue-gray */
+      }
+
+      .data-table .actions-col {
+        width: 1%; /* Make action column compact */
+        white-space: nowrap; /* Prevent wrapping */
+      }
+
+      /* Modals */
       .modal-overlay {
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.3); /* Slightly lighter dimming */
         position: fixed;
         top: 0;
         left: 0;
@@ -75,2686 +183,855 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 100;
+        z-index: 5000; /* Ensure it's on top */
       }
-      .modal-overlay .max-w-md {
-        max-width: 95%; /* Make modals take up more width on small screens */
+
+      /* Adjusted modal content spacing on mobile */
+      /* This rule now applies to the actual white modal content box */
+      .modal-overlay > div {
+        background-color: #ffffff; /* Re-added background color */
+        border-radius: 1rem; /* Keep rounded corners */
+        padding: 1.5rem; /* Slightly reduced padding for more space */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Re-added shadow */
+        color: #334155; /* Ensure text color is readable */
+        width: calc(
+          100% - 2rem
+        ); /* Full width minus 1rem margin on each side */
+        margin: 1rem; /* Add consistent margin around the modal */
+        /* Calculate max-height: 100vh - (margin-top + margin-bottom) - (bottom-nav-height) */
+        /* Increased buffer for more general clearance. */
+        max-height: calc(100vh - 10rem); /* Adjusted for more clearance */
+        overflow-y: auto; /* Allow scrolling if content is too long */
       }
+
+      /* Global Message */
       #globalMessage {
         position: fixed;
-        top: 0.75rem; /* Reduced top position */
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10000;
-        padding: 0.6rem 0.8rem; /* Further reduced padding */
+        top: 1rem;
+        right: 1rem;
+        z-index: 5000;
+        width: calc(100% - 2rem);
+        max-width: 400px;
         border-radius: 0.5rem;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        max-width: 90%;
-        width: 260px; /* Even narrower */
-        text-align: left;
-        font-size: 0.8rem; /* Even smaller font for messages */
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
       }
+
       #globalMessage.hidden {
-        display: none;
-      }
-      #globalMessage.bg-green-100 {
-        background-color: #d1fae5;
-        border-color: #34d399;
-        color: #065f46;
-      }
-      #globalMessage.bg-red-100 {
-        background-color: #fee2e2;
-        border-color: #ef4444;
-        color: #991b1b;
-      }
-      #globalMessage.bg-blue-100 {
-        background-color: #dbeafe;
-        border-color: #3b82f6;
-        color: #1e40af;
-      }
-      #globalMessage .font-bold {
-        font-weight: 700;
-        font-size: 0.85rem; /* Even smaller title */
-      }
-      #globalMessage #messageCloseBtn {
-        cursor: pointer;
-        font-size: 1rem; /* Adjust close button size */
+        opacity: 0;
+        pointer-events: none;
       }
 
-      /* Table styles - Adjusted to match portalsiswa.html */
-      .data-table {
-        width: 100%;
-        border-collapse: collapse;
+      /* Responsive adjustments */
+      @media (max-width: 767px) {
+        body {
+          font-size: 0.875rem; /* Mengurangi ukuran font dasar untuk mobile */
+        }
+        .sidebar {
+          display: none; /* Hide sidebar on mobile */
+        }
+
+        .main-content {
+          padding: 0.75rem; /* Reduced padding for mobile */
+          padding-top: 3.5rem; /* Mengurangi padding di sini untuk memberi ruang pada header */
+          padding-bottom: 4rem; /* Mengembalikan padding bawah untuk navigasi */
+        }
+
+        .main-header .greeting {
+          margin-bottom: 0.5rem;
+          font-size: 1rem; /* Mengurangi ukuran font untuk mobile */
+        }
+
+        .card-header {
+          font-size: 1rem; /* Mengurangi ukuran font header card untuk mobile */
+        }
+
+        /* Removed .main-header .logout-btn for mobile */
+
+        .bottom-nav {
+          display: flex;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          background-color: #ffffff;
+          box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+          justify-content: space-around;
+          padding: 0.5rem 0;
+          z-index: 1000;
+        }
+
+        .bottom-nav button {
+          background: none;
+          border: none;
+          color: #64748b; /* Slate-500 */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex-grow: 1; /* Make buttons take equal available space */
+          font-size: 0.75rem; /* Mengecilkan ukuran font untuk navigasi bawah */
+          padding: 0.5rem 0.25rem; /* Mengurangi padding vertikal */
+          border-radius: 0.5rem;
+          transition: all 0.2s ease;
+        }
+
+        .bottom-nav button .fas {
+          font-size: 1.1rem; /* Mengecilkan ukuran ikon */
+          margin-bottom: 0.15rem; /* Mengurangi margin bawah ikon */
+        }
+
+        .bottom-nav button.active {
+          color: #0ea5e9; /* Sky-500 */
+          background-color: #e0f2fe; /* Light blue-100 */
+        }
+
+        /* Specific font size adjustments for modal content on mobile */
+        #generateMaterialModal .text-xl {
+          /* Modal title */
+          font-size: 1rem; /* Further reduced to text-base */
+        }
+        #generateMaterialModal .block.text-sm {
+          /* Labels */
+          font-size: 0.7rem; /* Even smaller than text-xs */
+        }
+        #generateMaterialModal input,
+        #generateMaterialModal select,
+        #generateMaterialModal textarea {
+          /* Inputs */
+          font-size: 0.8rem; /* Even smaller than text-sm */
+          padding: 0.5rem; /* Further reduced padding for inputs */
+        }
+        #generateMaterialModal button {
+          /* Buttons */
+          font-size: 0.75rem; /* Equivalent to text-xs */
+          padding: 0.4rem 0.8rem; /* Adjusted padding for buttons */
+        }
+        #generateMaterialModal .input-error-message,
+        #generateMaterialModal #subTopicSuggestionError,
+        #generateMaterialModal #materialGenerationError {
+          font-size: 0.6rem; /* Even smaller for error messages */
+        }
+
+        /* Further adjustments for modal content on mobile */
+        .modal-overlay > div {
+          padding: 0.75rem; /* Further reduced padding inside the modal */
+          max-height: calc(100vh - 14rem); /* Increased clearance */
+        }
+        #generateMaterialModal textarea {
+          rows: 2; /* Reduced default rows for textarea to minimize height */
+        }
+        #generateMaterialFormModal .space-y-4 {
+          margin-top: 0.5rem; /* Adjust top margin for the form */
+        }
+        #generateMaterialFormModal > div {
+          margin-bottom: 0.5rem; /* Reduce vertical spacing between form groups */
+        }
       }
-      .data-table th,
-      .data-table td {
-        padding: 0.5rem 0.6rem; /* Further reduced padding */
-        text-align: left;
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 0.75rem; /* Even smaller font for table content */
-      }
-      .data-table th {
-        background-color: #f8fafc;
-        font-weight: 600;
-        color: #475569;
-        text-transform: uppercase;
-        font-size: 0.7rem; /* Even smaller font for table headers */
-      }
+
       @media (min-width: 768px) {
-        .data-table td {
-          font-size: 0.85rem; /* Slightly larger on desktop, but still smaller than before */
+        .app-container {
+          display: flex;
         }
-      }
-      .data-table tbody tr:hover {
-        background-color: #f0f4f8;
-      }
-      .overflow-x-auto {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .data-table .actions-col {
-        min-width: 80px; /* Further smaller min-width */
-      }
-      .data-table .actions-col button {
-        padding: 0.15rem 0.3rem; /* Further reduced padding */
-        font-size: 0.65rem; /* Even smaller font for action buttons */
-      }
-
-      /* Loading spinner */
-      .loading-spinner {
-        display: inline-block;
-        width: 18px; /* Slightly smaller spinner */
-        height: 18px; /* Slightly smaller spinner */
-        border: 2px solid rgba(255, 255, 255, 0.3); /* Thinner border */
-        border-radius: 50%;
-        border-top-color: #fff;
-        animation: spin 1s ease-in-out infinite;
-        -webkit-animation: spin 1s ease-in-out infinite;
-        margin-left: 0.4rem; /* Reduced margin */
-        vertical-align: middle;
-      }
-
-      @keyframes spin {
-        to {
-          -webkit-transform: rotate(360deg);
+        .bottom-nav {
+          display: none; /* Hide bottom nav on desktop */
         }
-      }
-      @-webkit-keyframes spin {
-        to {
-          -webkit-transform: rotate(360deg);
+        /* Menambahkan margin-left pada main-content untuk mengimbangi sidebar fixed */
+        .main-content {
+          margin-left: 250px; /* Lebar sidebar */
+          padding-top: 0.75rem; /* Mengurangi padding atas untuk desktop */
         }
       }
 
-      /* Dark Mode Styles - Adjusted to match portalsiswa.html */
-      body.dark-mode {
-        background-color: #1a202c; /* Dark background */
-        color: #e2e8f0; /* Light text */
-      }
-      body.dark-mode .card {
-        background-color: #2d3748; /* Darker card background */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      }
-      body.dark-mode .card-header {
-        color: #4fd1c5; /* Teal-400 for headers */
-      }
-      body.dark-mode input,
-      body.dark-mode textarea {
-        background-color: #4a5568;
-        border-color: #64748b;
-        color: #e2e8f0;
-      }
-      body.dark-mode input::placeholder,
-      body.dark-mode textarea::placeholder {
-        color: #a0aec0;
-      }
-      body.dark-mode .data-table th {
-        background-color: #4a5568;
-        color: #e2e8f0;
-      }
-      body.dark-mode .data-table tbody tr:hover {
-        background-color: #4a5568;
-      }
-      body.dark-mode .modal-overlay .bg-white {
-        background-color: #2d3748;
-        color: #e2e8f0;
-      }
-      body.dark-mode .modal-overlay h3 {
-        color: #4fd1c5;
-      }
-      body.dark-mode .modal-overlay .text-gray-700 {
-        color: #e2e8f0;
-      }
-      body.dark-mode .modal-overlay .text-gray-500 {
-        color: #a0aec0;
-      }
-      body.dark-mode #globalMessage.bg-blue-100 {
-        background-color: #2c5282;
-        border-color: #4299e1;
-        color: #ebf8ff;
-      }
-      body.dark-mode #globalMessage.bg-green-100 {
-        background-color: #2f855a;
-        border-color: #48bb78;
-        color: #ebf8ff;
-      }
-      body.dark-mode #globalMessage.bg-red-100 {
-        background-color: #9b2c2c;
-        border-color: #e53e3e;
-        color: #fed7d7;
-      }
-
-      /* Custom styles for input/textarea in teacher portal */
+      /* Custom styles for input/textarea */
       input[type="text"],
       input[type="password"],
       input[type="email"],
       input[type="number"],
-      textarea {
-        @apply w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500 transition duration-200 text-sm; /* Smaller padding and font */
+      textarea,
+      select {
+        @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-base; /* Ensure text-base for inputs */
       }
-      /* Specific adjustment for button padding/font in teacher portal */
+
+      /* Specific adjustment for button padding/font */
       .btn-primary {
-        @apply bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm; /* Smaller padding and font */
+        @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm;
       }
-      .btn-secondary {
-        @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition duration-200 text-sm; /* Smaller padding and font */
-      }
+
       .btn-danger {
-        @apply bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out text-sm; /* Smaller padding and font */
+        @apply bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm;
       }
 
-      /* Specific adjustments for dashboard cards */
-      .dashboard-stat-card {
-        @apply bg-gradient-to-br from-cyan-500 to-cyan-600 text-white p-4 rounded-xl shadow-md; /* Adjusted padding */
-      }
-      .dashboard-stat-card p {
-        @apply text-sm opacity-90; /* Smaller font */
-      }
-      .dashboard-stat-card .text-3xl {
-        @apply text-2xl font-bold mt-1; /* Smaller font */
-      }
-
-      /* Adjustments for daily exercise form */
-      .form-group {
-        @apply mb-3; /* Reduced margin */
-      }
-      .form-group label {
-        @apply block text-gray-700 text-sm font-semibold mb-1; /* Smaller font and margin */
-      }
-      .form-group input,
-      .form-group textarea {
-        @apply p-2 text-sm; /* Smaller padding and font */
-      }
-
-      /* Adjustments for exercise list items */
-      .exercise-item {
-        @apply bg-gray-50 p-3 rounded-md mb-2 border border-gray-200 text-sm; /* Smaller padding and font */
-      }
-      .exercise-item strong {
-        @apply text-base; /* Adjusted strong font size */
-      }
-      .exercise-item small {
-        @apply text-xs italic text-gray-500; /* Adjusted small font size */
-      }
-
-      /* Adjustments for student list items */
-      .student-item {
-        @apply bg-white p-3 rounded-md mb-2 shadow-sm flex items-center justify-between text-sm; /* Smaller padding and font */
-      }
-      .student-item .student-actions button {
-        @apply py-1 px-2 text-xs; /* Smaller buttons */
-      }
-
-      /* Adjustments for chart container */
-      .chart-container {
-        @apply relative h-56; /* Reduced height */
-      }
-
-      /* New: Main view sections (login and app) */
-      .full-screen-view {
-        width: 100%;
-        flex-grow: 1; /* Allow it to take up available vertical space */
-        display: flex; /* Make it a flex container */
-        flex-direction: column; /* Stack its children vertically */
-        overflow-y: auto; /* Allow scrolling if content overflows */
-        -webkit-overflow-scrolling: touch;
-        background-color: #f0f4f8; /* Match body background */
-      }
-      .full-screen-view.hidden {
-        display: none;
-      }
-
-      /* Specific centering for login form within its view */
-      .login-center-container {
-        min-height: 100vh; /* Ensure this container takes full height to center content */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        padding: 1.25rem; /* Reduced padding for mobile */
-      }
-      @media (max-width: 767px) {
-        .login-center-container {
-          padding: 0.6rem; /* Further reduced padding on small screens */
-        }
-      }
-
-      /* Tab content sections */
+      /* Specific styles for tab content sections */
       .tab-content-section {
         display: none; /* Hidden by default */
       }
+
       .tab-content-section.active {
-        display: block; /* Only active section is shown */
+        display: block; /* Shown when active */
       }
 
-      /* Fixed Bottom Navigation (copied from portalsiswa.html) */
-      .bottom-nav {
-        position: fixed; /* Keep it fixed */
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: white;
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-        display: flex;
-        justify-content: space-around;
-        padding: 0.3rem 0; /* Further reduced padding */
-        z-index: 50;
-      }
-      .bottom-nav button {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 0.3rem 0.15rem; /* Further reduced padding */
-        color: #64748b; /* Slate-600 */
-        font-size: 0.6rem; /* Even smaller font for nav text */
-        font-weight: 500;
-        transition: color 0.2s ease;
-        border-radius: 0.5rem;
-      }
-      .bottom-nav button.active {
-        color: #06b6d4; /* Cyan-500 */
-        font-weight: 600;
-      }
-      .bottom-nav button i {
-        font-size: 1rem; /* Even smaller font for icons */
-        margin-bottom: 0.1rem; /* Further reduced margin */
-      }
-      .bottom-nav button:hover {
-        color: #06b6d4;
+      /* Inline Error Message Style */
+      .input-error-message {
+        @apply text-red-500 text-xs mt-1 ml-1;
       }
 
-      /* Adjust main content padding to account for fixed bottom nav */
-      main.container {
-        padding-bottom: 4rem; /* Adjust based on bottom nav height */
-      }
-
-      /* AI Exercise specific styles (copied from portalsiswa.html) */
-      .ai-question-item {
-        background-color: #f8fafc;
-        padding: 0.7rem; /* Further reduced padding */
-        border-radius: 0.5rem;
-        margin-bottom: 0.7rem; /* Further reduced margin */
-        border: 1px solid #e2e8f0;
-        font-size: 0.8rem;
-      }
-      .ai-question-item p strong {
-        color: #06b6d4;
-      }
-      .ai-question-item small {
-        color: #64748b;
-        font-style: italic;
-        font-size: 0.7rem;
-      }
-      .ai-reading-text {
-        background-color: #f0f9ff;
-        padding: 0.7rem;
-        border-left: 4px solid #06b6d4;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        line-height: 1.4;
-        text-align: justify;
-        font-size: 0.8rem;
-      }
-      @media (max-width: 767px) {
-        .ai-reading-text {
-          font-size: 0.75rem;
-          padding: 0.5rem;
-        }
+      /* Custom style for header title shadow */
+      .app-title-shadow {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
       }
     </style>
   </head>
   <body>
-    <div
-      id="globalMessage"
-      class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] p-4 rounded-md shadow-lg hidden max-w-sm w-full"
-      role="alert"
-    >
-      <div class="flex justify-between items-center">
-        <p id="messageTitle" class="font-bold"></p>
-        <button id="messageCloseBtn" class="text-current text-lg font-bold">
-          ×
+    <div class="app-container">
+      <!-- Sidebar (Desktop) -->
+      <aside class="sidebar hidden md:flex flex-shrink-0">
+        <div>
+          <div class="sidebar-header">
+            <div class="logo">🧠</div>
+            <h2 class="text-xl font-bold text-slate-800">AI Tutor</h2>
+          </div>
+          <nav class="sidebar-nav">
+            <button class="sidebar-nav-item active" data-view="dashboard">
+              <i class="fas fa-chart-pie"></i>
+              <span>Dashboard</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="soal">
+              <i class="fas fa-book-open"></i>
+              <span>Soal</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="materi">
+              <i class="fas fa-book"></i>
+              <span>Materi</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="manajemen-siswa">
+              <i class="fas fa-users"></i>
+              <span>Manajemen</span>
+            </button>
+            <!-- NEW: Penjadwalan Nav Item Desktop -->
+            <button class="sidebar-nav-item" data-view="penjadwalan">
+              <i class="fas fa-calendar-alt"></i>
+              <span>Penjadwalan</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="pengaturan">
+              <i class="fas fa-cog"></i>
+              <span>Pengaturan</span>
+            </button>
+          </nav>
+        </div>
+        <button id="logoutButtonDesktop" class="btn-danger w-fit mx-auto">
+          <i class="fas fa-sign-out-alt mr-2"></i> Keluar
         </button>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="main-content flex-grow min-w-0">
+        <!-- Mobile Header (Visible only on mobile) -->
+        <header
+          class="fixed top-0 left-0 z-10 w-full flex md:hidden items-center p-2"
+          style="background-color: #f0f4f8"
+        >
+          <div
+            class="flex items-center space-x-2 text-cyan-700 font-bold text-lg"
+          >
+            <div class="text-pink-500 text-xl">🧠</div>
+            <h1 class="app-title-shadow text-lg">AI Tutor</h1>
+          </div>
+        </header>
+
+        <!-- Global Message Display -->
+        <div
+          id="globalMessage"
+          class="hidden bg-blue-100 border-blue-500 text-blue-700"
+        >
+          <div>
+            <p id="messageTitle" class="font-bold">Informasi</p>
+            <p id="messageText" class="text-sm">Pesan Anda di sini.</p>
+          </div>
+          <button id="messageCloseBtn" class="text-xl font-bold ml-4">
+            &times;
+          </button>
+        </div>
+
+        <!-- Dynamic App Views -->
+        <main id="appView" class="hidden">
+          <!-- Dashboard View (internal tab content) -->
+          <div id="dashboardView" class="tab-content-section active">
+            <!-- Grid Layout for Dashboard Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Teacher Info Card -->
+              <div
+                id="teacherInfoCard"
+                class="card col-span-1 h-40 flex flex-col"
+              >
+                <h3 class="card-header">Informasi Guru</h3>
+                <div
+                  class="space-y-2 text-gray-700 flex-grow flex flex-col justify-center"
+                >
+                  <p>
+                    <strong>Nama:</strong>
+                    <span id="teacherNameDisplay">Memuat...</span>
+                  </p>
+                  <!-- NIP line removed -->
+                  <p>
+                    <strong>Kelas Diajar:</strong>
+                    <span id="teacherClassesDisplay">Memuat...</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Total Students Card (moved up to the first row) -->
+              <div
+                id="totalStudentsCard"
+                class="card flex items-center justify-between p-6 cursor-pointer hover:shadow-lg transition-shadow duration-300 h-40"
+              >
+                <div>
+                  <h3 class="card-header">Total Siswa</h3>
+                  <p
+                    id="totalStudentsCount"
+                    class="text-4xl font-bold text-cyan-700"
+                  >
+                    0
+                  </p>
+                </div>
+                <i class="fas fa-users text-5xl text-cyan-400"></i>
+              </div>
+
+              <!-- Recent Activities Card -->
+              <div id="recentActivitiesCard" class="card col-span-1">
+                <h3 class="card-header text-sm">Aktivitas Latihan Terbaru</h3>
+                <div class="h-40 overflow-y-auto space-y-1 mt-2">
+                  <p class="text-gray-600 text-xs">
+                    Siswa A menyelesaikan Literasi (2024-07-30)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa B menyelesaikan Numerasi (2024-07-29)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa C menyelesaikan Literasi (2024-07-29)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa D menyelesaikan Numerasi (2024-07-28)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa E menyelesaikan Literasi (2024-07-28)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa F menyelesaikan Numerasi (2024-07-27)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa G menyelesaikan Literasi (2024-07-27)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa H menyelesaikan Numerasi (2024-07-26)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa I menyelesaikan Literasi (2024-07-26)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa J menyelesaikan Numerasi (2024-07-25)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa K menyelesaikan Literasi (2024-07-24)
+                  </p>
+                  <p class="text-gray-600 text-xs">
+                    Siswa L menyelesaikan Numerasi (2024-07-24)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Soal View (internal tab content) -->
+          <div id="soalView" class="tab-content-section hidden">
+            <div class="grid grid-cols-1 gap-6">
+              <div class="card">
+                <h2 class="card-header">Generate Soal Latihan</h2>
+                <p class="text-gray-600 mb-4">
+                  Generate soal Literasi atau Numerasi untuk siswa Anda.
+                </p>
+                <button
+                  id="generateTodayExerciseBtn"
+                  class="block mx-auto w-fit bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mb-4"
+                >
+                  Generate Soal Hari Ini
+                </button>
+                <button
+                  id="viewEditDailyExerciseBtn"
+                  class="block mx-auto w-fit bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+                >
+                  <i class="fas fa-eye mr-2"></i> Lihat/Edit Soal Hari Ini
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Materi View (internal tab content) -->
+          <div id="materiView" class="tab-content-section hidden">
+            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="card mb-8">
+                <h2 class="card-header">Kelola Materi Pembelajaran</h2>
+                <p class="text-gray-600 mb-4">
+                  Buat materi baru atau lihat materi yang sudah Anda buat.
+                </p>
+                <button
+                  id="showGenerateMaterialModalBtn"
+                  class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition duration-300 ease-in-out"
+                >
+                  <i class="fas fa-plus-circle mr-2"></i> Buat Materi
+                  Pembelajaran Baru
+                </button>
+              </div>
+
+              <div class="card mt-8">
+                <h2 class="card-header">Daftar Materi Tersimpan</h2>
+                <div id="materialsListContainer">
+                  <!-- Materi yang sudah ada akan dirender di sini oleh JavaScript -->
+                  <p class="text-gray-600 py-4">Memuat daftar materi...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manajemen Siswa View (internal tab content) -->
+          <div id="manajemen-siswaView" class="tab-content-section hidden">
+            <div class="card">
+              <h3 class="text-lg font-semibold text-slate-700 mb-3">
+                Daftar Siswa
+              </h3>
+              <button
+                id="addStudentButton"
+                class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mb-4"
+              >
+                <i class="fas fa-user-plus mr-2"></i> Tambah Siswa Baru
+              </button>
+              <div class="overflow-x-auto" id="studentListTableContainer">
+                <p class="text-gray-600 py-4">Memuat daftar siswa...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- NEW: Penjadwalan View (internal tab content) -->
+          <div id="penjadwalanView" class="tab-content-section hidden">
+            <div class="card">
+              <h2 class="card-header">Atur Jadwal Tugas Harian</h2>
+              <p class="text-gray-600 mb-4">
+                Pilih materi atau soal untuk dijadwalkan sebagai tugas harian.
+              </p>
+
+              <!-- Formulir Penjadwalan -->
+              <form id="scheduleTaskForm" class="space-y-4">
+                <div>
+                  <label
+                    for="taskTypeSelect"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Tipe Tugas:</label
+                  >
+                  <select
+                    id="taskTypeSelect"
+                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Pilih Tipe</option>
+                    <option value="materi">Materi Pembelajaran</option>
+                    <option value="soal">Soal Latihan</option>
+                  </select>
+                  <div
+                    id="taskTypeSelect-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <div id="taskContentContainer" class="hidden">
+                  <label
+                    for="taskContentSelect"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Pilih Konten:</label
+                  >
+                  <select
+                    id="taskContentSelect"
+                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Pilih Konten</option>
+                    <!-- Options will be loaded dynamically by jadwal.js -->
+                  </select>
+                  <div
+                    id="taskContentSelect-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <div>
+                  <label
+                    for="scheduleDate"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Tanggal Penugasan:</label
+                  >
+                  <input
+                    type="date"
+                    id="scheduleDate"
+                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                  <div
+                    id="scheduleDate-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <div>
+                  <label
+                    for="scheduleTime"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Waktu Penugasan (Opsional):</label
+                  >
+                  <input
+                    type="time"
+                    id="scheduleTime"
+                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <div
+                    id="scheduleTime-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <button
+                  type="submit"
+                  id="submitScheduleBtn"
+                  class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+                >
+                  Jadwalkan Tugas
+                </button>
+              </form>
+
+              <div class="mt-8">
+                <h3 class="text-lg font-semibold text-slate-700 mb-3">
+                  Daftar Tugas Terjadwal
+                </h3>
+                <div class="overflow-x-auto" id="scheduledTasksListContainer">
+                  <p class="text-gray-600 py-4">
+                    Memuat daftar tugas terjadwal...
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pengaturan View (internal tab content) -->
+          <div id="pengaturanView" class="tab-content-section hidden">
+            <div class="card mb-6">
+              <h2 class="card-header">Profil Anda</h2>
+              <form id="profileEditForm" class="space-y-4 mb-6">
+                <div>
+                  <label
+                    for="teacherName"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Nama Lengkap</label
+                  >
+                  <input
+                    type="text"
+                    id="teacherName"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                  <div
+                    id="teacherName-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <div>
+                  <label
+                    for="teacherEmail"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Email</label
+                  >
+                  <input
+                    type="email"
+                    id="teacherEmail"
+                    class="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                    disabled
+                  />
+                  <p class="text-xs text-gray-500 mt-1">
+                    Email tidak dapat diubah.
+                  </p>
+                </div>
+                <div>
+                  <label
+                    for="teacherNip"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >NIP</label
+                  >
+                  <input
+                    type="text"
+                    id="teacherNip"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                  <div
+                    id="teacherNip-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <div>
+                  <label
+                    for="teacherClassesTaught"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Kelas Diajar (pisahkan dengan koma)</label
+                  >
+                  <input
+                    type="text"
+                    id="teacherClassesTaught"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                  <div
+                    id="teacherClassesTaught-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <button type="submit" class="btn-primary w-full">
+                  <i class="fas fa-save mr-2"></i> Simpan Perubahan Profil
+                </button>
+              </form>
+            </div>
+
+            <div class="card mt-6">
+              <h2 class="card-header">Ubah Kata Sandi</h2>
+              <form id="passwordChangeForm" class="space-y-4">
+                <div>
+                  <label
+                    for="newPassword"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Kata Sandi Baru</label
+                  >
+                  <input
+                    type="password"
+                    id="newPassword"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                  <div
+                    id="newPassword-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <div>
+                  <label
+                    for="confirmNewPassword"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Konfirmasi Kata Sandi Baru</label
+                  >
+                  <input
+                    type="password"
+                    id="confirmNewPassword"
+                    class="w-full p-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                  <div
+                    id="confirmNewPassword-error"
+                    class="input-error-message hidden"
+                  ></div>
+                </div>
+                <button
+                  type="submit"
+                  class="btn-primary w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <i class="fas fa-key mr-2"></i> Ubah Kata Sandi
+                </button>
+              </form>
+            </div>
+
+            <div class="card mt-6">
+              <h2 class="card-header">Keluar</h2>
+              <p class="text-gray-600 mb-4">
+                Klik tombol di bawah untuk keluar dari akun Anda.
+              </p>
+              <button id="logoutButtonDesktop" class="btn-danger w-full">
+                <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
-      <p id="messageText"></p>
     </div>
 
-    <!-- Login View -->
-    <div id="loginView" class="full-screen-view">
-      <div class="login-center-container bg-f0f4f8">
+    <!-- Fixed Bottom Navigation (Mobile only) -->
+    <nav class="bottom-nav" id="bottomNav">
+      <button id="navDashboardMobile" data-view="dashboard" class="active">
+        <i class="fas fa-chart-pie"></i>
+        <span>Dashboard</span>
+      </button>
+      <button id="navSoalMobile" data-view="soal">
+        <i class="fas fa-book-open"></i>
+        <span>Soal</span>
+      </button>
+      <button id="navMateriMobile" data-view="materi">
+        <i class="fas fa-book"></i>
+        <span>Materi</span>
+      </button>
+      <button id="navManajemenSiswaMobile" data-view="manajemen-siswa">
+        <i class="fas fa-users"></i>
+        <span>Manajemen</span>
+      </button>
+      <!-- NEW: Penjadwalan Nav Item Mobile -->
+      <button id="navPenjadwalanMobile" data-view="penjadwalan">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Jadwal</span>
+      </button>
+      <button id="navPengaturanMobile" data-view="pengaturan">
+        <i class="fas fa-cog"></i>
+        <span>Pengaturan</span>
+      </button>
+    </nav>
+
+    <!-- Modal Container -->
+    <div id="modal-container">
+      <!-- NEW MODAL: Generate Material Form -->
+      <div
+        id="generateMaterialModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[100] modal-overlay hidden"
+      >
         <div
-          class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm text-center"
+          class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md overflow-y-auto"
         >
-          <h2 class="text-3xl font-bold text-cyan-700 mb-6">Login Guru</h2>
-          <form id="teacherLoginForm" class="space-y-4">
+          <h3 class="text-xl font-bold text-blue-700 mb-4">
+            Buat Materi Pembelajaran Baru
+          </h3>
+          <form id="generateMaterialFormModal" class="space-y-4">
             <div>
               <label
-                for="teacherEmail"
-                class="block text-gray-700 text-sm font-semibold mb-2"
-                >Email Guru:</label
+                for="materialSubjectModal"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Mata Pelajaran:</label
               >
               <input
-                type="email"
-                id="teacherEmail"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500 transition duration-200"
-                placeholder="email@guru.com"
-                required
+                type="text"
+                id="materialSubjectModal"
+                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Contoh: IPAS"
               />
+              <div
+                id="materialSubjectModal-error"
+                class="input-error-message hidden"
+              ></div>
             </div>
             <div>
               <label
-                for="teacherPassword"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >Password:</label
+                for="materialTopicModal"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Topik:</label
               >
               <input
-                type="password"
-                id="teacherPassword"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500 transition duration-200"
-                placeholder="********"
-                required
+                type="text"
+                id="materialTopicModal"
+                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Contoh: Siklus Air"
               />
+              <div
+                id="materialTopicModal-error"
+                class="input-error-message hidden"
+              ></div>
+            </div>
+            <div>
+              <label
+                for="learningModelSelectModal"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Pilih Model Pembelajaran:</label
+              >
+              <select
+                id="learningModelSelectModal"
+                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                <!-- Options will be dynamically rendered by JS -->
+              </select>
+              <div
+                id="learningModelSelectModal-error"
+                class="input-error-message hidden"
+              ></div>
+            </div>
+            <div>
+              <label
+                for="materialSubTopicsModal"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Fokus Pembahasan (Sub-topik):</label
+              >
+              <textarea
+                id="materialSubTopicsModal"
+                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                rows="3"
+                placeholder="Masukkan sub-topik secara manual, atau klik 'Generate Sub-topik' untuk saran AI."
+              ></textarea>
+              <div
+                id="materialSubTopicsModal-error"
+                class="input-error-message hidden"
+              ></div>
+              <p
+                id="subTopicSuggestionError"
+                class="text-red-500 text-xs mt-1 hidden"
+              ></p>
             </div>
             <button
-              type="submit"
-              class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+              type="button"
+              id="generateSubTopicsBtnModal"
+              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
             >
-              Login Guru
+              Generate Sub-topik
             </button>
+            <div class="flex justify-end space-x-3 mt-4">
+              <button
+                type="button"
+                id="cancelGenerateMaterialModal"
+                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition duration-200"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                id="generateMaterialBtnModal"
+                class="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition duration-200"
+              >
+                Buat Materi!
+              </button>
+            </div>
+            <p
+              id="materialGenerationError"
+              class="text-red-500 text-xs mt-1 hidden"
+            ></p>
           </form>
         </div>
       </div>
-    </div>
 
-    <!-- Main App View -->
-    <div id="appView" class="full-screen-view hidden">
-      <div id="headerSection" class="container">
-        <div class="flex justify-between items-center mb-6">
-          <h1 class="text-3xl font-bold text-slate-800" id="portalTitle">
-            Dashboard Portal Guru
-          </h1>
-          <button
-            id="logoutButton"
-            class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
-          >
-            <i class="fas fa-sign-out-alt mr-2"></i> Keluar
-          </button>
+      <!-- NEW MODAL: View Material Details -->
+      <div
+        id="viewMaterialDetailsModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-[1000] modal-overlay hidden"
+      >
+        <div
+          class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-4xl overflow-y-auto"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-blue-700" id="viewMaterialTitle">
+              Detail Materi:
+            </h3>
+            <button
+              id="closeViewMaterialDetailsModal"
+              class="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+          <div id="materialContentDisplayInModal">
+            <!-- Detailed lesson content will be rendered here by renderLessonContentDisplay -->
+          </div>
         </div>
       </div>
-
-      <main class="container flex-grow pb-24">
-        <!-- Added flex-grow and pb-24 for bottom nav space -->
-        <!-- Dashboard View (internal tab content) -->
-        <div id="dashboardView" class="tab-content-section">
-          <div
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-6"
-            id="dashboardStatsContainer"
-          >
-            <!-- Stats will be rendered here -->
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div class="card">
-              <h2 class="card-header">
-                Distribusi Rata-rata Nilai Literasi Siswa
-              </h2>
-              <div class="relative h-64">
-                <canvas id="teacherLiterasiChart"></canvas>
-              </div>
-            </div>
-            <div class="card">
-              <h2 class="card-header">
-                Distribusi Rata-rata Nilai Numerasi Siswa
-              </h2>
-              <div class="relative h-64">
-                <canvas id="teacherNumerasiChart"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="card mt-6">
-            <h2 class="card-header">Aktivitas Latihan Terbaru</h2>
-            <div id="recentActivitiesTableContainer" class="overflow-x-auto">
-              <!-- Recent activities table will be rendered here -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Soal View (internal tab content) -->
-        <div id="soalView" class="tab-content-section">
-          <div class="card">
-            <h2 class="card-header">Soal Latihan Harian</h2>
-            <div id="dailyExerciseDisplayContainer">
-              <!-- Daily exercise content will be rendered here -->
-            </div>
-            <button
-              id="generateFutureExercisesBtn"
-              class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mt-4"
-            >
-              Generate Soal untuk 7 Hari ke Depan
-            </button>
-            <p class="text-sm text-gray-500 mt-2">
-              Ini akan membuat soal baru untuk 7 hari ke depan jika belum ada.
-            </p>
-          </div>
-        </div>
-
-        <!-- Riwayat View (internal tab content) -->
-        <div id="riwayatView" class="tab-content-section">
-          <div class="card">
-            <h2 class="card-header">Riwayat Soal yang Digenerate</h2>
-            <div id="generatedHistoryTableContainer" class="overflow-x-auto">
-              <!-- Generated history table will be rendered here -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Manajemen Siswa View (internal tab content) -->
-        <div id="manajemen-siswaView" class="tab-content-section">
-          <div class="card">
-            <div id="studentManagementContent">
-              <!-- Student management content will be rendered here -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Pengaturan View (internal tab content) -->
-        <div id="pengaturanView" class="tab-content-section">
-          <div class="card">
-            <h2 class="card-header">Profil Anda</h2>
-            <div id="teacherProfileContent">
-              <!-- Teacher profile content will be rendered here -->
-            </div>
-          </div>
-          <div class="card mt-6">
-            <h2 class="card-header">Pengaturan Umum Portal</h2>
-            <p class="text-sm text-gray-500">
-              Fitur pengaturan portal lainnya akan ditambahkan di sini.
-            </p>
-          </div>
-        </div>
-      </main>
-
-      <!-- Fixed Bottom Navigation -->
-      <nav class="bottom-nav" id="bottomNav">
-        <button id="navDashboard" data-view="dashboard">
-          <i class="fas fa-chart-pie"></i>
-          <span>Dashboard</span>
-        </button>
-        <button id="navSoal" data-view="soal">
-          <i class="fas fa-book-open"></i>
-          <span>Soal</span>
-        </button>
-        <button id="navRiwayat" data-view="riwayat">
-          <i class="fas fa-history"></i>
-          <span>Riwayat</span>
-        </button>
-        <button id="navManajemenSiswa" data-view="manajemen-siswa">
-          <i class="fas fa-users"></i>
-          <span>Siswa</span>
-        </button>
-        <button id="navPengaturan" data-view="pengaturan">
-          <i class="fas fa-cog"></i>
-          <span>Pengaturan</span>
-        </button>
-      </nav>
     </div>
 
-    <!-- Modal Container (for all modals) -->
-    <div id="modal-container"></div>
-
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signOut,
-        signInWithEmailAndPassword,
-      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import {
-        getFirestore,
-        collection,
-        query,
-        where,
-        doc,
-        getDoc,
-        setDoc, // Used for daily_ai_exercises and student profiles
-        updateDoc,
-        addDoc,
-        onSnapshot,
-        serverTimestamp,
-        getDocs,
-        deleteDoc,
-        Timestamp, // Import Timestamp for date comparisons
-      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-      // --- Firebase Configuration ---
-      // Ganti dengan konfigurasi Firebase Anda dari Firebase Console
-      const firebaseConfig = {
-        apiKey: "AIzaSyBWTYZH2OZuyq_mnbbxiap7iBg-17II55A",
-        authDomain: "tabungansiswa-8bbd6.firebaseapp.com",
-        projectId: "tabungansiswa-8bbd6",
-        storageBucket: "tabungansiswa-8bbd6.firebasestorage.app",
-        messagingSenderId: "1068130708793",
-        appId: "1:1068130708793:web:d6afeed38a9d42dd034ce8",
-      };
-
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-
-      // --- Global State Variables for Teacher Portal App ---
-      let teacherData = null;
-      let currentMainTeacherView = "dashboard"; // 'dashboard', 'soal', 'riwayat', 'manajemen-siswa', 'pengaturan'
-      let currentDailyExerciseAdmin = null; // Stores the daily exercise fetched for admin view
-      // currentAIExerciseType will be dynamically determined based on the current date
-      let allGeneratedExercises = []; // For generated history tab
-      let allStudents = []; // List of all students (role: 'student') for management
-      let studentExerciseHistory = []; // To store all student exercise history for dashboard
-      let hasAttemptedDailyGenerate = false; // Flag to prevent multiple auto-generations per session
-
-      // State for Modals
-      let showAddStudentModal = false;
-      let showEditStudentModal = false;
-      let editingStudent = null; // Store student object being edited
-      let showConfirmModal = false;
-      let confirmModalMessage = "";
-      let confirmModalAction = null;
-      let showExerciseDetailsModal = false; // New state for exercise details modal
-      let exerciseDetailsData = null; // Data for exercise details modal
-      let showStudentHistoryDetailsModal = false; // New: For viewing student history details
-      let currentStudentHistoryDetails = null; // New: Stores student history for detail modal
-
-      let teacherLiterasiChart = null; // Chart.js instance for Literasi pie chart
-      let teacherNumerasiChart = null; // Chart.js instance for Numerasi pie chart
-
-      // Menggunakan endpoint Vercel yang sama dengan latihankuv2.html
-      const VERCEL_GEMINI_API_ENDPOINT = "/api/gemini";
-
-      // --- DOM Elements ---
-      const bottomNav = document.getElementById("bottomNav");
-      const loginView = document.getElementById("loginView");
-      const appView = document.getElementById("appView");
-      const portalTitle = document.getElementById("portalTitle");
-      let modalContainer = document.getElementById("modal-container"); // Container for dynamically rendered modals
-
-      // Global Message Component
-      const globalMessage = document.getElementById("globalMessage");
-      const messageTitle = document.getElementById("messageTitle");
-      const messageText = document.getElementById("messageText");
-      const messageCloseBtn = document.getElementById("messageCloseBtn");
-
-      // --- Helper Functions ---
-      const formatCurrency = (amount) => {
-        return new Intl.NumberFormat("id-ID", {
-          style: "currency",
-          currency: "IDR",
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }).format(amount);
-      };
-
-      async function hashString(str) {
-        const textEncoder = new TextEncoder();
-        const data = textEncoder.encode(str);
-        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hexHash = hashArray
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
-        return hexHash;
-      }
-
-      const showMessage = (type, text, titleOverride = null) => {
-        globalMessage.classList.remove(
-          "hidden",
-          "bg-blue-100",
-          "border-blue-500",
-          "text-blue-700",
-          "bg-green-100",
-          "border-green-500",
-          "text-green-700",
-          "bg-red-100",
-          "border-red-500",
-          "text-red-700",
-          "bg-gray-100",
-          "border-gray-500",
-          "text-gray-700"
-        );
-
-        let bgColor, borderColor, textColor, title;
-        let duration = 3000;
-
-        switch (type) {
-          case "loading":
-            bgColor = "bg-blue-100";
-            borderColor = "border-blue-500";
-            textColor = "text-blue-700";
-            title = "Memuat...";
-            break;
-          case "success":
-            bgColor = "bg-green-100";
-            borderColor = "border-green-500";
-            textColor = "text-green-700";
-            title = "Berhasil!";
-            break;
-          case "error":
-            bgColor = "bg-red-100";
-            borderColor = "border-red-500";
-            textColor = "text-red-700";
-            title = "Terjadi Kesalahan!";
-            duration = 5000;
-            break;
-          case "info": // Added info type
-            bgColor = "bg-blue-100";
-            borderColor = "border-blue-500";
-            textColor = "text-blue-700";
-            title = "Informasi";
-            break;
-          default:
-            bgColor = "bg-gray-100";
-            borderColor = "border-gray-500";
-            textColor = "text-gray-700";
-            title = "";
-        }
-
-        messageTitle.innerText = titleOverride || title; // Use titleOverride if provided
-        globalMessage.classList.add(
-          bgColor,
-          `border-l-4`,
-          borderColor,
-          textColor
-        );
-        messageText.innerText = text;
-        globalMessage.classList.remove("hidden");
-
-        if (type !== "loading") {
-          setTimeout(() => globalMessage.classList.add("hidden"), duration);
-        }
-
-        messageCloseBtn.onclick = () => globalMessage.classList.add("hidden");
-      };
-
-      // --- Firebase Auth State Listener ---
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-
-          if (userDocSnap.exists() && userDocSnap.data().role === "teacher") {
-            teacherData = userDocSnap.data();
-            setupFirestoreListeners(user.uid);
-            await cleanOldData(); // Call cleanOldData on teacher login
-            renderMainContent(); // Initial render of portal content
-          } else {
-            showMessage("error", "Akses ditolak. Silakan login sebagai guru.");
-            await signOut(auth);
-            renderMainContent(); // This will show the login prompt
-          }
-        } else {
-          teacherData = null; // Clear teacher data on logout
-          renderMainContent(); // This will show the login prompt
-        }
-      });
-
-      // --- Firestore Listeners ---
-      let unsubscribeTeacherProfile;
-      let unsubscribeDailyAIExercise;
-      let unsubscribeAllGeneratedExercises;
-      let unsubscribeAllStudents;
-      let unsubscribeStudentExerciseHistory; // New listener
-
-      function setupFirestoreListeners(teacherUid) {
-        // Unsubscribe from previous listeners to prevent memory leaks and duplicate updates
-        if (unsubscribeTeacherProfile) unsubscribeTeacherProfile();
-        if (unsubscribeDailyAIExercise) unsubscribeDailyAIExercise();
-        if (unsubscribeAllGeneratedExercises)
-          unsubscribeAllGeneratedExercises();
-        if (unsubscribeAllStudents) unsubscribeAllStudents();
-        if (unsubscribeStudentExerciseHistory)
-          unsubscribeStudentExerciseHistory();
-
-        const teacherDocRef = doc(db, "users", teacherUid);
-        unsubscribeTeacherProfile = onSnapshot(
-          teacherDocRef,
-          (docSnap) => {
-            if (docSnap.exists()) {
-              teacherData = docSnap.data();
-              // Only re-render if the active view is dependent on teacherData
-              if (currentMainTeacherView === "pengaturan") {
-                renderPengaturanView();
-              }
-            } else {
-              console.log("No teacher data found for current user!");
-              teacherData = null;
-              renderMainContent(); // Show login prompt
-            }
-          },
-          (error) => {
-            console.error("Error fetching teacher data:", error);
-            showMessage("error", "Gagal memuat data profil guru.");
-          }
-        );
-
-        // Listener for current day's AI exercise (for admin view)
-        // IMPORTANT: Calculate todayDate here to ensure it's always fresh when listener is set up
-        const todayDate = new Date().toISOString().slice(0, 10);
-        const dailyAIExerciseDocRef = doc(db, "daily_ai_exercises", todayDate);
-        console.log(`Listening for daily exercise on: ${todayDate}`); // Log for debugging
-        unsubscribeDailyAIExercise = onSnapshot(
-          dailyAIExerciseDocRef,
-          async (docSnap) => {
-            if (docSnap.exists()) {
-              currentDailyExerciseAdmin = { id: docSnap.id, ...docSnap.data() };
-              console.log(`Daily exercise for ${todayDate} found.`);
-            } else {
-              currentDailyExerciseAdmin = null;
-              console.log(`No daily exercise for ${todayDate}.`);
-              // NEW: Automatic generation if no exercise for today and not yet attempted
-              if (
-                !hasAttemptedDailyGenerate &&
-                currentMainTeacherView === "soal" &&
-                teacherData // Ensure teacherData is loaded before attempting auto-generate
-              ) {
-                hasAttemptedDailyGenerate = true; // Set flag to prevent re-triggering
-                showMessage(
-                  "info",
-                  "Soal harian untuk hari ini belum ada. Mencoba menggenerate otomatis..."
-                );
-                const dailyTypeForToday = getDailyExerciseTypeForAI(todayDate);
-                await generateAndSaveDailyExercise(
-                  todayDate,
-                  dailyTypeForToday,
-                  true
-                ); // true for isAutoGenerate
-              }
-            }
-            if (currentMainTeacherView === "soal") {
-              renderSoalView(); // Re-render to update AI app admin view
-            }
-          },
-          (error) => {
-            console.error("Error fetching daily AI exercise:", error);
-            showMessage("error", "Gagal memuat soal latihan AI harian.");
-          }
-        );
-
-        // Listener for all generated exercises (for history tab)
-        const allGeneratedExercisesQuery = query(
-          collection(db, "daily_ai_exercises")
-        );
-        unsubscribeAllGeneratedExercises = onSnapshot(
-          allGeneratedExercisesQuery,
-          (snapshot) => {
-            allGeneratedExercises = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            allGeneratedExercises.sort((a, b) => {
-              const dateA = new Date(a.date);
-              const dateB = new Date(b.date);
-              return dateB - dateA; // Sort by date descending
-            });
-            if (
-              currentMainTeacherView === "riwayat" ||
-              currentMainTeacherView === "dashboard"
-            ) {
-              renderRiwayatView(); // Re-render to update history tab
-              renderDashboardView(); // Re-render dashboard as it uses this data
-            }
-          },
-          (error) => {
-            console.error("Error fetching all generated exercises:", error);
-            showMessage("error", "Gagal memuat riwayat soal yang digenerate.");
-          }
-        );
-
-        // Listener for all students (role: 'student') for management tab
-        const studentsQuery = query(
-          collection(db, "users"),
-          where("role", "==", "student")
-        );
-        unsubscribeAllStudents = onSnapshot(
-          studentsQuery,
-          (snapshot) => {
-            allStudents = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            allStudents.sort((a, b) => a.name.localeCompare(b.name)); // Sort by name
-            if (
-              currentMainTeacherView === "manajemen-siswa" ||
-              currentMainTeacherView === "dashboard"
-            ) {
-              renderManajemenSiswaView(); // Re-render to update student list
-              renderDashboardView(); // Re-render dashboard as it uses this data
-            }
-          },
-          (error) => {
-            console.error("Error fetching students:", error);
-            showMessage("error", "Gagal memuat daftar siswa.");
-          }
-        );
-
-        // Listener for all student exercise history (for dashboard)
-        const studentHistoryQuery = query(
-          collection(db, "student_exercise_history")
-        );
-        unsubscribeStudentExerciseHistory = onSnapshot(
-          studentHistoryQuery,
-          (snapshot) => {
-            studentExerciseHistory = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            studentExerciseHistory.sort((a, b) => {
-              // Sort by timestamp descending
-              const timestampA = a.timestamp
-                ? a.timestamp.toDate
-                  ? a.timestamp.toDate()
-                  : new Date(a.timestamp)
-                : new Date(0);
-              const timestampB = b.timestamp
-                ? b.timestamp.toDate
-                  ? b.timestamp.toDate()
-                  : new Date(b.timestamp)
-                : new Date(0);
-              return timestampB - timestampA;
-            });
-            if (currentMainTeacherView === "dashboard") {
-              renderDashboardView();
-            }
-          },
-          (error) => {
-            console.error("Error fetching student exercise history:", error);
-            showMessage("error", "Gagal memuat riwayat latihan siswa.");
-          }
-        );
-      }
-
-      async function handleLogout() {
-        showMessage("loading", "Sedang logout...");
-        try {
-          await signOut(auth);
-          teacherData = null;
-          currentDailyExerciseAdmin = null;
-          allGeneratedExercises = [];
-          allStudents = [];
-          studentExerciseHistory = [];
-          currentMainTeacherView = "dashboard";
-          hasAttemptedDailyGenerate = false;
-          // currentAIExerciseType is now dynamically determined
-          if (teacherLiterasiChart) {
-            teacherLiterasiChart.destroy();
-            teacherLiterasiChart = null;
-          }
-          if (teacherNumerasiChart) {
-            teacherNumerasiChart.destroy();
-            teacherNumerasiChart = null;
-          }
-
-          // Clear modal states
-          showAddStudentModal = false;
-          showEditStudentModal = false;
-          editingStudent = null;
-          showConfirmModal = false;
-          confirmModalMessage = "";
-          confirmModalAction = null;
-          showExerciseDetailsModal = false;
-          exerciseDetailsData = null;
-          showStudentHistoryDetailsModal = false;
-          currentStudentHistoryDetails = null;
-
-          // Unsubscribe all listeners
-          if (unsubscribeTeacherProfile) unsubscribeTeacherProfile();
-          if (unsubscribeDailyAIExercise) unsubscribeDailyAIExercise();
-          if (unsubscribeAllGeneratedExercises)
-            unsubscribeAllGeneratedExercises();
-          if (unsubscribeAllStudents) unsubscribeAllStudents();
-          if (unsubscribeStudentExerciseHistory)
-            unsubscribeStudentExerciseHistory();
-
-          showMessage("success", "Berhasil logout.");
-          renderMainContent(); // Show login prompt
-        } catch (error) {
-          console.error("Logout error:", error);
-          showMessage("error", "Gagal logout: " + error.message);
-        }
-      }
-
-      // --- Main Content Renderer ---
-      // This function now manages visibility of main sections and dispatches rendering to specific views
-      function renderMainContent() {
-        // Hide all main views first
-        loginView.classList.add("hidden");
-        appView.classList.add("hidden");
-
-        if (teacherData) {
-          // Logged in: Show app view
-          appView.classList.remove("hidden");
-          bottomNav.style.display = "flex";
-          portalTitle.innerText = `Halo, ${teacherData.name}!`;
-
-          // Hide all internal tab content sections within appView first
-          document
-            .querySelectorAll("#appView .tab-content-section")
-            .forEach((section) => {
-              section.classList.remove("active"); // Remove active from all
-            });
-
-          // Show the current active internal tab content section
-          const activeViewElement = document.getElementById(
-            `${currentMainTeacherView}View`
-          );
-          if (activeViewElement) {
-            activeViewElement.classList.add("active"); // Add active to the current one
-          }
-
-          // Set active class for bottom navigation buttons
-          document.querySelectorAll(".bottom-nav button").forEach((button) => {
-            if (button.dataset.view === currentMainTeacherView) {
-              button.classList.add("active");
-            } else {
-              button.classList.remove("active");
-            }
-          });
-
-          // Call specific render function for the active view
-          switch (currentMainTeacherView) {
-            case "dashboard":
-              renderDashboardView();
-              break;
-            case "soal":
-              renderSoalView();
-              break;
-            case "riwayat":
-              renderRiwayatView();
-              break;
-            case "manajemen-siswa":
-              renderManajemenSiswaView();
-              break;
-            case "pengaturan":
-              renderPengaturanView();
-              break;
-          }
-          renderModals();
-          attachDynamicEventListeners();
-        } else {
-          // Not logged in: Show login view
-          loginView.classList.remove("hidden");
-          bottomNav.style.display = "none";
-          // Ensure login form listener is attached
-          document
-            .getElementById("teacherLoginForm")
-            ?.addEventListener("submit", handleTeacherLogin);
-        }
-      }
-
-      // --- Sub-renderers for each view ---
-
-      function renderDashboardView() {
-        const dashboardViewElement = document.getElementById("dashboardView");
-        if (!dashboardViewElement) return;
-
-        const totalStudents = allStudents.length;
-
-        // Calculate overall class average score for Literasi
-        const totalLiterasiScoresClass = studentExerciseHistory
-          .filter((h) => h.exerciseType === "Literasi")
-          .reduce((sum, h) => sum + (h.score || 0), 0);
-        const totalLiterasiExercisesCompletedClass =
-          studentExerciseHistory.filter(
-            (h) => h.exerciseType === "Literasi"
-          ).length;
-        const overallLiterasiAverageScore =
-          totalLiterasiExercisesCompletedClass > 0
-            ? (
-                totalLiterasiScoresClass / totalLiterasiExercisesCompletedClass
-              ).toFixed(0)
-            : "N/A";
-
-        // Calculate overall class average score for Numerasi
-        const totalNumerasiScoresClass = studentExerciseHistory
-          .filter((h) => h.exerciseType === "Numerasi")
-          .reduce((sum, h) => sum + (h.score || 0), 0);
-        const totalNumerasiExercisesCompletedClass =
-          studentExerciseHistory.filter(
-            (h) => h.exerciseType === "Numerasi"
-          ).length;
-        const overallNumerasiAverageScore =
-          totalNumerasiExercisesCompletedClass > 0
-            ? (
-                totalNumerasiScoresClass / totalNumerasiExercisesCompletedClass
-              ).toFixed(0)
-            : "N/A";
-
-        const dashboardStatsHtml = `
-            <div class="card bg-gradient-to-br from-cyan-500 to-cyan-600 text-white">
-                <p class="text-sm opacity-90">Jumlah Siswa Terdaftar</p>
-                <p class="text-3xl font-bold mt-2">${totalStudents} Siswa</p>
-            </div>
-            <div class="card bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-                <p class="text-sm opacity-90">Rata-rata Nilai Kelas</p>
-                <p class="text-xl font-bold mt-2">Literasi: ${overallLiterasiAverageScore}</p>
-                <p class="text-xl font-bold mt-1">Numerasi: ${overallNumerasiAverageScore}</p>
-            </div>
-        `;
-        document.getElementById("dashboardStatsContainer").innerHTML =
-          dashboardStatsHtml;
-
-        const recentActivities = studentExerciseHistory
-          .slice(0, 10)
-          .map((history) => {
-            const student = allStudents.find((s) => s.id === history.studentId);
-            return {
-              date: history.exerciseDate,
-              studentName: student ? student.name : "Siswa Tidak Dikenal",
-              exerciseType: history.exerciseType,
-              score: history.score !== undefined ? history.score : "N/A",
-              aiSuggestions: history.aiSuggestions || "Tidak ada saran.",
-              id: history.id, // Keep ID for detail view
-            };
-          });
-
-        const recentActivitiesTableHtml = `
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Siswa</th>
-                        <th>Jenis Latihan</th>
-                        <th>Nilai</th>
-                        <th class="actions-col">Saran AI</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${recentActivities
-                      .map(
-                        (activity) => `
-                            <tr>
-                                <td>${activity.date}</td>
-                                <td>${activity.studentName}</td>
-                                <td>${activity.exerciseType}</td>
-                                <td>${activity.score}</td>
-                                <td class="actions-col">
-                                    <button class="text-blue-500 hover:text-blue-700 text-sm view-student-history-details-btn" data-history-id="${activity.id}">
-                                        <i class="fas fa-eye"></i> Lihat
-                                    </button>
-                                </td>
-                            </tr>
-                        `
-                      )
-                      .join("")}
-                    ${
-                      recentActivities.length === 0
-                        ? `<tr><td colspan="5" class="text-center text-gray-500">Belum ada riwayat latihan siswa.</td></tr>`
-                        : ""
-                    }
-                </tbody>
-            </table>
-        `;
-        document.getElementById("recentActivitiesTableContainer").innerHTML =
-          recentActivitiesTableHtml;
-
-        renderDashboardCharts(); // Render or update the chart
-        // Re-attach listeners for history buttons in dashboard
-        document
-          .querySelectorAll(".view-student-history-details-btn")
-          .forEach((button) => {
-            button.addEventListener("click", async (e) => {
-              const historyId = e.currentTarget.dataset.historyId;
-              showMessage("loading", "Memuat detail riwayat latihan siswa...");
-              try {
-                const docRef = doc(db, "student_exercise_history", historyId);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                  currentStudentHistoryDetails = docSnap.data();
-                  showStudentHistoryDetailsModal = true;
-                  renderModals(); // Render the history details modal immediately
-                  attachDynamicEventListeners(); // Re-attach listeners for the new modal
-                  showMessage(
-                    "success",
-                    "Detail riwayat latihan berhasil dimuat."
-                  );
-                } else {
-                  showMessage("error", "Riwayat latihan tidak ditemukan.");
-                }
-              } catch (error) {
-                console.error("Error viewing student history details:", error);
-                showMessage(
-                  "error",
-                  "Gagal memuat detail riwayat latihan: " + error.message
-                );
-              }
-            });
-          });
-      }
-
-      function renderSoalView() {
-        const soalViewElement = document.getElementById("soalView");
-        if (!soalViewElement) return;
-
-        const todayDate = new Date().toISOString().slice(0, 10);
-        const dailyTypeForToday = getDailyExerciseTypeForAI(todayDate);
-        const exerciseTypeLabel =
-          dailyTypeForToday === "Literasi"
-            ? "Literasi 📖"
-            : "Numerasi ➕➖✖️➗";
-
-        let dailyExerciseDisplayHtml = "";
-        if (currentDailyExerciseAdmin) {
-          dailyExerciseDisplayHtml = `
-                    <h3 class="text-lg font-semibold text-slate-700 mb-3">Soal Hari Ini (${
-                      currentDailyExerciseAdmin.type
-                    }) - ${currentDailyExerciseAdmin.date}</h3>
-                    <div id="currentExerciseContent" class="hidden">
-                        ${
-                          currentDailyExerciseAdmin.readingText
-                            ? `
-                            <div class="ai-reading-text">
-                                <h4 class="font-semibold text-cyan-700 mb-2">Bacaan:</h4>
-                                <p>${currentDailyExerciseAdmin.readingText.replace(
-                                  /\n/g,
-                                  "<br>"
-                                )}</p>
-                            </div>`
-                            : ""
-                        }
-                        <div>
-                            <h4 class="font-semibold text-cyan-700 mb-2">Pertanyaan:</h4>
-                            ${currentDailyExerciseAdmin.questions
-                              .map(
-                                (q, index) => `
-                                <div class="ai-question-item">
-                                    <p><strong>Soal ${index + 1}:</strong> ${
-                                  q.question
-                                } <small>${
-                                  q.minWords ? `(Min. ${q.minWords} kata)` : ""
-                                }</small></p>
-                                </div>
-                            `
-                              )
-                              .join("")}
-                        </div>
-                    </div>
-                    <button id="toggleExerciseViewBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mt-4">
-                        Lihat Soal Hari Ini
-                    </button>
-                    <button id="generateTodayExerciseBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mt-2">
-                        Perbarui Soal ${dailyTypeForToday} Hari Ini
-                    </button>
-                    <p class="text-sm text-gray-500 mt-2">Tombol ini akan membuat soal baru atau menimpa soal ${dailyTypeForToday} yang sudah ada untuk tanggal ${todayDate}.</p>
-                `;
-        } else {
-          dailyExerciseDisplayHtml = `
-                    <h3 class="text-lg font-semibold text-slate-700 mb-3">Soal Hari Ini (${exerciseTypeLabel}) - ${todayDate}</h3>
-                    <p class="text-gray-600 mb-4">Belum ada soal latihan ${exerciseTypeLabel} yang digenerate untuk hari ini.</p>
-                    <button id="generateTodayExerciseBtn" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out">
-                        Generate Soal ${exerciseTypeLabel} Hari Ini
-                    </button>
-                `;
-        }
-        document.getElementById("dailyExerciseDisplayContainer").innerHTML =
-          dailyExerciseDisplayHtml;
-
-        // Re-attach listeners for buttons in soal view
-        document
-          .getElementById("generateTodayExerciseBtn")
-          ?.addEventListener("click", () => {
-            const todayDate = new Date().toISOString().slice(0, 10);
-            const dailyTypeForToday = getDailyExerciseTypeForAI(todayDate);
-            generateAndSaveDailyExercise(todayDate, dailyTypeForToday);
-          });
-
-        document
-          .getElementById("generateFutureExercisesBtn")
-          ?.addEventListener("click", () => {
-            showConfirmationModal(
-              "Ini akan menggenerate soal untuk 7 hari ke depan (dimulai dari besok) jika belum ada. Lanjutkan?",
-              () => generateFutureExercises(7)
-            );
-          });
-
-        document
-          .getElementById("toggleExerciseViewBtn")
-          ?.addEventListener("click", (e) => {
-            const contentDiv = document.getElementById(
-              "currentExerciseContent"
-            );
-            if (contentDiv) {
-              contentDiv.classList.toggle("hidden");
-              e.currentTarget.innerText = contentDiv.classList.contains(
-                "hidden"
-              )
-                ? "Lihat Soal Hari Ini"
-                : "Sembunyikan Soal Hari Ini";
-            }
-          });
-      }
-
-      function renderRiwayatView() {
-        const riwayatViewElement = document.getElementById("riwayatView");
-        if (!riwayatViewElement) return;
-
-        let generatedHistoryHtml = "";
-        if (allGeneratedExercises.length > 0) {
-          generatedHistoryHtml = `
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Jenis</th>
-                                <th>Oleh</th>
-                                <th class="actions-col">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${allGeneratedExercises
-                              .map(
-                                (ex) => `
-                                <tr>
-                                    <td>${ex.date}</td>
-                                    <td>${ex.type}</td>
-                                    <td>${ex.generatedByName || "Guru"}</td>
-                                    <td class="actions-col">
-                                        <button class="text-blue-500 hover:text-blue-700 text-sm view-ai-exercise-btn" data-exercise-id="${
-                                          ex.id
-                                        }">
-                                            <i class="fas fa-eye"></i> Lihat
-                                        </button>
-                                    </td>
-                                </tr>
-                            `
-                              )
-                              .join("")}
-                        </tbody>
-                    </table>
-                `;
-        } else {
-          generatedHistoryHtml = `<p class="text-gray-600">Belum ada riwayat soal yang digenerate.</p>`;
-        }
-        document.getElementById("generatedHistoryTableContainer").innerHTML =
-          generatedHistoryHtml;
-
-        // Re-attach listeners for history buttons
-        document.querySelectorAll(".view-ai-exercise-btn").forEach((button) => {
-          button.addEventListener("click", async (e) => {
-            const exerciseId = e.currentTarget.dataset.exerciseId;
-            showMessage("loading", "Memuat detail soal...");
-            try {
-              const docRef = doc(db, "daily_ai_exercises", exerciseId);
-              const docSnap = await getDoc(docRef);
-              if (docSnap.exists()) {
-                exerciseDetailsData = docSnap.data();
-                showExerciseDetailsModal = true;
-                renderModals(); // Render the modal immediately
-                attachDynamicEventListeners(); // Re-attach listeners for the new modal
-                showMessage("success", "Detail soal berhasil dimuat.");
-              } else {
-                showMessage("error", "Soal tidak ditemukan.");
-              }
-            } catch (error) {
-              console.error("Error viewing AI exercise details:", error);
-              showMessage(
-                "error",
-                "Gagal memuat detail soal: " + error.message
-              );
-            }
-          });
-        });
-      }
-
-      function renderManajemenSiswaView() {
-        const manajemenSiswaViewElement = document.getElementById(
-          "manajemen-siswaView"
-        );
-        if (!manajemenSiswaViewElement) return;
-
-        let studentManagementHtml = `
-                <h3 class="text-lg font-semibold text-slate-700 mb-3">Daftar Siswa</h3>
-                <button id="addStudentButton" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mb-4">
-                    <i class="fas fa-user-plus mr-2"></i> Tambah Siswa Baru
-                </button>
-                <div class="overflow-x-auto">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>Username</th>
-                                <th>NISN</th>
-                                <th>Kelas</th>
-                                <th class="actions-col">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${allStudents
-                              .map(
-                                (student) => `
-                                <tr>
-                                    <td>${student.name}</td>
-                                    <td>${student.username || "N/A"}</td>
-                                    <td>${student.studentId || "N/A"}</td>
-                                    <td>${student.classId || "N/A"}</td>
-                                    <td class="flex space-x-2 actions-col">
-                                        <button class="text-blue-500 hover:text-blue-700 text-sm edit-student-btn" data-student-id="${
-                                          student.id
-                                        }">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                        <button class="text-red-500 hover:text-red-700 text-sm delete-student-btn" data-student-id="${
-                                          student.id
-                                        }">
-                                            <i class="fas fa-trash-alt"></i> Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                            `
-                              )
-                              .join("")}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        document.getElementById("studentManagementContent").innerHTML =
-          studentManagementHtml;
-
-        // Re-attach listeners for student management buttons
-        document
-          .getElementById("addStudentButton")
-          ?.addEventListener("click", () => {
-            showAddStudentModal = true;
-            renderModals(); // Render the add student modal immediately
-            attachDynamicEventListeners(); // Re-attach listeners for the new modal
-          });
-
-        document.querySelectorAll(".edit-student-btn").forEach((button) => {
-          button.addEventListener("click", (e) => {
-            const studentId = e.currentTarget.dataset.studentId;
-            editingStudent = allStudents.find((s) => s.id === studentId);
-            showEditStudentModal = true;
-            renderModals(); // Render the edit student modal immediately
-            attachDynamicEventListeners(); // Re-attach listeners for the new modal
-          });
-        });
-
-        document.querySelectorAll(".delete-student-btn").forEach((button) => {
-          button.addEventListener("click", (e) => {
-            const studentId = e.currentTarget.dataset.studentId;
-            const studentName =
-              allStudents.find((s) => s.id === studentId)?.name || "siswa ini";
-            showConfirmationModal(
-              `Apakah Anda yakin ingin menghapus siswa ${studentName} dan semua riwayat latihannya?`,
-              () => handleDeleteStudent(studentId)
-            );
-          });
-        });
-      }
-
-      function renderPengaturanView() {
-        const pengaturanViewElement = document.getElementById("pengaturanView");
-        if (!pengaturanViewElement) return;
-
-        const teacherProfileHtml = `
-            <p><strong>Nama:</strong> ${teacherData.name}</p>
-            <p><strong>Email:</strong> ${teacherData.email}</p>
-            <p><strong>NIP:</strong> ${teacherData.nip || "N/A"}</p>
-            <p><strong>Kelas Diajar:</strong> ${
-              teacherData.classesTaught
-                ? teacherData.classesTaught.join(", ")
-                : "N/A"
-            }</p>
-            <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out mt-4">
-                Ubah Profil
-            </button>
-        `;
-        document.getElementById("teacherProfileContent").innerHTML =
-          teacherProfileHtml;
-      }
-
-      async function handleTeacherLogin(e) {
-        e.preventDefault();
-        const email = document.getElementById("teacherEmail").value;
-        const password = document.getElementById("teacherPassword").value;
-        showMessage("loading", "Sedang login...");
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-          showMessage("success", "Login guru berhasil!");
-        } catch (error) {
-          console.error("Login guru error:", error);
-          let errorMessage = "Terjadi kesalahan saat login guru.";
-          if (error.code === "auth/invalid-email") {
-            errorMessage = "Email guru tidak valid.";
-          } else if (error.code === "auth/user-disabled") {
-            errorMessage = "Akun guru ini telah dinonaktifkan.";
-          } else if (
-            error.code === "auth/user-not-found" ||
-            error.code === "auth/wrong-password" ||
-            error.code === "auth/invalid-credential"
-          ) {
-            errorMessage = "Email atau password guru salah.";
-          }
-          showMessage("error", errorMessage);
-        }
-      }
-
-      // --- Attach Event Listeners for Dynamically Rendered Content ---
-      function attachDynamicEventListeners() {
-        // Attach event listeners for bottom navigation tabs (these are persistent)
-        document.querySelectorAll(".bottom-nav button").forEach((button) => {
-          // Remove existing listener to prevent duplicates
-          button.removeEventListener("click", handleNavButtonClick);
-          button.addEventListener("click", handleNavButtonClick);
-        });
-
-        // Logout button in header (if present in current view)
-        document
-          .getElementById("logoutButton")
-          ?.removeEventListener("click", handleLogout); // Prevent duplicates
-        document
-          .getElementById("logoutButton")
-          ?.addEventListener("click", handleLogout);
-
-        // Modals event listeners (common for all modals) - these need to be re-attached every time modals are rendered
-        // The check for `showXModal` is important here to only attach listeners if the modal is actually present.
-        if (showAddStudentModal) {
-          document
-            .getElementById("cancelAddStudent")
-            ?.removeEventListener("click", handleCancelAddStudent);
-          document
-            .getElementById("cancelAddStudent")
-            ?.addEventListener("click", handleCancelAddStudent);
-          document
-            .getElementById("addStudentForm")
-            ?.removeEventListener("submit", handleAddStudentSubmit);
-          document
-            .getElementById("addStudentForm")
-            ?.addEventListener("submit", handleAddStudentSubmit);
-        }
-
-        if (showEditStudentModal && editingStudent) {
-          document
-            .getElementById("cancelEditStudent")
-            ?.removeEventListener("click", handleCancelEditStudent);
-          document
-            .getElementById("cancelEditStudent")
-            ?.addEventListener("click", handleCancelEditStudent);
-          document
-            .getElementById("editStudentForm")
-            ?.removeEventListener("submit", handleUpdateStudentSubmit);
-          document
-            .getElementById("editStudentForm")
-            ?.addEventListener("submit", handleUpdateStudentSubmit);
-        }
-
-        if (showConfirmModal) {
-          document
-            .getElementById("cancelConfirm")
-            ?.removeEventListener("click", handleCancelConfirm);
-          document
-            .getElementById("cancelConfirm")
-            ?.addEventListener("click", handleCancelConfirm);
-          document
-            .getElementById("executeConfirm")
-            ?.removeEventListener("click", handleExecuteConfirm);
-          document
-            .getElementById("executeConfirm")
-            ?.addEventListener("click", handleExecuteConfirm);
-        }
-
-        if (showExerciseDetailsModal && exerciseDetailsData) {
-          document
-            .getElementById("closeExerciseDetailsModal")
-            ?.removeEventListener("click", handleCloseExerciseDetailsModal);
-          document
-            .getElementById("closeExerciseDetailsModal")
-            ?.addEventListener("click", handleCloseExerciseDetailsModal);
-        }
-
-        if (showStudentHistoryDetailsModal && currentStudentHistoryDetails) {
-          document
-            .getElementById("closeStudentHistoryDetailsModal")
-            ?.removeEventListener(
-              "click",
-              handleCloseStudentHistoryDetailsModal
-            );
-          document
-            .getElementById("closeStudentHistoryDetailsModal")
-            ?.addEventListener("click", handleCloseStudentHistoryDetailsModal);
-        }
-      }
-
-      function handleNavButtonClick(e) {
-        currentMainTeacherView = e.currentTarget.dataset.view;
-        renderMainContent(); // Re-render main content based on new view
-      }
-
-      // Handlers for modal close/cancel actions
-      function handleCancelAddStudent() {
-        showAddStudentModal = false;
-        renderModals(); // Re-render modals to hide this one
-      }
-
-      function handleCancelEditStudent() {
-        showEditStudentModal = false;
-        editingStudent = null;
-        renderModals(); // Re-render modals to hide this one
-      }
-
-      function handleCancelConfirm() {
-        showConfirmModal = false;
-        confirmModalMessage = "";
-        confirmModalAction = null;
-        renderModals(); // Re-render modals to hide this one
-      }
-
-      function handleExecuteConfirm() {
-        if (confirmModalAction) {
-          confirmModalAction();
-        }
-        showConfirmModal = false;
-        confirmModalMessage = "";
-        confirmModalAction = null;
-        renderModals(); // Re-render modals to hide this one
-      }
-
-      function handleCloseExerciseDetailsModal() {
-        showExerciseDetailsModal = false;
-        exerciseDetailsData = null;
-        renderModals(); // Re-render modals to hide this one
-      }
-
-      function handleCloseStudentHistoryDetailsModal() {
-        showStudentHistoryDetailsModal = false;
-        currentStudentHistoryDetails = null;
-        renderModals(); // Re-render modals to hide this one
-      }
-
-      // --- Chart Rendering for Dashboard ---
-      function renderDashboardCharts() {
-        // Destroy existing charts if they exist
-        if (teacherLiterasiChart) {
-          teacherLiterasiChart.destroy();
-          teacherLiterasiChart = null;
-        }
-        if (teacherNumerasiChart) {
-          teacherNumerasiChart.destroy();
-          teacherNumerasiChart = null;
-        }
-
-        // Calculate each student's average Literasi and Numerasi score
-        const studentAverages = {}; // { studentId: { literasiAvg: X, numerasiAvg: Y } }
-
-        allStudents.forEach((student) => {
-          const studentId = student.id;
-          const studentLiterasiScores = studentExerciseHistory
-            .filter(
-              (h) => h.studentId === studentId && h.exerciseType === "Literasi"
-            )
-            .map((h) => h.score || 0);
-          const studentNumerasiScores = studentExerciseHistory
-            .filter(
-              (h) => h.studentId === studentId && h.exerciseType === "Numerasi"
-            )
-            .map((h) => h.score || 0);
-
-          const literasiAvg =
-            studentLiterasiScores.length > 0
-              ? studentLiterasiScores.reduce((sum, score) => sum + score, 0) /
-                studentLiterasiScores.length
-              : null;
-          const numerasiAvg =
-            studentNumerasiScores.length > 0
-              ? studentNumerasiScores.reduce((sum, score) => sum + score, 0) /
-                studentNumerasiScores.length
-              : null;
-
-          studentAverages[studentId] = { literasiAvg, numerasiAvg };
-        });
-
-        // Define score categories and their colors
-        const categories = [
-          { label: "Sangat Baik", min: 85, max: 100, color: "#10b981" }, // Emerald-500
-          { label: "Baik", min: 70, max: 84, color: "#3b82f6" }, // Blue-500
-          { label: "Cukup", min: 50, max: 69, color: "#f59e0b" }, // Amber-500
-          { label: "Perlu Peningkatan", min: 0, max: 49, color: "#ef4444" }, // Red-500
-          {
-            label: "Belum Ada Data",
-            min: -Infinity,
-            max: -1,
-            color: "#94a3b8",
-          }, // Slate-500 for nulls
-        ];
-
-        const literasiCategoryCounts = new Array(categories.length).fill(0);
-        const numerasiCategoryCounts = new Array(categories.length).fill(0);
-
-        allStudents.forEach((student) => {
-          const { literasiAvg, numerasiAvg } = studentAverages[student.id];
-
-          // Categorize Literasi
-          if (literasiAvg !== null) {
-            let found = false;
-            for (let i = 0; i < categories.length - 1; i++) {
-              // Exclude 'Belum Ada Data' from loop
-              if (
-                literasiAvg >= categories[i].min &&
-                literasiAvg <= categories[i].max
-              ) {
-                literasiCategoryCounts[i]++;
-                found = true;
-                break;
-              }
-            }
-            if (!found) {
-              // Fallback for any score outside defined ranges (shouldn't happen with 0-100)
-              literasiCategoryCounts[categories.length - 2]++; // Put in 'Perlu Peningkatan'
-            }
-          } else {
-            literasiCategoryCounts[categories.length - 1]++; // 'Belum Ada Data'
-          }
-
-          // Categorize Numerasi
-          if (numerasiAvg !== null) {
-            let found = false;
-            for (let i = 0; i < categories.length - 1; i++) {
-              // Exclude 'Belum Ada Data' from loop
-              if (
-                numerasiAvg >= categories[i].min &&
-                numerasiAvg <= categories[i].max
-              ) {
-                numerasiCategoryCounts[i]++;
-                found = true;
-                break;
-              }
-            }
-            if (!found) {
-              // Fallback
-              numerasiCategoryCounts[categories.length - 2]++; // Put in 'Perlu Peningkatan'
-            }
-          } else {
-            numerasiCategoryCounts[categories.length - 1]++; // 'Belum Ada Data'
-          }
-        });
-
-        const chartLabels = categories.map((c) => c.label);
-        const chartColors = categories.map((c) => c.color);
-
-        // Literasi Chart
-        const literasiCtx = document.getElementById("teacherLiterasiChart");
-        if (literasiCtx) {
-          teacherLiterasiChart = new Chart(literasiCtx, {
-            type: "pie",
-            data: {
-              labels: chartLabels,
-              datasets: [
-                {
-                  data: literasiCategoryCounts,
-                  backgroundColor: chartColors,
-                  hoverOffset: 4,
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false, // Changed to false
-                },
-                title: {
-                  display: true,
-                  text: `Distribusi Rata-rata Nilai Literasi Siswa (${allStudents.length} Siswa)`,
-                  font: {
-                    size: 14,
-                  },
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function (context) {
-                      let label = context.label || "";
-                      if (label) {
-                        label += ": ";
-                      }
-                      if (context.parsed !== null) {
-                        const totalStudents = allStudents.length;
-                        const percentage =
-                          ((context.parsed / totalStudents) * 100).toFixed(1) +
-                          "%";
-                        label += context.parsed + " siswa (" + percentage + ")";
-                      }
-                      return label;
-                    },
-                  },
-                },
-              },
-            },
-          });
-        }
-
-        // Numerasi Chart
-        const numerasiCtx = document.getElementById("teacherNumerasiChart");
-        if (numerasiCtx) {
-          teacherNumerasiChart = new Chart(numerasiCtx, {
-            type: "pie",
-            data: {
-              labels: chartLabels,
-              datasets: [
-                {
-                  data: numerasiCategoryCounts,
-                  backgroundColor: chartColors,
-                  hoverOffset: 4,
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false, // Changed to false
-                },
-                title: {
-                  display: true,
-                  text: `Distribusi Rata-rata Nilai Numerasi Siswa (${allStudents.length} Siswa)`,
-                  font: {
-                    size: 14,
-                  },
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function (context) {
-                      let label = context.label || "";
-                      if (label) {
-                        label += ": ";
-                      }
-                      if (context.parsed !== null) {
-                        const totalStudents = allStudents.length;
-                        const percentage =
-                          ((context.parsed / totalStudents) * 100).toFixed(1) +
-                          "%";
-                        label += context.parsed + " siswa (" + percentage + ")";
-                      }
-                      return label;
-                    },
-                  },
-                },
-              },
-            },
-          });
-        }
-      }
-
-      /**
-       * Determines the daily exercise type for AI app based on a given date.
-       * This is a helper for the AI app admin view.
-       * @param {string} dateString - Date in YYYY-MM-DD format.
-       * @returns {string} 'Literasi' atau 'Numerasi'.
-       */
-      function getDailyExerciseTypeForAI(dateString) {
-        const date = new Date(dateString);
-        return date.getDate() % 2 === 0 ? "Literasi" : "Numerasi";
-      }
-
-      /**
-       * Parses the raw content generated by the Gemini API for Literasi exercises.
-       * @param {string} generatedContent - The raw text content from Gemini.
-       * @returns {{readingText: string, questions: Array<Object>}} - Parsed reading text and questions.
-       */
-      function parseLiterasiContent(generatedContent) {
-        let readingText = "";
-        const questions = [];
-
-        // Split content into parts based on "Soal X:" pattern
-        const parts = generatedContent.split(/Soal \d+:\s*/).filter(Boolean); // Filter out empty strings
-
-        // First part should be the reading text
-        const readingMatch = parts[0].match(/Bacaan:\s*([\s\S]*)/i);
-        if (readingMatch && readingMatch[1]) {
-          readingText = readingMatch[1].trim();
-        } else {
-          // Fallback: If "Bacaan:" not found, assume the first part is the reading text
-          readingText = parts[0].trim();
-        }
-
-        // Subsequent parts are questions
-        for (let i = 1; i < parts.length; i++) {
-          const blockContent = parts[i];
-          if (blockContent) {
-            const questionLines = blockContent
-              .split("\n")
-              .map((line) => line.trim())
-              .filter(Boolean);
-            const questionText = questionLines[0]; // First line is the question
-
-            let minWords = 0;
-            const minWordsLine = questionLines.find((line) =>
-              line.includes("Minimal Kata Jawaban:")
-            );
-            if (minWordsLine) {
-              const minWordsMatch = minWordsLine.match(
-                /Minimal Kata Jawaban:\s*(\d+)/
-              );
-              if (minWordsMatch && minWordsMatch[1]) {
-                minWords = parseInt(minWordsMatch[1]);
-              }
-            }
-            if (isNaN(minWords) || minWords <= 0) {
-              minWords = 10; // Default minimum words
-            }
-            questions.push({ question: questionText, minWords: minWords });
-          }
-        }
-        return { readingText, questions };
-      }
-
-      /**
-       * Parses the raw content generated by the Gemini API for Numerasi exercises.
-       * @param {string} generatedContent - The raw text content from Gemini.
-       * @returns {{questions: Array<Object>}} - Parsed questions.
-       */
-      function parseNumerasiContent(generatedContent) {
-        const questions = [];
-        // Use regex to find all lines starting with "Soal X:"
-        const questionMatches = generatedContent.match(/Soal \d+:\s*([^\n]+)/g);
-
-        if (questionMatches) {
-          questionMatches.forEach((match) => {
-            const questionText = match.replace(/Soal \d+:\s*/, "").trim();
-            if (questionText) {
-              questions.push({ question: questionText });
-            }
-          });
-        }
-        return { questions };
-      }
-
-      /**
-       * Generates and saves a daily exercise using Gemini API via a backend endpoint.
-       * Can be triggered manually by teacher or automatically on login.
-       * @param {string} targetDate - The date for which to generate the exercise (YYYY-MM-DD).
-       * @param {string} exerciseType - The type of exercise to generate ('Literasi' or 'Numerasi').
-       * @param {boolean} [isAutoGenerate=false] - True if triggered automatically on login.
-       */
-      async function generateAndSaveDailyExercise(
-        targetDate,
-        exerciseType,
-        isAutoGenerate = false
-      ) {
-        const messagePrefix = isAutoGenerate
-          ? "Otomatis menggenerate"
-          : "Sedang menggenerate";
-        showMessage(
-          "loading",
-          `${messagePrefix} soal AI ${exerciseType} untuk ${targetDate}...`
-        );
-
-        const docRef = doc(db, "daily_ai_exercises", targetDate);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          if (isAutoGenerate) {
-            showMessage(
-              "info",
-              `Soal ${
-                docSnap.data().type
-              } untuk ${targetDate} sudah ada. Tidak perlu menggenerate otomatis.`
-            );
-            return;
-          } else {
-            const confirmOverwrite = await new Promise((resolve) => {
-              showConfirmationModal(
-                `Soal ${
-                  docSnap.data().type
-                } untuk ${targetDate} sudah ada. Apakah Anda yakin ingin menimpa soal ini dengan soal ${exerciseType} baru?`,
-                () => resolve(true)
-              );
-              const cancelBtn = document.getElementById("cancelConfirm");
-              if (cancelBtn) {
-                cancelBtn.onclick = () => {
-                  resolve(false);
-                };
-              }
-            });
-            if (!confirmOverwrite) {
-              showMessage("info", "Generate soal dibatalkan.");
-              return;
-            }
-          }
-        }
-
-        let prompt = "";
-        if (exerciseType === "Literasi") {
-          prompt = `Buatlah 1 bacaan pendek yang cocok untuk siswa SD kelas 5 (sekitar 150-200 kata) terdiri dari 3 paragraf. Gunakan bahasa yang sederhana dan mudah dipahami. Tema bacaan bisa berupa cerita fiksi, pengetahuan umum, atau deskripsi tentang sesuatu yang menarik bagi anak-anak.
-                Setelah bacaan, buat 3 soal terbuka yang memantik pemikiran kritis dan meningkatkan pemahaman literasi siswa.
-                - Soal 1: Mudah (pertanyaan langsung dari teks)
-                - Soal 2: Sedang (membutuhkan sedikit penalaran atau inferensi)
-                - Soal 3: Sulit (membutuhkan pemikiran mendalam, analisis, atau menghubungkan ide)
-                Sertakan juga di akhir setiap setiap soal, "Minimal Kata Jawaban: [jumlah angka, misal 15]".
-                Format output:
-                Bacaan: [isi bacaan paragraf 1]
-                [isi bacaan paragraf 2]
-                [isi bacaan paragraf 3]
-                Soal 1: [pertanyaan mudah]
-                Minimal Kata Jawaban: [jumlah kata]
-                Soal 2: [pertanyaan sedang]
-                Minimal Kata Jawaban: [jumlah kata]
-                Soal 3: [pertanyaan sulit]
-                Minimal Kata Jawaban: [jumlah kata]
-                `;
-        } else {
-          // Numerasi
-          prompt = `Buatlah 5 soal cerita matematika untuk siswa SD kelas 3-4. Soal melibatkan operasi dasar (penjumlahan, pengurangan, perkalian, pembagian) dan sederhana. Jangan berikan jawaban atau penjelasan. Format output:
-                Soal 1: [soal cerita]
-                Soal 2: [soal cerita]
-                Soal 3: [soal cerita]
-                Soal 4: [soal cerita]
-                Soal 5: [soal cerita]
-                `;
-        }
-
-        try {
-          // Panggil endpoint Vercel yang sama dengan latihankuv2.html
-          const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt: prompt }), // Kirim prompt saja
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(
-              `HTTP error! status: ${response.status}, message: ${
-                errorData.error || "Unknown error"
-              }`
-            );
-          }
-
-          const data = await response.json();
-          const generatedContent = data.text; // Ambil teks dari properti 'text'
-
-          let parsedResult;
-          if (exerciseType === "Literasi") {
-            parsedResult = parseLiterasiContent(generatedContent);
-          } else {
-            parsedResult = parseNumerasiContent(generatedContent);
-          }
-
-          // Save to Firestore. Use setDoc with the date as ID to overwrite if exists.
-          await setDoc(doc(db, "daily_ai_exercises", targetDate), {
-            date: targetDate,
-            type: exerciseType, // Simpan tipe yang benar
-            rawContent: generatedContent, // Store raw content for reference
-            readingText: parsedResult.readingText || "", // Store parsed reading text for Literasi
-            questions: parsedResult.questions, // Store parsed questions with minWords
-            generatedBy: auth.currentUser.uid,
-            generatedByName: teacherData.name,
-            timestamp: serverTimestamp(),
-          });
-
-          showMessage(
-            "success",
-            `Soal ${exerciseType} untuk ${targetDate} berhasil digenerate dan disimpan!`
-          );
-          // Listener akan secara otomatis memperbarui currentDailyExerciseAdmin dan me-render ulang
-        } catch (error) {
-          console.error("Error generating and saving daily exercise:", error);
-          showMessage("error", `Gagal generate soal AI: ${error.message}`);
-        }
-      }
-
-      /**
-       * Generates exercises for a specified number of future days.
-       * @param {number} daysToGenerate - Number of days to generate exercises for (starting from tomorrow).
-       */
-      async function generateFutureExercises(daysToGenerate) {
-        showMessage(
-          "loading",
-          `Sedang menggenerate soal untuk ${daysToGenerate} hari ke depan...`
-        );
-        let successCount = 0;
-        let failCount = 0;
-
-        for (let i = 1; i <= daysToGenerate; i++) {
-          const futureDate = new Date();
-          futureDate.setDate(futureDate.getDate() + i);
-          const targetDate = futureDate.toISOString().slice(0, 10);
-          const exerciseType = getDailyExerciseTypeForAI(targetDate);
-
-          try {
-            // Check if exercise already exists for this future date
-            const docRef = doc(db, "daily_ai_exercises", targetDate);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-              console.log(
-                `Soal untuk ${targetDate} sudah ada. Melewatkan generate.`
-              );
-              successCount++; // Consider it a success if it already exists and we skip
-              continue; // Skip generation if already exists
-            }
-
-            let prompt = "";
-            if (exerciseType === "Literasi") {
-              prompt = `Buatlah 1 bacaan pendek yang cocok untuk siswa SD kelas 5 (sekitar 150-200 kata) terdiri dari 3 paragraf. Gunakan bahasa yang sederhana dan mudah dipahami. Tema bacaan bisa berupa cerita fiksi, pengetahuan umum, atau deskripsi tentang sesuatu yang menarik bagi anak-anak.
-                        Setelah bacaan, buat 3 soal terbuka yang memantik pemikiran kritis dan meningkatkan pemahaman literasi siswa.
-                        - Soal 1: Mudah (pertanyaan langsung dari teks)
-                        - Soal 2: Sedang (membutuhkan sedikit penalaran atau inferensi)
-                        - Soal 3: Sulit (membutuhkan pemikiran mendalam, analisis, atau menghubungkan ide)
-                        Sertakan juga di akhir setiap setiap soal, "Minimal Kata Jawaban: [jumlah angka, misal 15]".
-                        Format output:
-                        Bacaan: [isi bacaan paragraf 1]
-                        [isi bacaan paragraf 2]
-                        [isi bacaan paragraf 3]
-                        Soal 1: [pertanyaan mudah]
-                        Minimal Kata Jawaban: [jumlah kata]
-                        Soal 2: [pertanyaan sedang]
-                        Minimal Kata Jawaban: [jumlah kata]
-                        Soal 3: [pertanyaan sulit]
-                        Minimal Kata Jawaban: [jumlah kata]
-                        `;
-            } else {
-              // Numerasi
-              prompt = `Buatlah 5 soal cerita matematika untuk siswa SD kelas 3-4. Soal melibatkan operasi dasar (penjumlahan, pengurangan, perkalian, pembagian) dan sederhana. Jangan berikan jawaban atau penjelasan. Format output:
-                        Soal 1: [soal cerita]
-                        Soal 2: [soal cerita]
-                        Soal 3: [soal cerita]
-                        Soal 4: [soal cerita]
-                        Soal 5: [soal cerita]
-                        `;
-            }
-
-            // Panggil endpoint Vercel yang sama dengan latihankuv2.html
-            const response = await fetch(VERCEL_GEMINI_API_ENDPOINT, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt: prompt }), // Kirim prompt saja
-            });
-
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(
-                `HTTP error! status: ${response.status}, message: ${
-                  errorData.error || "Unknown error"
-                }`
-              );
-            }
-
-            const data = await response.json();
-            const generatedContent = data.text; // Ambil teks dari properti 'text'
-
-            let parsedResult;
-            if (exerciseType === "Literasi") {
-              parsedResult = parseLiterasiContent(generatedContent);
-            } else {
-              parsedResult = parseNumerasiContent(generatedContent);
-            }
-
-            // FIX: Use setDoc function instead of docRef.set()
-            await setDoc(docRef, {
-              date: targetDate,
-              type: exerciseType,
-              rawContent: generatedContent,
-              readingText: parsedResult.readingText || "",
-              questions: parsedResult.questions,
-              generatedBy: auth.currentUser.uid,
-              generatedByName: teacherData.name,
-              timestamp: serverTimestamp(),
-            });
-            successCount++;
-          } catch (error) {
-            console.error(
-              `Error generating exercise for ${targetDate}:`,
-              error
-            );
-            failCount++;
-          }
-        }
-        showMessage(
-          "success",
-          `Generate selesai: ${successCount} soal berhasil, ${failCount} soal gagal/dilewati.`
-        );
-      }
-
-      /**
-       * Menghapus data lama dari koleksi daily_ai_exercises dan student_exercise_history.
-       * Dipanggil saat guru login.
-       */
-      async function cleanOldData() {
-        showMessage(
-          "loading",
-          "Memeriksa dan membersihkan data lama...",
-          "Pembersihan Data"
-        );
-        let deletedExerciseCount = 0;
-        let deletedHistoryCount = 0;
-
-        try {
-          // 1. Hapus soal latihan yang lebih tua dari 30 hari
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-          const thirtyDaysAgoTimestamp = Timestamp.fromDate(thirtyDaysAgo);
-
-          const oldExercisesQuery = query(
-            collection(db, "daily_ai_exercises"),
-            where("timestamp", "<", thirtyDaysAgoTimestamp)
-          );
-          const oldExercisesSnapshot = await getDocs(oldExercisesQuery);
-
-          const deleteExercisePromises = [];
-          oldExercisesSnapshot.forEach((docToDelete) => {
-            deleteExercisePromises.push(
-              deleteDoc(doc(db, "daily_ai_exercises", docToDelete.id))
-            );
-            deletedExerciseCount++;
-          });
-          await Promise.all(deleteExercisePromises);
-          console.log(`Dihapus ${deletedExerciseCount} soal latihan lama.`);
-
-          // 2. Hapus riwayat latihan siswa yang lebih tua dari 1 tahun
-          const oneYearAgo = new Date();
-          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-          const oneYearAgoTimestamp = Timestamp.fromDate(oneYearAgo);
-
-          const oldHistoryQuery = query(
-            collection(db, "student_exercise_history"),
-            where("timestamp", "<", oneYearAgoTimestamp)
-          );
-          const oldHistorySnapshot = await getDocs(oldHistoryQuery);
-
-          const deleteHistoryPromises = [];
-          oldHistorySnapshot.forEach((docToDelete) => {
-            deleteHistoryPromises.push(
-              deleteDoc(doc(db, "student_exercise_history", docToDelete.id))
-            );
-            deletedHistoryCount++;
-          });
-          await Promise.all(deleteHistoryPromises);
-          console.log(
-            `Dihapus ${deletedHistoryCount} riwayat latihan siswa lama.`
-          );
-
-          if (deletedExerciseCount > 0 || deletedHistoryCount > 0) {
-            showMessage(
-              "success",
-              `Pembersihan selesai: ${deletedExerciseCount} soal dan ${deletedHistoryCount} riwayat latihan dihapus.`,
-              "Pembersihan Data"
-            );
-          } else {
-            showMessage(
-              "info",
-              "Tidak ada data lama yang perlu dihapus.",
-              "Pembersihan Data"
-            );
-          }
-        } catch (error) {
-          console.error("Error cleaning old data:", error);
-          showMessage(
-            "error",
-            `Gagal membersihkan data lama: ${error.message}`,
-            "Pembersihan Data"
-          );
-        }
-      }
-
-      /**
-       * Generates and appends modal HTML to the body based on global state.
-       */
-      function renderModals() {
-        // Ensure modalContainer exists
-        if (!modalContainer) {
-          modalContainer = document.createElement("div");
-          modalContainer.id = "modal-container";
-          document.body.appendChild(modalContainer);
-        }
-
-        let modalHtml = "";
-
-        if (showAddStudentModal) {
-          modalHtml += `
-              <div id="addStudentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[100] modal-overlay">
-                  <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
-                  <h3 class="text-xl font-bold text-cyan-700 mb-4">Tambah Siswa Baru</h3>
-                  <form id="addStudentForm" class="space-y-4">
-                      <div>
-                      <label for="newStudentName" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Siswa</label>
-                      <input type="text" id="newStudentName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" required />
-                      </div>
-                      <div>
-                      <label for="newStudentUsername" class="block text-sm font-medium text-gray-700 mb-1">Username (untuk login)</label>
-                      <input type="text" id="newStudentUsername" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" required />
-                      </div>
-                      <div>
-                      <label for="newStudentPassword" class="block text-sm font-medium text-gray-700 mb-1">Password (untuk login)</label>
-                      <input type="password" id="newStudentPassword" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" required />
-                      <p class="text-xs text-red-500 mt-1">Peringatan: Password akan di-hash sebelum disimpan.</p>
-                      </div>
-                      <div>
-                      <label for="newStudentNisn" class="block text-sm font-medium text-gray-700 mb-1">NISN (Opsional)</label>
-                      <input type="text" id="newStudentNisn" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" placeholder="Contoh: 1234567890" />
-                      </div>
-                      <div>
-                      <label for="newStudentClassId" class="block text-sm font-medium text-gray-700 mb-1">Kelas (Opsional)</label>
-                      <input type="text" id="newStudentClassId" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" />
-                      </div>
-                      <div class="flex justify-end space-x-3 mt-4">
-                      <button type="button" id="cancelAddStudent" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition duration-200">
-                          Batal
-                      </button>
-                      <button type="submit" class="px-4 py-2 bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 transition duration-200">
-                          Simpan Siswa
-                      </button>
-                      </div>
-                  </form>
-                  </div>
-              </div>
-              `;
-        }
-
-        if (showEditStudentModal && editingStudent) {
-          modalHtml += `
-              <div id="editStudentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[100] modal-overlay">
-                  <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
-                  <h3 class="text-xl font-bold text-cyan-700 mb-4">Edit Data Siswa</h3>
-                  <form id="editStudentForm" class="space-y-4">
-                      <input type="hidden" id="editStudentId" value="${
-                        editingStudent.id
-                      }" />
-                      <div>
-                      <label for="editStudentName" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Siswa</label>
-                      <input type="text" id="editStudentName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" value="${
-                        editingStudent.name
-                      }" required />
-                      </div>
-                      <div>
-                      <label for="editStudentUsername" class="block text-sm font-medium text-gray-700 mb-1">Username (untuk login)</label>
-                      <input type="text" id="editStudentUsername" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" value="${
-                        editingStudent.username || ""
-                      }" required />
-                      </div>
-                      <div>
-                      <label for="editStudentPassword" class="block text-sm font-medium text-gray-700 mb-1">Password (untuk login)</label>
-                      <input type="password" id="editStudentPassword" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" />
-                      <p class="text-xs text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengubah password.</p>
-                      </div>
-                      <div>
-                      <label for="editStudentNisn" class="block text-sm font-medium text-gray-700 mb-1">NISN (Opsional)</label>
-                      <input type="text" id="editStudentNisn" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" value="${
-                        editingStudent.studentId || ""
-                      }" />
-                      </div>
-                      <div>
-                      <label for="editStudentClassId" class="block text-sm font-medium text-gray-700 mb-1">Kelas (Opsional)</label>
-                      <input type="text" id="editStudentClassId" class="w-full p-2 border border-gray-300 rounded-md focus:ring-cyan-500 focus:border-cyan-500" value="${
-                        editingStudent.classId || ""
-                      }" />
-                      </div>
-                      <div class="flex justify-end space-x-3 mt-4">
-                      <button type="button" id="cancelEditStudent" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition duration-200">
-                          Batal
-                      </button>
-                      <button type="submit" class="px-4 py-2 bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 transition duration-200">
-                          Simpan Perubahan
-                      </button>
-                      </div>
-                  </form>
-                  </div>
-              </div>
-              `;
-        }
-
-        if (showConfirmModal) {
-          modalHtml += `
-              <div id="confirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[100] modal-overlay">
-                  <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm text-center">
-                  <h3 class="text-xl font-bold text-red-700 mb-4">Konfirmasi Aksi</h3>
-                  <p class="text-gray-700 mb-6">${confirmModalMessage}</p>
-                  <div class="flex justify-center space-x-4">
-                      <button type="button" id="cancelConfirm" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition duration-200">
-                      Batal
-                      </button>
-                      <button type="button" id="executeConfirm" class="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition duration-200">
-                      Lanjutkan
-                      </button>
-                  </div>
-                  </div>
-              </div>
-              `;
-        }
-
-        if (showExerciseDetailsModal && exerciseDetailsData) {
-          modalHtml += `
-              <div id="exerciseDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-[1000] modal-overlay">
-                  <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <div class="flex justify-between items-center mb-4">
-                          <h3 class="text-xl font-bold text-cyan-700">Detail Soal Latihan (${
-                            exerciseDetailsData.type
-                          })</h3>
-                          <button id="closeExerciseDetailsModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
-                      </div>
-                      <p class="text-gray-600 mb-4">Tanggal: ${
-                        exerciseDetailsData.date
-                      } | Digenerate oleh: ${
-            exerciseDetailsData.generatedByName || "N/A"
-          }</p>
-                      ${
-                        exerciseDetailsData.readingText
-                          ? `<div class="ai-reading-text">
-                              <h4 class="font-semibold text-cyan-700 mb-2">Bacaan:</h4>
-                              <p>${exerciseDetailsData.readingText.replace(
-                                /\n/g,
-                                "<br>"
-                              )}</p>
-                          </div>`
-                          : ""
-                      }
-                      <div>
-                          <h4 class="font-semibold text-cyan-700 mb-2">Pertanyaan:</h4>
-                          ${exerciseDetailsData.questions
-                            .map(
-                              (q, index) => `
-                              <div class="ai-question-item">
-                                  <p><strong>Soal ${index + 1}:</strong> ${
-                                q.question
-                              } <small>${
-                                q.minWords ? `(Min. ${q.minWords} kata)` : ""
-                              }</small></p>
-                              </div>
-                          `
-                            )
-                            .join("")}
-                      </div>
-                  </div>
-              </div>
-              `;
-        }
-
-        if (showStudentHistoryDetailsModal && currentStudentHistoryDetails) {
-          modalHtml += `
-              <div id="studentHistoryDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-[1000] modal-overlay">
-                  <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <div class="flex justify-between items-center mb-4">
-                          <h3 class="text-xl font-bold text-cyan-700">Detail Riwayat Latihan Siswa</h3>
-                          <button id="closeStudentHistoryDetailsModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
-                      </div>
-                      <p class="text-gray-600 mb-4">Siswa: <strong>${
-                        allStudents.find(
-                          (s) => s.id === currentStudentHistoryDetails.studentId
-                        )?.name || "Siswa Tidak Dikenal"
-                      }</strong> | Tanggal: ${
-            currentStudentHistoryDetails.exerciseDate
-          } | Jenis: ${
-            currentStudentHistoryDetails.exerciseType
-          } | Nilai: <strong>${
-            currentStudentHistoryDetails.score || "N/A"
-          }</strong></p>
-                      <div class="mb-4">
-                          <h4 class="font-semibold text-cyan-700 mb-2">Jawaban Siswa:</h4>
-                          ${currentStudentHistoryDetails.answers
-                            .map(
-                              (ans, index) => `
-                              <div class="ai-question-item">
-                                  <p><strong>Soal ${index + 1}:</strong> ${
-                                ans.question
-                              }</p>
-                                  <p class="text-gray-700">Jawaban: ${
-                                    ans.answer
-                                  }</p>
-                              </div>
-                          `
-                            )
-                            .join("")}
-                      </div>
-                      <div class="ai-suggestion-box">
-                          <h4 class="font-bold text-cyan-800">Saran AI:</h4>
-                          <p>${
-                            currentStudentHistoryDetails.aiSuggestions
-                              ? currentStudentHistoryDetails.aiSuggestions.replace(
-                                  /\n/g,
-                                  "<br>"
-                                )
-                              : "Tidak ada saran yang tersedia."
-                          }</p>
-                      </div>
-                  </div>
-              </div>
-              `;
-        }
-        modalContainer.innerHTML = modalHtml;
-      }
-
-      // --- Student Management Functions ---
-
-      /**
-       * Handles adding a new student to Firestore.
-       * @param {Event} e - The form submission event.
-       */
-      async function handleAddStudentSubmit(e) {
-        e.preventDefault();
-        showMessage("loading", "Menambahkan siswa baru...");
-
-        const name = document.getElementById("newStudentName").value.trim();
-        const username = document
-          .getElementById("newStudentUsername")
-          .value.trim();
-        const password = document
-          .getElementById("newStudentPassword")
-          .value.trim();
-        const nisn = document.getElementById("newStudentNisn").value.trim();
-        const classId = document
-          .getElementById("newStudentClassId")
-          .value.trim();
-
-        if (!name || !username || !password) {
-          showMessage("error", "Nama, Username, dan Password harus diisi.");
-          return;
-        }
-
-        try {
-          // Check if username already exists
-          const usernameQuery = query(
-            collection(db, "users"),
-            where("username", "==", username)
-          );
-          const usernameSnapshot = await getDocs(usernameQuery);
-          if (!usernameSnapshot.empty) {
-            showMessage(
-              "error",
-              `Username '${username}' sudah digunakan. Mohon gunakan username lain.`
-            );
-            return;
-          }
-
-          const hashedPassword = await hashString(password);
-
-          const newStudentData = {
-            name: name,
-            username: username,
-            passwordHash: hashedPassword, // Store hashed password
-            role: "student",
-            studentId: nisn, // NISN
-            classId: classId,
-            createdAt: serverTimestamp(),
-            createdBy: auth.currentUser.uid,
-          };
-
-          await addDoc(collection(db, "users"), newStudentData);
-
-          showMessage("success", "Siswa baru berhasil ditambahkan!");
-          showAddStudentModal = false; // Close modal
-          renderModals(); // Re-render modals to hide this one
-          // Student list will auto-update via onSnapshot listener
-        } catch (error) {
-          console.error("Error adding student:", error);
-          showMessage("error", `Gagal menambahkan siswa: ${error.message}`);
-        }
-      }
-
-      /**
-       * Handles updating an existing student's data in Firestore.
-       * @param {Event} e - The form submission event.
-       */
-      async function handleUpdateStudentSubmit(e) {
-        e.preventDefault();
-        showMessage("loading", "Memperbarui data siswa...");
-
-        const studentId = document.getElementById("editStudentId").value;
-        const name = document.getElementById("editStudentName").value.trim();
-        const username = document
-          .getElementById("editStudentUsername")
-          .value.trim();
-        const password = document
-          .getElementById("editStudentPassword")
-          .value.trim(); // New password, if any
-        const nisn = document.getElementById("editStudentNisn").value.trim();
-        const classId = document
-          .getElementById("editStudentClassId")
-          .value.trim();
-
-        if (!name || !username) {
-          showMessage("error", "Nama dan Username harus diisi.");
-          return;
-        }
-
-        try {
-          const studentDocRef = doc(db, "users", studentId);
-          const updatedData = {
-            name: name,
-            username: username,
-            studentId: nisn,
-            classId: classId,
-          };
-
-          // Only update password if a new one is provided
-          if (password) {
-            updatedData.passwordHash = await hashString(password);
-          }
-
-          // Check if username already exists for another student
-          const usernameQuery = query(
-            collection(db, "users"),
-            where("username", "==", username)
-          );
-          const usernameSnapshot = await getDocs(usernameQuery);
-          let usernameConflict = false;
-          usernameSnapshot.forEach((doc) => {
-            if (doc.id !== studentId) {
-              // If it's a different student
-              usernameConflict = true;
-            }
-          });
-
-          if (usernameConflict) {
-            showMessage(
-              "error",
-              `Username '${username}' sudah digunakan oleh siswa lain. Mohon gunakan username lain.`
-            );
-            return;
-          }
-
-          await updateDoc(studentDocRef, updatedData);
-
-          showMessage("success", "Data siswa berhasil diperbarui!");
-          showEditStudentModal = false; // Close modal
-          editingStudent = null; // Clear editing state
-          renderModals(); // Re-render modals to hide this one
-          // Student list will auto-update via onSnapshot listener
-        } catch (error) {
-          console.error("Error updating student:", error);
-          showMessage("error", `Gagal memperbarui siswa: ${error.message}`);
-        }
-      }
-
-      /**
-       * Handles deleting a student and their history.
-       * This function is triggered by the confirmation modal.
-       * @param {string} studentId - The ID of the student to delete.
-       */
-      async function handleDeleteStudent(studentId) {
-        showMessage("loading", "Menghapus siswa dan riwayat latihannya...");
-        try {
-          // Delete all associated exercise history
-          const historyToDeleteQuery = query(
-            collection(db, "student_exercise_history"),
-            where("studentId", "==", studentId)
-          );
-          const historySnapshot = await getDocs(historyToDeleteQuery);
-          const deleteHistoryPromises = historySnapshot.docs.map(
-            (docToDelete) =>
-              deleteDoc(doc(db, "student_exercise_history", docToDelete.id))
-          );
-          await Promise.all(deleteHistoryPromises);
-
-          // Delete the student document
-          await deleteDoc(doc(db, "users", studentId));
-
-          showMessage(
-            "success",
-            "Siswa dan semua riwayat latihannya berhasil dihapus!"
-          );
-          // Student list will auto-update via onSnapshot listener
-        } catch (error) {
-          console.error("Error deleting student:", error);
-          showMessage("error", `Gagal menghapus siswa: ${error.message}`);
-        } finally {
-          renderModals(); // Ensure modals are re-rendered to hide confirmation
-        }
-      }
-
-      /**
-       * Shows a generic confirmation modal.
-       * @param {string} message - The message to display in the confirmation modal.
-       * @param {Function} action - The function to execute if the user confirms.
-       */
-      function showConfirmationModal(message, action) {
-        confirmModalMessage = message;
-        confirmModalAction = action;
-        showConfirmModal = true;
-        renderModals(); // Render the confirmation modal
-        attachDynamicEventListeners(); // Re-attach listeners for the new modal
-      }
-
-      // --- Date Change Detection and Listener Refresh ---
-      let lastCheckedDate = new Date().toISOString().slice(0, 10);
-
-      // Check for date change every minute
-      setInterval(() => {
-        const newTodayDate = new Date().toISOString().slice(0, 10);
-        if (newTodayDate !== lastCheckedDate) {
-          console.log(
-            "Date changed! Re-initializing Firestore listeners for new day."
-          );
-          lastCheckedDate = newTodayDate;
-          if (auth.currentUser) {
-            // Re-setup all listeners with the new date context
-            setupFirestoreListeners(auth.currentUser.uid);
-            // If the current view is 'soal', force a re-render to show the new daily exercise
-            if (currentMainTeacherView === "soal") {
-              renderSoalView();
-            }
-          }
-        }
-      }, 60 * 1000); // Check every 1 minute (60,000 milliseconds)
-
-      // Initial render will be handled by onAuthStateChanged
-    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+    <script type="module" src="js/setting.js"></script>
+    <script type="module" src="js/soal.js"></script>
+    <script type="module" src="js/materi.js"></script>
+    <script type="module" src="js/jadwal.js"></script>
+    <!-- NEW: Import jadwal.js -->
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>
