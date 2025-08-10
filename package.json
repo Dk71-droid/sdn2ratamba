@@ -1,0 +1,25 @@
+{
+  "name": "portalsiswa",
+  "version": "1.0.0",
+  "main": "replace-api-safe.js",
+  "scripts": {
+  "dev": "vite",
+  "build": "vite build"
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dk71-droid/sdn2ratamba.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dk71-droid/sdn2ratamba/issues"
+  },
+  "homepage": "https://github.com/Dk71-droid/sdn2ratamba#readme",
+  "description": "",
+  "devDependencies": {
+    "vite": "^7.1.1"
+  }
+}

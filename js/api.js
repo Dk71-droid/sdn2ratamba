@@ -1,21 +1,10 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+// File: api.js
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(req.body),
-      }
-    );
+// Ambil kunci API Gemini dari variabel lingkungan
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-    const data = await response.json();
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
+// URL dasar untuk Gemini API
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
+
+// Ekspor variabel
+export { GEMINI_API_KEY, GEMINI_API_URL };
