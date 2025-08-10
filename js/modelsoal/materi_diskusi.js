@@ -20,7 +20,7 @@ import {
   getDocs,
 } from "../firebase.js";
 import { studentData } from "../app_siswa.js";
-import { '/api/gemini' } from "../api.js";
+import { GEMINI_API_URL } from "../api.js";
 
 /**
  * Mendapatkan semua data kiriman bab untuk materi tertentu dan siswa.
@@ -553,7 +553,7 @@ Contoh format output:
               },
             };
             const apiKey = "";
-            const apiUrl = '/api/gemini';
+            const apiUrl = GEMINI_API_URL;
 
             const MAX_RETRIES = 3;
             const INITIAL_DELAY = 1000;

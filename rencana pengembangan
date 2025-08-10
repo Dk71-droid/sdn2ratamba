@@ -1,0 +1,310 @@
+Rencana Implementasi Fitur Pembelajaran & Penilaian AI
+Ini adalah panduan lengkap untuk merealisasikan konsep aplikasi yang telah kita diskusikan, mencakup alur kerja guru dan siswa, sistem penilaian, serta pembaruan teknis yang diperlukan.
+
+1. Konsep & Alur Kerja Siswa (Pengalaman Pengguna)
+   Tujuan: Memberikan pengalaman belajar yang terstruktur harian namun tetap fleksibel, memastikan konsistensi latihan kemampuan dasar, dan mengintegrasikan materi pembelajaran.
+
+A. Dashboard Siswa:
+
+"Tugas Hari Ini" (Fokus Utama):
+
+Di bagian paling menonjol dashboard, hanya akan ditampilkan satu tugas materi yang dijadwalkan oleh guru untuk mata pelajaran spesifik hari ini.
+
+Sistem akan mencari tugas di scheduled_tasks yang scheduleDate <= hari ini <= dueDate DAN scheduledSubject cocok dengan hari ini (misalnya, "Senin" untuk "Bahasa Indonesia").
+
+Jika tidak ada tugas yang cocok, pesan informatif akan ditampilkan (misalnya, "Tidak ada tugas terjadwal untuk hari ini.").
+
+"Daftar Tugas Aktif" (Fleksibilitas):
+
+Akan ada tautan terpisah (misalnya, "Lihat Semua Tugas Aktif" atau "Jadwal Tugas") yang mengarah ke halaman daftar.
+
+Halaman ini menampilkan semua tugas materi yang aktif (dalam rentang scheduleDate hingga dueDate), terlepas dari scheduledSubject hari ini. Ini memungkinkan siswa untuk mengejar atau belajar ekstra.
+
+B. Alur Pengerjaan Tugas (Setelah Siswa Memilih Tugas):
+
+Langkah 1: Soal Pemanasan Harian (Wajib)
+
+Ketika siswa mengklik "Tugas Hari Ini" atau memilih tugas dari "Daftar Tugas Aktif", aplikasi akan pertama kali menampilkan satu soal Literasi atau Numerasi.
+
+Jenis soal (Literasi/Numerasi) ditentukan secara otomatis oleh sistem berdasarkan hari dalam seminggu (Senin Literasi, Selasa Numerasi, Rabu Literasi, dst., kecuali Minggu).
+
+Siswa harus menyelesaikan soal ini untuk melanjutkan.
+
+Penting: Penyelesaian soal ini menjadi indikator kedisiplinan harian siswa (bahwa mereka "check-in" untuk belajar). Hasilnya disimpan di student_exercise_history dengan penanda isWarmup: true.
+
+Langkah 2: Konten Materi Pembelajaran Utama & Interaksi Tertanam
+
+Setelah soal pemanasan selesai, materi pembelajaran yang dijadwalkan akan terbuka.
+
+Siswa akan membaca dan berinteraksi dengan materi. Di dalam setiap bagian atau "level" materi (khususnya untuk model "Eksplorasi Konsep & Diskusi Esai"), siswa akan menemukan:
+
+"Ayo Berpikir & Berbagi! 🤔": Pertanyaan reflektif untuk memicu pemikiran kualitatif, dengan jawaban disimpan ke student_discussion_submissions.
+
+"Uji Coba! ✅": Latihan singkat berbasis kuis atau pilihan ganda yang tertanam langsung di akhir setiap bagian/level materi. Ini bertujuan untuk menguji pemahaman per bagian, dengan hasil disimpan ke student_quiz_submissions.
+
+Langkah 3: Uji Pemahaman Keseluruhan (Setelah Materi Selesai)
+
+Setelah siswa menelusuri seluruh konten materi dan menyelesaikan semua "Ayo Berpikir & Berbagi! 🤔" serta "Uji Coba! ✅" yang tertanam di dalamnya, sebuah prompt atau tombol akan muncul bertuliskan: "Lanjut ke Uji Pemahaman Kalian!".
+
+Ketika siswa mengklik tombol ini, mereka akan diarahkan ke set soal baru yang dirancang untuk menguji pemahaman keseluruhan dari seluruh materi yang baru saja dipelajari.
+
+Soal "Uji Pemahaman! 🧠" ini akan disimpan di student_exercise_history dengan penanda isOverallAssessment: true dan materialId yang relevan.
+
+Progres siswa dalam materi (bagian yang dilihat, diskusi yang dijawab, kuis yang diselesaikan) akan dilacak dan disimpan di student_material_progress.
+
+Setelah materi dan aktivitas interaktifnya (termasuk "Uji Pemahaman! 🧠") selesai, tugas akan ditandai sebagai isCompleted.
+
+2. Konsep & Alur Generate Konten (Sisi Guru)
+   Tujuan: Memberikan guru alat yang jelas dan terpisah untuk membuat berbagai jenis konten pembelajaran.
+
+A. Membuat Materi Pembelajaran Baru (via Modul "Materi"):
+
+Guru masuk ke tab "Materi".
+
+Mengklik "Buat Materi Pembelajaran Baru".
+
+Mengisi formulir: Mata Pelajaran, Topik, Model Pembelajaran, Fokus Pembahasan/Sub-topik.
+
+AI akan menggenerate konten materi lengkap, termasuk bagian penjelasan, pertanyaan diskusi (Ayo Berpikir & Berbagi! 🤔), latihan uji pemahaman per bagian (Uji Coba! ✅), DAN juga soal untuk "Uji Pemahaman! 🧠" keseluruhan.
+
+Materi ini disimpan di koleksi materials.
+
+B. Membuat Soal Latihan Harian (via Modul "Soal"):
+
+Guru masuk ke tab "Soal".
+
+Mengklik "Buat Soal Latihan Baru".
+
+Mengisi formulir untuk menentukan jenis soal (Literasi atau Numerasi) dan tanggal target.
+
+AI akan membuat 1 set soal Literasi atau Numerasi.
+
+Soal ini disimpan di koleksi daily_ai_exercises, menjadi "kolam" soal pemanasan.
+
+Otomatisasi: Soal harian juga akan digenerate secara otomatis (jika belum ada) saat guru atau siswa login untuk hari itu, menggunakan daily_exercise_manager.js.
+
+C. Menjadwalkan Tugas Baru (via Modul "Jadwal"):
+
+Guru masuk ke tab "Jadwal".
+
+Mengklik "Jadwalkan Tugas Baru".
+
+Memilih materi pembelajaran yang sudah ada dari daftar.
+
+Mengisi detail penjadwalan:
+
+Tanggal Penjadwalan (scheduleDate): Kapan tugas ini mulai aktif.
+
+Tanggal Jatuh Tempo (dueDate): Soft deadline untuk materi ini (misalnya, 3-7 hari).
+
+Mata Pelajaran Terjadwal (scheduledSubject): Mata pelajaran yang akan menjadi "fokus harian" untuk tugas ini (misalnya, "IPAS" untuk hari Senin).
+
+Tipe Pemanasan Harian (dailyWarmupType): Ini akan ditentukan secara otomatis oleh sistem berdasarkan hari penjadwalan (Senin Literasi, Selasa Numerasi, dst., kecuali Minggu). Guru tidak perlu memilihnya secara manual di sini.
+
+Kelas/Siswa yang Ditugaskan.
+
+Tugas ini disimpan di koleksi scheduled_tasks.
+
+3. Konsep & Alur Analisis (Sisi Guru)
+   Tujuan: Memberikan guru wawasan komprehensif tentang kemajuan akademik dan kedisiplinan siswa.
+
+A. Analisis Per Mata Pelajaran (Dashboard / Halaman Detail Mapel):
+
+Sumber Data: Nilai dari Uji Coba! ✅ (latihan per bagian materi) dan Uji Pemahaman! 🧠 (latihan keseluruhan materi) yang disimpan di student_exercise_history dan terhubung dengan materialId, subject, topic.
+
+Tampilan:
+
+Dashboard Guru: Kartu ringkasan per mata pelajaran (misalnya IPAS, Matematika) menampilkan nilai rata-rata kelas, tren performa, topik paling dikuasai/butuh perhatian.
+
+Halaman Detail Mata Pelajaran (Baru): Grafik tren nilai kelas, distribusi nilai, daftar nilai per topik, dan daftar siswa berkinerja tinggi/rendah per topik.
+
+B. Analisis Per Anak (Profil Siswa Individu):
+
+Sumber Data: Semua data dari student_exercise_history (soal pemanasan, literasi/numerasi, Uji Coba! ✅, Uji Pemahaman! 🧠) dan jawaban Ayo Berpikir & Berbagi! 🤔 (dari student_discussion_submissions). Juga progres materi dari student_material_progress.
+
+Tampilan:
+
+Grafik Tren Nilai Keseluruhan: Progres nilai siswa dari waktu ke waktu (bisa gabungan atau terpisah).
+
+Riwayat Latihan Lengkap: Daftar semua latihan yang dikerjakan siswa dengan nilai, tanggal, dan tipe.
+
+Analisis Per Mata Pelajaran Siswa: Nilai rata-rata siswa di setiap mata pelajaran dan progres mereka di setiap topik.
+
+Wawasan Kualitatif: Ringkasan analisis AI atau daftar jawaban siswa dari Ayo Berpikir & Berbagi! 🤔, memberikan pemahaman tentang pemikiran dan miskonsepsi.
+
+C. Analisis Kedisiplinan (Dashboard / Profil Siswa):
+
+Sumber Data: Catatan penyelesaian soal pemanasan harian (isWarmup: true) di student_exercise_history.
+
+Tampilan:
+
+Dashboard Guru: Ringkasan "Tingkat Kehadiran Belajar" atau "Konsistensi Harian" untuk kelas. Daftar siswa yang paling sering/jarang menyelesaikan pemanasan.
+
+Profil Siswa Individu: Kalender atau grafik batang yang menunjukkan "hari aktif belajar" siswa (hari di mana mereka menyelesaikan soal pemanasan). Statistik "rata-rata belajar per minggu".
+
+4. Rincian Implementasi Teknis & Pembaruan Kode
+   A. Struktur Data Firestore (Pembaruan Kunci):
+
+materials Koleksi:
+
+lessonData.overallAssessment (Array of Objects): Struktur baru untuk menyimpan soal-soal "Uji Pemahaman! 🧠" keseluruhan. Contoh: [{ question: "Soal 1", options: ["A", "B"], answer: "A" }]
+
+scheduled_tasks Koleksi:
+
+scheduledSubject (String): Mata pelajaran yang dijadwalkan untuk hari itu (misalnya "Senin" -> "Bahasa Indonesia").
+
+dueDate (String - YYYY-MM-DD): Tanggal jatuh tempo soft deadline untuk materi.
+
+dailyWarmupType (String): "Literasi" atau "Numerasi" untuk soal pemanasan (akan diisi otomatis oleh sistem).
+
+isCompleted (Map: { [studentUid]: true/false }): Status penyelesaian materi oleh setiap siswa.
+
+student_exercise_history Koleksi:
+
+isWarmup (Boolean): true jika ini adalah hasil dari soal pemanasan harian.
+
+isOverallAssessment (Boolean): true jika ini adalah hasil dari "Uji Pemahaman! 🧠" keseluruhan.
+
+scheduledTaskId (String): ID tugas terjadwal jika soal pemanasan terkait dengan tugas tertentu.
+
+materialId (String): ID materi (jika ini Uji Coba! ✅ atau Uji Pemahaman! 🧠).
+
+subject (String): Mata pelajaran dari materi (jika ini Uji Coba! ✅ atau Uji Pemahaman! 🧠).
+
+topic (String): Topik dari materi (jika ini Uji Coba! ✅ atau Uji Pemahaman! 🧠).
+
+student_material_progress Koleksi (Baru):
+
+docId: ${studentUid}_${materialId}
+
+studentId (String): UID siswa.
+
+materialId (String): ID materi.
+
+title (String): Judul materi.
+
+subject (String): Mata pelajaran materi.
+
+learningModel (String): Model pembelajaran materi.
+
+lastAccessed (Timestamp): Waktu terakhir diakses.
+
+sectionsCompleted (Array of Numbers): Indeks bagian materi yang sudah dilihat.
+
+activitiesCompleted (Map: { [activityType_index]: true }): Status penyelesaian aktivitas (misalnya discussion_0: true, quiz_0: true).
+
+overallAssessmentCompleted (Boolean): Status penyelesaian "Uji Pemahaman! 🧠" keseluruhan.
+
+isCompleted (Boolean): Status keseluruhan materi selesai (akan menjadi true hanya jika overallAssessmentCompleted juga true).
+
+B. Pembaruan File-file JavaScript:
+
+js/daily_exercise_manager.js (FILE BARU):
+
+Berisi fungsi generateAndSaveDailyExercise dan getDailyExerciseTypeForAI.
+
+Fungsi ini akan diimpor dan digunakan oleh app.js (guru) dan app_siswa.js (siswa) untuk auto-generate soal harian.
+
+Tidak akan memanggil showMessage secara langsung saat auto-generate di latar belakang.
+
+Pembaruan: Fungsi getDailyExerciseTypeForAI akan dimodifikasi untuk menentukan tipe soal berdasarkan hari dalam seminggu (Senin Literasi, Selasa Numerasi, dst., kecuali Minggu).
+
+js/app.js (Sisi Guru):
+
+Listener Firestore: unsubscribeDailyAIExercise akan memanggil generateAndSaveDailyExerciseManager saat guru login jika soal harian belum ada.
+
+allScheduledTasks: Mengelola data tugas terjadwal dengan properti baru.
+
+renderSoalView: Memastikan tombol generate soal harian memicu fungsi dari daily_exercise_manager.js.
+
+js/jadwal.js (Sisi Guru):
+
+Formulir Penjadwalan Tugas: Menambahkan input untuk scheduledSubject (dropdown), dueDate (pemilih tanggal). Pilihan dailyWarmupType akan dihapus dari formulir ini karena akan diisi otomatis.
+
+handleScheduleTask: Menyimpan nilai-nilai baru ini ke Firestore. Properti dailyWarmupType akan diisi secara otomatis berdasarkan scheduleDate menggunakan logika dari getDailyExerciseTypeForAI.
+
+renderScheduledTasksList: Menampilkan properti baru di tabel jadwal guru.
+
+js/soal.js (Sisi Guru):
+
+Mengimpor dan menggunakan generateAndSaveDailyExerciseManager dari daily_exercise_manager.js untuk fungsi generate soal harian manual.
+
+Logika konfirmasi penimpaan soal tetap ada.
+
+js/app_siswa.js (Sisi Siswa):
+
+setupFirestoreListeners:
+
+Listener untuk scheduled_tasks akan memfilter tugas yang relevan dengan siswa (berdasarkan classId atau assignedTo).
+
+Logika "Tugas Hari Ini": Mengidentifikasi satu tugas materi yang paling relevan untuk hari ini berdasarkan scheduledSubject dan rentang tanggal.
+
+Auto-generate Soal Pemanasan: Memanggil generateAndSaveDailyExerciseManager saat siswa login jika soal harian untuk hari itu belum ada.
+
+renderDashboardView: Menampilkan "Tugas Hari Ini" secara menonjol.
+
+handleGoToTodaysTask: Memicu alur terpadu (pemanasan + materi) dengan memanggil fungsi di materi_siswa.js.
+
+handleLogout: Membersihkan localStorage (currentStudentFirestoreId dan currentStudentAuthUid).
+
+js/soal_siswa.js (Sisi Siswa):
+
+renderSoalHarianView: Diperbarui untuk menjadi fungsi yang menampilkan soal pemanasan wajib.
+
+Memuat soal pemanasan dari daily_ai_exercises.
+
+Menyimpan hasil pengerjaan soal pemanasan ke student_exercise_history dengan penanda isWarmup: true dan scheduledTaskId.
+
+Menerima onCompleteCallback yang akan dipanggil setelah pemanasan selesai, untuk melanjutkan ke materi.
+
+Fungsi Baru renderOverallAssessmentView: Fungsi ini akan dipanggil dari materi_siswa.js untuk menampilkan soal "Uji Pemahaman! 🧠" keseluruhan. Akan menyimpan hasilnya ke student_exercise_history dengan isOverallAssessment: true.
+
+js/materi_siswa.js (Sisi Siswa):
+
+handleIntegratedMaterialTask (FUNGSI BARU): Fungsi wrapper yang dipanggil dari app_siswa.js. Ini akan mengorkestrasi:
+
+Memanggil renderSoalHarianView untuk menampilkan soal pemanasan.
+
+Setelah pemanasan selesai (melalui callback), baru merender detail materi (renderMaterialDetail).
+
+renderMaterialDetail: Diperbarui untuk:
+
+Menampilkan "Ayo Berpikir & Berbagi! 🤔" dan "Uji Coba! ✅" di dalam setiap bagian/level materi.
+
+Menambahkan logika untuk mendeteksi apakah semua bagian materi dan aktivitas tertanam (Ayo Berpikir & Berbagi! 🤔, Uji Coba! ✅) sudah selesai.
+
+Jika sudah selesai, menampilkan tombol "Lanjut ke Uji Pemahaman Kalian!".
+
+Ketika tombol diklik, memanggil fungsi renderOverallAssessmentView dari soal_siswa.js dan meneruskan data soal overallAssessment dari materialData.
+
+Pelacakan Progres Materi: Implementasi fungsi updateMaterialProgress untuk mencatat bagian yang dilihat (sectionsCompleted), aktivitas yang diselesaikan (activitiesCompleted), dan status overallAssessmentCompleted di koleksi student_material_progress.
+
+Pemicu Latihan Berbasis Materi: Memastikan Uji Coba! ✅ di dalam materi dapat diakses dan hasilnya disimpan ke student_exercise_history dengan detail subject dan topic dari materi.
+
+Penyimpanan Diskusi: Jawaban Ayo Berpikir & Berbagi! 🤔 disimpan ke koleksi student_discussion_submissions.
+
+C. Pembaruan Firestore Security Rules:
+
+users: allow read: if true; tetap ada untuk login siswa.
+
+daily_ai_exercises: allow create: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student'; untuk auto-generate siswa.
+
+student_exercise_history:
+
+allow read: if request.auth != null && resource.data.studentId == request.auth.uid; (siswa hanya baca miliknya).
+
+allow create: if request.auth != null && request.resource.data.studentId == request.auth.uid; (siswa hanya buat miliknya).
+
+student_discussion_submissions & student_quiz_submissions: Aturan serupa dengan student_exercise_history (siswa baca/tulis miliknya, guru baca/tulis semua).
+
+student_motivation_messages: allow read: if request.auth != null && request.auth.uid == studentId; (siswa baca miliknya).
+
+materials: allow read: if request.auth != null; (siswa/guru bisa baca).
+
+scheduled_tasks: allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student' && resource.data.assignedTo == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.classId; (siswa hanya baca tugas kelasnya).
+
+student_material_progress (KOLEKSI BARU):
+
+allow read, write: if request.auth != null && request.auth.uid == resource.data.studentId; (siswa baca/tulis miliknya).
+
+allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher'; (guru baca semua).

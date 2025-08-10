@@ -15,7 +15,7 @@ import {
 } from "./firebase.js";
 import { showMessage } from "./utils.js";
 import { renderModals } from "./app.js"; // Diperlukan untuk menampilkan modal
- // NEW: Import from api.js
+import { GEMINI_API_KEY, GEMINI_API_URL } from "./api.js"; // NEW: Import from api.js
 
 // --- Global State Variables for Materi Module ---
 export let allGeneratedMaterials = []; // Array untuk menyimpan semua materi yang digenerate guru
@@ -277,7 +277,7 @@ export async function generateFokusPembahasanSuggestions() {
   };
 
   try {
-    const result = await fetchWithExponentialBackoff('/api/gemini', {
+    const result = await fetchWithExponentialBackoff(GEMINI_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -767,7 +767,7 @@ export async function generateMaterial() {
   };
 
   try {
-    const result = await fetchWithExponentialBackoff('/api/gemini', {
+    const result = await fetchWithExponentialBackoff(GEMINI_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

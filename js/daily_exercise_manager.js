@@ -4,7 +4,7 @@
 
 import { db, doc, setDoc, serverTimestamp } from "./firebase.js";
 import { showMessage } from "./utils.js"; // Digunakan untuk menampilkan pesan notifikasi
- // Mengimpor URL API Gemini dari file api.js
+import { GEMINI_API_URL } from "./api.js"; // Mengimpor URL API Gemini dari file api.js
 
 /**
  * Fungsi untuk mengimplementasikan exponential backoff untuk panggilan API.
@@ -160,7 +160,7 @@ async function generateAndSaveDailyExercise(
       },
     };
 
-    const response = await fetchWithExponentialBackoff('/api/gemini', {
+    const response = await fetchWithExponentialBackoff(GEMINI_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

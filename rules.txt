@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Aturan untuk koleksi 'users'
+    match /users/{userId} {
+      // Guru yang terautentikasi bisa membaca dan menulis profil siswa/guru
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+      // SIAPA PUN (termasuk siswa yang TIDAK terautentikasi) bisa MEMBACA profil siswa.
+      allow read: if true;
+      // Guru yang terautentikasi bisa membuat profil siswa baru.
+      allow create: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    // Aturan untuk koleksi 'daily_ai_exercises'
+    match /daily_ai_exercises/{exerciseDate} {
+      allow read: if true; // IZINKAN SEMUA PENGGUNA MEMBACA
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    // Aturan untuk koleksi 'student_exercise_history'
+    match /student_exercise_history/{historyDocId} {
+      // IZINKAN SEMUA PENGGUNA MEMBACA riwayat latihan
+      allow read: if true;
+      // Siswa bisa membuat entri riwayat
+      allow create: if request.resource.data.studentId != null;
+      // Guru bisa menghapus atau memperbarui (jika diperlukan untuk moderasi)
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+      // Siswa yang membuat dokumen juga bisa mengupdate, jika diperlukan
+      allow update: if request.resource.data.studentId == request.auth.uid;
+    }
+
+    // ATURAN UNTUK KOLEKSI BARU: 'student_discussion_submissions'
+    match /student_discussion_submissions/{submissionId} {
+      // Siswa bisa membuat (create) submission mereka sendiri
+      allow create: if request.resource.data.studentId != null;
+      // Siswa bisa membaca (read) submission mereka sendiri, berdasarkan studentId di data dokumen.
+      allow read: if resource.data.studentId == request.resource.data.studentId;
+      // Guru tetap bisa membaca semua submission diskusi
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+      // Guru bisa menghapus atau memperbarui (jika diperlukan untuk moderasi)
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    // ATURAN UNTUK KOLEKSI BARU: 'student_quiz_submissions'
+    match /student_quiz_submissions/{submissionId} {
+      // Siswa bisa membuat (create) submission mereka sendiri
+      allow create: if request.resource.data.studentId != null;
+      // Siswa bisa membaca (read) submission mereka sendiri, berdasarkan studentId di data dokumen.
+      allow read: if resource.data.studentId == request.resource.data.studentId;
+      // Guru tetap bisa membaca semua submission kuis
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+      // Guru bisa menghapus atau memperbarui (jika diperlukan untuk moderasi)
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    // ATURAN UNTUK SARAN MOTIVASI AI SISWA
+    match /student_motivation_messages/{studentId} {
+      allow read: if true; // IZINKAN SEMUA PENGGUNA MEMBACA pesan motivasi (untuk siswa non-auth)
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher'; // Hanya guru yang bisa menulis
+    }
+
+    // ATURAN UNTUK KOLEKSI 'materials'
+    match /materials/{materialId} {
+      allow read: if true; // IZINKAN SEMUA PENGGUNA MEMBACA materi
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    // ATURAN UNTUK KOLEKSI 'scheduled_tasks'
+    match /scheduled_tasks/{taskId} {
+      allow read: if true; // IZINKAN SEMUA PENGGUNA MEMBACA jadwal tugas
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+  }
+}
