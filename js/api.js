@@ -1,17 +1,17 @@
-// URL palsu yang aman, mengarah ke API route di Vercel
 export const GEMINI_API_URL = "/api/gemini";
 
-// Fungsi untuk memanggil API
 export async function callGemini(prompt) {
-  const res = await fetch(GEMINI_API_URL, {
+  const response = await fetch(GEMINI_API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ prompt }),
   });
 
-  if (!res.ok) {
-    throw new Error("Request gagal");
+  if (!response.ok) {
+    throw new Error(`API returned status ${response.status}`);
   }
 
-  return await res.json();
+  return await response.json();
 }
