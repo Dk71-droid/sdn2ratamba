@@ -21,7 +21,7 @@ import {
   renderModals,
   switchView,
 } from "./app.js"; // Import dari app.js
-
+import { GEMINI_API_KEY, GEMINI_API_URL } from "./api.js";
 
 // Fungsi untuk mengimplementasikan exponential backoff untuk panggilan API
 async function fetchWithExponentialBackoff(
@@ -209,7 +209,7 @@ async function generateAndSaveDailyExercise(
       },
     };
 
-    const response = await fetchWithExponentialBackoff('/api/gemini', {
+    const response = await fetchWithExponentialBackoff(GEMINI_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

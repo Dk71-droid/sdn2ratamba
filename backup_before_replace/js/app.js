@@ -1,6 +1,6 @@
 // js/app.js
 
- // NEW: Import from api.js
+import { GEMINI_API_KEY, GEMINI_API_URL } from "./api.js"; // NEW: Import from api.js
 
 // Import modul-modul yang dibutuhkan
 import {

@@ -3,7 +3,7 @@
 import { showMessage } from "../utils.js";
 import { db, doc, setDoc, serverTimestamp, getDoc } from "../firebase.js";
 import { studentData } from "../app_siswa.js";
-import { '/api/gemini' } from "../api.js"; // NEW: Import from api.js
+import { GEMINI_API_URL } from "../api.js"; // NEW: Import from api.js
 
 /**
  * Menangani pengiriman jawaban diskusi dan evaluasi AI.
@@ -76,8 +76,8 @@ export async function handleDiscussionSubmit(
             }
         `;
 
-    const response = await fetch('/api/gemini', {
-      // Use '/api/gemini' from api.js
+    const response = await fetch(GEMINI_API_URL, {
+      // Use GEMINI_API_URL from api.js
       method: "POST",
       headers: {
         "Content-Type": "application/json",

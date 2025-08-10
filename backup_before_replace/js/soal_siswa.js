@@ -8,7 +8,7 @@ import {
   displayInlineError,
 } from "./utils.js";
 import { studentData, switchView } from "./app_siswa.js"; // PERBAIKAN: Mengimpor switchView, bukan renderDashboardView
-
+import { GEMINI_API_URL } from "./api.js";
 
 // Variabel konfigurasi yang disediakan oleh lingkungan Canvas
 const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
@@ -232,7 +232,7 @@ async function handleSubmitExercise(exerciseData, studentUid) {
         },
       };
 
-      const response = await fetchWithBackoff('/api/gemini', {
+      const response = await fetchWithBackoff(GEMINI_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
