@@ -15,7 +15,7 @@ import {
 } from "./firebase.js";
 import { showMessage } from "./utils.js";
 import { renderModals } from "./app.js"; // Diperlukan untuk menampilkan modal
-import { GEMINI_API_KEY, GEMINI_API_URL } from "./api.js"; // NEW: Import from api.js
+import { GEMINI_API_URL } from "./api.js"; // NEW: Import from api.js
 
 // --- Global State Variables for Materi Module ---
 export let allGeneratedMaterials = []; // Array untuk menyimpan semua materi yang digenerate guru

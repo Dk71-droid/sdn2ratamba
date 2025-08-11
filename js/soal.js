@@ -21,7 +21,7 @@ import {
   renderModals,
   switchView,
 } from "./app.js"; // Import dari app.js
-import { GEMINI_API_KEY, GEMINI_API_URL } from "./api.js";
+import { GEMINI_API_URL } from "./api.js";
 
 // Fungsi untuk mengimplementasikan exponential backoff untuk panggilan API
 async function fetchWithExponentialBackoff(
