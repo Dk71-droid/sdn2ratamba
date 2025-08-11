@@ -1,10 +1,13 @@
-// File: api.js
+// Konfigurasi Kunci API dan URL untuk layanan eksternal
+// Kunci API Gemini sekarang disimpan di Cloudflare Worker untuk keamanan.
 
-// Ambil kunci API Gemini dari variabel lingkungan
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// URL dasar untuk Cloudflare Worker yang akan menjadi proxy untuk Gemini API
+// Ganti dengan URL Worker Anda yang sebenarnya!
+const GEMINI_API_URL = "https://gemini-api-proxy.nama-pengguna.workers.dev";
 
-// URL dasar untuk Gemini API
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
+// Variabel GEMINI_API_KEY tidak lagi diekspor dari sini
+// Karena sekarang dikelola secara rahasia di sisi server.
+// const GEMINI_API_KEY = "YOUR_API_KEY_DI_SINI"; // Hapus baris ini
 
-// Ekspor variabel
-export { GEMINI_API_KEY, GEMINI_API_URL };
+// Ekspor variabel agar bisa digunakan di modul lain
+export { GEMINI_API_URL };
