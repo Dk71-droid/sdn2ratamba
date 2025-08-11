@@ -3,7 +3,7 @@
 
 // URL dasar untuk Cloudflare Worker yang akan menjadi proxy untuk Gemini API
 // Ganti dengan URL Worker Anda yang sebenarnya!
-const GEMINI_API_URL = "gemini-api-worker.tutorku.workers.dev";
+const GEMINI_API_URL = "https://gemini-api-worker.tutorku.workers.dev";
 
 // Variabel GEMINI_API_KEY tidak lagi diekspor dari sini
 // Karena sekarang dikelola secara rahasia di sisi server.
