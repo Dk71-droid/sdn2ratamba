@@ -46,7 +46,7 @@ async function initializeApp() {
 
   if (!studentIdFromLocalStorage) {
     console.log("No student ID found in localStorage. Redirecting to login.");
-    window.location.href = "loginsiswa.html";
+    window.location.href = "login.html";
     return;
   }
 
@@ -71,7 +71,7 @@ async function initializeApp() {
         localStorage.removeItem("currentStudentId");
         showMessage("error", "Akses ditolak. Silakan login sebagai siswa.");
         setTimeout(() => {
-          window.location.href = "loginsiswa.html";
+          window.location.href = "login.html";
         }, 2000);
       }
     } else {
@@ -81,7 +81,7 @@ async function initializeApp() {
       localStorage.removeItem("currentStudentId");
       showMessage("error", "Data pengguna tidak ditemukan.");
       setTimeout(() => {
-        window.location.href = "loginsiswa.html";
+        window.location.href = "login.html";
       }, 2000);
     }
   } catch (error) {
@@ -92,7 +92,7 @@ async function initializeApp() {
     );
     localStorage.removeItem("currentStudentId");
     setTimeout(() => {
-      window.location.href = "loginsiswa.html";
+      window.location.href = "login.html";
     }, 2000);
   }
 
@@ -436,7 +436,7 @@ async function handleLogout() {
   try {
     localStorage.removeItem("currentStudentId");
     showMessage("success", "Berhasil logout.");
-    window.location.href = "loginsiswa.html";
+    window.location.href = "login.html";
   } catch (error) {
     console.error("Logout error:", error);
     showMessage("error", "Gagal logout: " + error.message);
