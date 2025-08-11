@@ -8,14 +8,22 @@ import {
   saveChapterProgress,
   renderMateriView,
 } from "../materi_siswa.js";
+import {
+  db,
+  doc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "../firebase.js";
 import { studentData } from "../app_siswa.js";
-
-// URL Cloudflare Worker yang baru
-const WORKER_URL = "https://gemini-api-worker.tutorku.workers.dev/";
+import { GEMINI_API_URL } from "../api.js";
 
 /**
- * Mendapatkan semua data kiriman bab untuk materi tertentu dan siswa
- * melalui Cloudflare Worker.
+ * Mendapatkan semua data kiriman bab untuk materi tertentu dan siswa.
  * @param {string} materialId - ID materi saat ini.
  * @param {string} studentUid - UID siswa yang sedang login.
  * @returns {Promise<Array<Object>>} - Promise yang me-resolve dengan array data kiriman.
@@ -25,22 +33,19 @@ async function getStudentSubmissionsForMaterial(materialId, studentUid) {
     return [];
   }
   try {
-    const response = await fetch(`${WORKER_URL}submissions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ materialId, studentUid }),
+    const q = query(
+      collection(db, "student_chapter_submissions"),
+      where("materialId", "==", materialId),
+      where("studentUid", "==", studentUid)
+    );
+    const querySnapshot = await getDocs(q);
+    const submissions = [];
+    querySnapshot.forEach((doc) => {
+      submissions.push(doc.data());
     });
-
-    if (!response.ok) {
-      throw new Error("Gagal mengambil progres dari Cloudflare Worker.");
-    }
-
-    const submissions = await response.json();
     return submissions;
   } catch (error) {
-    console.error("Gagal mengambil progres dari Worker:", error);
+    console.error("Gagal mengambil progres dari Firestore:", error);
     return [];
   }
 }
@@ -195,24 +200,18 @@ async function renderChapterContent(
 
   let submissionData = existingSubmissionData;
   if (!submissionData && studentData?.uid) {
+    const submissionRef = doc(
+      db,
+      "student_chapter_submissions",
+      `${materialData.id}_${chapterIndex}_${studentData.uid}`
+    );
     try {
-      const response = await fetch(`${WORKER_URL}submission`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          materialId: materialData.id,
-          chapterIndex,
-          studentUid: studentData.uid,
-        }),
-      });
-
-      if (response.ok) {
-        submissionData = await response.json();
+      const submissionDoc = await getDoc(submissionRef);
+      if (submissionDoc.exists()) {
+        submissionData = submissionDoc.data();
       }
     } catch (error) {
-      console.error("Gagal mengambil data progres dari Worker: ", error);
+      console.error("Gagal mengambil data progres: ", error);
     }
   }
 
@@ -242,7 +241,7 @@ async function renderChapterContent(
         </div>
   `;
 
-  if (submissionData && submissionData.combinedScore !== undefined) {
+  if (submissionData) {
     chapterHtml += `
       <div class="bg-blue-50 rounded-xl p-4 md:p-6 mb-6 text-center shadow-inner border-l-4 border-blue-500">
         <p class="text-xl md:text-2xl font-bold text-blue-800">Skor Anda:</p>
@@ -354,11 +353,14 @@ async function renderChapterContent(
         </form>
         <div id="quiz-feedback-${chapterIndex}" class="mt-3 text-sm"></div>
         ${
-          submissionData && submissionData.quizCorrectAnswer
+          submissionData
             ? `
           <div class="mt-4">
             <p class="font-semibold text-green-800">Jawaban yang Benar:</p>
-            <p class="p-2 text-sm bg-green-100 rounded-md whitespace-pre-wrap">${submissionData.quizCorrectAnswer}</p>
+            <p class="p-2 text-sm bg-green-100 rounded-md whitespace-pre-wrap">${
+              submissionData.quizCorrectAnswer ||
+              "Jawaban benar tidak tersedia."
+            }</p>
           </div>
         `
             : ""
@@ -497,33 +499,138 @@ async function renderChapterContent(
 
       if (allSubmitted) {
         try {
-          // Mengirim data ke Worker untuk diproses
-          const response = await fetch(`${WORKER_URL}submit-chapter`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              materialId: materialData.id,
-              chapterIndex,
-              studentUid: studentData.uid,
-              studentDiscussionAnswer: discussionAnswer,
-              studentQuizAnswer: selectedQuizOption,
-              section, // Mengirim seluruh objek section
-            }),
-          });
+          const quizCorrectAnswer = section.quizCorrectAnswer;
+          const isQuizCorrect =
+            selectedQuizOption && quizCorrectAnswer
+              ? selectedQuizOption.trim() === quizCorrectAnswer.trim()
+              : false;
 
-          if (!response.ok) {
-            throw new Error("Gagal mengirim jawaban ke Worker.");
+          const quizScore = isQuizCorrect ? 100 : 0;
+
+          let discussionScore = 0;
+          let discussionFeedback = "";
+          const discussionExampleAnswer = section.discussionExampleAnswer;
+
+          if (hasDiscussion) {
+            const prompt = `
+Berdasarkan materi penjelasan berikut: '${
+              section.explanation
+            }', dan pertanyaan diskusi ini: '${
+              section.discussionQuestion
+            }', serta kunci jawaban berikut: '${
+              discussionExampleAnswer || "Tidak tersedia"
+            }',
+
+Nilailah jawaban siswa berikut: '${discussionAnswer}'.
+Tugasmu adalah memberikan skor dan umpan balik yang ramah, sederhana, dan mudah dimengerti oleh siswa SD. Umpan balik harus mencakup alasan mengapa skor tersebut diberikan dan saran perbaikan dalam satu paragraf yang mengalir.
+
+Aturan penilaian:
+- Jika jawaban siswa tidak nyambung sama sekali atau salah, berikanlah skor 0.
+- Jika jawaban siswa "so-so" (kurang lengkap tapi ada benarnya), berikan skor antara 20 sampai 95.
+- Jika jawaban siswa sudah relevan dan benar, meskipun tidak terlalu lengkap, berikanlah skor 100.
+
+Contoh format output:
+{
+  "score": 75,
+  "feedback": "Jawabanmu sudah cukup bagus! Kamu sudah mengerti sebagian, karena kamu menyebutkan tentang [...]. Namun, kamu bisa membuatnya lebih lengkap dengan [...]. Coba baca lagi penjelasan materinya ya!"
+}
+`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = {
+              contents: chatHistory,
+              generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                    score: { type: "NUMBER" },
+                    feedback: { type: "STRING" },
+                  },
+                  propertyOrdering: ["score", "feedback"],
+                },
+              },
+            };
+            const apiKey = "";
+            const apiUrl = GEMINI_API_URL;
+
+            const MAX_RETRIES = 3;
+            const INITIAL_DELAY = 1000;
+
+            let response;
+            for (let i = 0; i < MAX_RETRIES; i++) {
+              try {
+                response = await fetch(apiUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                  break;
+                } else if (response.status === 429) {
+                  const delay = INITIAL_DELAY * Math.pow(2, i);
+                  console.log(`Rate limit exceeded. Retrying in ${delay}ms...`);
+                  await new Promise((resolve) => setTimeout(resolve, delay));
+                } else {
+                  throw new Error(`API returned status ${response.status}`);
+                }
+              } catch (error) {
+                if (i === MAX_RETRIES - 1) {
+                  throw error;
+                }
+              }
+            }
+            if (!response.ok) {
+              throw new Error("API failed after multiple retries.");
+            }
+
+            const result = await response.json();
+            if (
+              result.candidates &&
+              result.candidates.length > 0 &&
+              result.candidates[0].content &&
+              result.candidates[0].content.parts &&
+              result.candidates[0].content.parts.length > 0
+            ) {
+              const jsonResponse = result.candidates[0].content.parts[0].text;
+              const parsedResponse = JSON.parse(jsonResponse);
+              discussionScore = parsedResponse.score || 0;
+              discussionFeedback = parsedResponse.feedback || "";
+            }
           }
 
-          const submissionData = await response.json();
-          const {
-            combinedScore,
-            discussionScore,
-            discussionFeedback,
-            quizScore,
-          } = submissionData;
+          let totalScore = quizScore + discussionScore;
+          let totalItems = 0;
+          if (hasDiscussion) totalItems++;
+          if (hasQuiz) totalItems++;
+          const combinedScore =
+            totalItems > 0 ? Math.round(totalScore / totalItems) : 0;
+
+          const submissionData = {
+            materialId: materialData.id,
+            chapterIndex: chapterIndex,
+            studentUid: studentData.uid,
+            discussionQuestion: section.discussionQuestion || null,
+            studentDiscussionAnswer: discussionAnswer || null,
+            discussionExampleAnswer: discussionExampleAnswer || null,
+            quizQuestion: section.quizQuestion || null,
+            studentQuizAnswer: selectedQuizOption || null,
+            quizCorrectAnswer: quizCorrectAnswer || null,
+            isQuizCorrect: isQuizCorrect,
+            discussionScore: discussionScore,
+            discussionFeedback: discussionFeedback,
+            combinedScore: combinedScore,
+            timestamp: serverTimestamp(),
+          };
+
+          const submissionRef = doc(
+            db,
+            "student_chapter_submissions",
+            `${materialData.id}_${chapterIndex}_${studentData.uid}`
+          );
+          await setDoc(submissionRef, submissionData, { merge: true });
 
           modalContent.innerHTML = `
             <div class="text-center mb-6">
@@ -638,8 +745,8 @@ async function renderChapterContent(
 }
 
 /**
- * Mendapatkan ringkasan progres dan nilai siswa untuk materi tertentu
- * melalui Cloudflare Worker.
+ * Mendapatkan ringkasan progres dan nilai siswa untuk materi tertentu.
+ * Ini adalah fungsi baru yang dibuat untuk mengekspor data progres.
  * @param {string} materialId - ID materi saat ini.
  * @param {string} studentUid - UID siswa yang sedang login.
  * @returns {Promise<Object>} - Promise yang me-resolve dengan ringkasan progres.
@@ -649,7 +756,8 @@ async function renderChapterContent(
  * { "chapterIndex": 0, "score": 90 },
  * { "chapterIndex": 1, "score": 80 }
  * ],
- * "completedChapters": 2
+ * "completedChapters": 2,
+ * "totalChapters": 5
  * }
  */
 export async function getMaterialProgressSummary(materialId, studentUid) {
