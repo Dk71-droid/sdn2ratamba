@@ -557,5 +557,17 @@
     <script type="module" src="js/materi_siswa.js"></script>
     <script type="module" src="js/jadwal_siswa.js"></script>
     <script type="module" src="js/app_siswa.js"></script>
+    <script
+      src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+      defer
+    ></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function (OneSignal) {
+        await OneSignal.init({
+          appId: "ed885ac6-80eb-4669-912f-259088c7f678",
+        });
+      });
+    </script>
   </body>
 </html>
