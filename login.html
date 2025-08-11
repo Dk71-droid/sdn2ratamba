@@ -6,10 +6,15 @@
     <title>Login Siswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
+      /* Base styles for light mode */
       body {
         font-family: "Poppins", sans-serif;
         background-color: #f0f4f8; /* Light blue-gray background */
@@ -24,24 +29,40 @@
 
       /* Specific centering for login form within its view */
       .login-center-container {
-        min-height: 100vh; /* Ensure this container takes full height to center content */
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         width: 100%;
-        padding: 1rem; /* Reduced padding for mobile */
+        padding: 1rem;
       }
+      /* Mengatur tata letak yang lebih minimalis untuk desktop */
       @media (min-width: 768px) {
         .login-center-container {
-          padding: 2rem; /* Standard padding for desktop */
+          background-color: #ffffff; /* Ubah background menjadi putih untuk desktop */
+        }
+        body {
+          background-color: #f0f4f8; /* Jaga background body tetap abu-abu */
+        }
+        .login-card {
+          box-shadow: 0 0 0 rgba(0, 0, 0, 0.1); /* Hilangkan shadow di desktop */
+          border: 1px solid #e2e8f0; /* Tambahkan border tipis */
+          background-color: #ffffff;
+        }
+        /* Penyesuaian agar konten tetap di tengah */
+        .login-card-desktop-wrapper {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
         }
       }
 
       .login-card {
         background-color: #ffffff;
         padding: 2rem;
-        border-radius: 1.5rem; /* More rounded corners */
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         width: 100%;
         max-width: 400px;
         text-align: center;
@@ -50,26 +71,26 @@
       .login-logo {
         width: 80px;
         height: 80px;
-        background-color: #e0f2fe; /* Light blue-100 */
+        background-color: #e0f2fe;
         border-radius: 50%;
         margin: 0 auto 1.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 2.5rem;
-        color: #0ea5e9; /* Sky-500 */
+        color: #0ea5e9;
       }
 
       .login-title {
-        font-size: 1.75rem; /* text-2xl */
+        font-size: 1.75rem;
         font-weight: 700;
-        color: #1e293b; /* Slate-800 */
+        color: #1e293b;
         margin-bottom: 0.5rem;
       }
 
       .login-subtitle {
-        font-size: 1rem; /* text-base */
-        color: #64748b; /* Slate-500 */
+        font-size: 1rem;
+        color: #64748b;
         margin-bottom: 2rem;
       }
 
@@ -80,17 +101,17 @@
 
       .form-group label {
         display: block;
-        font-size: 0.875rem; /* text-sm */
+        font-size: 0.875rem;
         font-weight: 500;
-        color: #475569; /* Slate-700 */
+        color: #475569;
         margin-bottom: 0.5rem;
       }
 
       .form-group input {
         width: 100%;
         padding: 0.75rem 1rem;
-        border: 1px solid #cbd5e1; /* Slate-300 */
-        border-radius: 0.75rem; /* Rounded input fields */
+        border: 1px solid #cbd5e1;
+        border-radius: 0.75rem;
         font-size: 1rem;
         color: #334155;
         transition: all 0.2s ease;
@@ -98,27 +119,42 @@
 
       .form-group input:focus {
         outline: none;
-        border-color: #0ea5e9; /* Sky-500 */
+        border-color: #0ea5e9;
         box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
       }
 
       .login-button {
         width: 100%;
         padding: 0.85rem 1rem;
-        background-color: #0ea5e9; /* Sky-500 */
+        background-color: #0ea5e9;
         color: white;
-        font-size: 1.125rem; /* text-lg */
+        font-size: 1.125rem;
         font-weight: 600;
         border: none;
-        border-radius: 0.75rem; /* Rounded button */
+        border-radius: 0.75rem;
         cursor: pointer;
         transition: background-color 0.2s ease, transform 0.2s ease;
         box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
       }
 
       .login-button:hover {
-        background-color: #0284c7; /* Sky-600 */
+        background-color: #0284c7;
         transform: translateY(-2px);
+      }
+
+      .login-link-container {
+        margin-top: 1rem;
+      }
+
+      .login-link {
+        font-size: 0.875rem;
+        color: #64748b;
+        text-decoration: underline;
+        transition: color 0.2s ease;
+      }
+
+      .login-link:hover {
+        color: #334155;
       }
 
       .loading-overlay {
@@ -181,7 +217,6 @@
         <div class="login-logo">🧑‍🎓</div>
         <h1 class="login-title">Selamat Datang Siswa!</h1>
         <p class="login-subtitle">Silakan login untuk memulai belajar.</p>
-
         <form id="studentLoginForm">
           <div class="form-group">
             <label for="studentUsername">Username</label>
@@ -203,28 +238,43 @@
           </div>
           <button type="submit" class="login-button">Login</button>
         </form>
+        <!-- Link untuk Login Guru -->
+        <div class="login-link-container">
+          <a href="login-guru.html" class="login-link">Login sebagai Guru</a>
+        </div>
       </div>
     </div>
 
     <!-- Global Message Display -->
     <div
       id="globalMessage"
-      class="hidden bg-blue-100 border-blue-500 text-blue-700"
+      class="hidden bg-blue-100 text-blue-700 font-medium"
     >
-      <div>
-        <p id="messageTitle" class="font-bold">Informasi</p>
-        <p id="messageText" class="text-sm">Pesan Anda di sini.</p>
-      </div>
-      <button id="messageCloseBtn" class="text-xl font-bold ml-4">
+      <span></span>
+      <button
+        onclick="document.getElementById('globalMessage').classList.add('hidden')"
+        class="ml-4 text-blue-700"
+      >
         &times;
       </button>
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay hidden" aria-hidden="true">
+    <div id="loadingOverlay" class="loading-overlay hidden">
       <div class="spinner"></div>
     </div>
 
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script>
+      // Sembunyikan pesan global saat dimuat
+      window.onload = function () {
+        const globalMessage = document.getElementById("globalMessage");
+        if (globalMessage) {
+          globalMessage.classList.add("hidden");
+        }
+      };
+    </script>
     <script type="module">
       import {
         db,
@@ -232,69 +282,61 @@
         query,
         where,
         getDocs,
-        doc,
-        getDoc,
-        // Hapus impor terkait Firebase Auth seperti auth, onAuthStateChanged, signInWithCustomToken, signOut
+        hashString,
+        initializeApp,
+        getAuth,
+        signInWithCustomToken,
+        signInAnonymously,
       } from "./js/firebase.js";
-      import { showMessage, hashString } from "./js/utils.js";
-
+      import { showMessage } from "./js/utils.js";
       const studentLoginForm = document.getElementById("studentLoginForm");
-      const loadingOverlay = document.getElementById("loading-overlay");
 
+      // Fungsi untuk menampilkan overlay loading
       function showLoadingOverlay() {
-        if (loadingOverlay) loadingOverlay.classList.remove("hidden");
+        document.getElementById("loadingOverlay").classList.remove("hidden");
       }
 
+      // Fungsi untuk menyembunyikan overlay loading
       function hideLoadingOverlay() {
-        if (loadingOverlay) loadingOverlay.classList.add("hidden");
+        document.getElementById("loadingOverlay").classList.add("hidden");
       }
-
-      // Fungsi untuk memeriksa status "login" berdasarkan localStorage
-      // Ini akan dipanggil saat halaman dimuat
-      async function checkLoginStatus() {
-        showLoadingOverlay();
-        const storedStudentId = localStorage.getItem("currentStudentId");
-        if (storedStudentId) {
-          try {
-            const studentDocRef = doc(db, "users", storedStudentId);
-            const studentDocSnap = await getDoc(studentDocRef);
-
-            if (
-              studentDocSnap.exists() &&
-              studentDocSnap.data().role === "student"
-            ) {
-              // Jika ID ada dan peran adalah siswa, anggap sudah login
-              window.location.href = "portalsiswa.html";
-            } else {
-              // Jika data tidak valid, hapus dari localStorage dan tetap di halaman login
-              localStorage.removeItem("currentStudentId");
-              hideLoadingOverlay();
-            }
-          } catch (error) {
-            console.error("Error checking stored student ID:", error);
-            localStorage.removeItem("currentStudentId"); // Hapus jika ada error
-            hideLoadingOverlay();
-          }
-        } else {
-          hideLoadingOverlay();
-        }
-      }
-
-      // Panggil fungsi checkLoginStatus saat DOMContentLoaded
-      document.addEventListener("DOMContentLoaded", checkLoginStatus);
-
-      // Handle login form submission
       studentLoginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         showLoadingOverlay();
-
         const username = document.getElementById("studentUsername").value;
         const password = document.getElementById("studentPassword").value;
 
+        // Ambil data __firebase_config dan __initial_auth_token
+        const firebaseConfig = JSON.parse(
+          typeof __firebase_config !== "undefined" ? __firebase_config : "{}"
+        );
+        const initialAuthToken =
+          typeof __initial_auth_token !== "undefined"
+            ? __initial_auth_token
+            : "";
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Autentikasi dengan token khusus jika tersedia
+        if (initialAuthToken) {
+          try {
+            await signInWithCustomToken(auth, initialAuthToken);
+          } catch (error) {
+            console.error("Custom token sign-in failed:", error);
+            // Lanjutkan dengan sign-in anonim jika custom token gagal
+            await signInAnonymously(auth);
+          }
+        } else {
+          await signInAnonymously(auth);
+        }
+
         try {
-          // Fetch user by username to get their UID and password hash
-          const usersRef = collection(db, "users");
-          const q = query(usersRef, where("username", "==", username));
+          const q = query(
+            collection(db, "users"),
+            where("username", "==", username)
+          );
           const querySnapshot = await getDocs(q);
 
           if (querySnapshot.empty) {
