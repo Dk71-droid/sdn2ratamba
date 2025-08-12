@@ -168,9 +168,9 @@ function setupSettingListeners() {
   }
 
   // Listener untuk tombol logout desktop (di bagian pengaturan)
-  const logoutButtonDesktop = document.getElementById("logoutButtonDesktop");
-  if (logoutButtonDesktop) {
-    logoutButtonDesktop.addEventListener("click", handleLogout);
+  const logoutButtonDesktop = document.getElementById("logoutButtonSettings");
+  if (logoutButtonSettings) {
+    logoutButtonSettings.addEventListener("click", handleLogout);
   }
 
   // Listener untuk form edit profil
