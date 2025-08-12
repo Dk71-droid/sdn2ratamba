@@ -1,68 +1,61 @@
-// src/index.js
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent';
 
-addEventListener('fetch', (event) => {
-	event.respondWith(handleRequest(event.request));
-});
+export default {
+	async fetch(request, env) {
+		// Pastikan hanya metode POST yang diizinkan
+		if (request.method !== 'POST') {
+			// Mengatasi pre-flight OPTIONS request dari CORS
+			if (request.method === 'OPTIONS') {
+				return new Response(null, {
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+						'Access-Control-Allow-Headers': 'Content-Type',
+					},
+				});
+			}
+			return new Response('Method Not Allowed', { status: 405 });
+		}
 
-async function handleRequest(request) {
-	if (request.method !== 'POST') {
-		return new Response('Method Not Allowed', { status: 405 });
-	}
+		// Ambil body permintaan dari aplikasi Anda
+		const requestBody = await request.text();
 
-	const { prompt } = await request.json();
+		// Dapatkan kunci API dari secrets yang telah diatur
+		const GEMINI_API_KEY = env.GEMINI_API_KEY;
 
-	// Panggil API Gemini
-	const geminiApiKey = GEMINI_API_KEY;
-	const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`;
+		// Buat URL API Gemini dengan kunci API
+		const apiUrlWithKey = `${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`;
 
-	const geminiResponse = await fetch(geminiUrl, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-	});
-
-	const geminiData = await geminiResponse.json();
-	const geminiText = geminiData.candidates[0].content.parts[0].text;
-
-	// Simpan respons ke Firestore
-	try {
-		const firestoreServiceAccountKey = FIREBASE_SERVICE_ACCOUNT_KEY;
-		const serviceAccount = JSON.parse(firestoreServiceAccountKey);
-		const projectId = serviceAccount.project_id;
-		const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/gemini-responses`;
-
-		// Anda perlu mengimplementasikan fungsi getAccessToken yang menghasilkan JWT.
-		const accessToken = await getAccessToken(serviceAccount);
-
-		const firestoreData = {
-			fields: {
-				timestamp: { timestampValue: new Date().toISOString() },
-				prompt: { stringValue: prompt },
-				response: { stringValue: geminiText },
-			},
-		};
-
-		await fetch(firestoreUrl, {
+		// Buat permintaan baru ke Gemini API
+		const geminiRequest = new Request(apiUrlWithKey, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${accessToken}`,
 			},
-			body: JSON.stringify(firestoreData),
+			body: requestBody,
 		});
-	} catch (error) {
-		console.error('Failed to save to Firestore:', error);
-	}
 
-	// Kembalikan respons ke frontend
-	return new Response(JSON.stringify({ text: geminiText }), {
-		headers: { 'Content-Type': 'application/json' },
-	});
-}
-
-async function getAccessToken(serviceAccount) {
-	// Fungsi ini harus diimplementasikan dengan benar.
-	// Anda bisa mencari "Firebase REST API JWT Cloudflare Workers" untuk referensi.
-	// Contoh: `https://developers.cloudflare.com/workers/examples/using-firebase-admin/`
-	return 'contoh_access_token';
-}
+		try {
+			// Kirim permintaan dan kembalikan respons
+			const response = await fetch(geminiRequest);
+			const data = await response.json();
+			return new Response(JSON.stringify(data), {
+				status: response.status,
+				headers: {
+					'Content-Type': 'application/json',
+					// Tambahkan header CORS ini ke respons
+					'Access-Control-Allow-Origin': '*',
+				},
+			});
+		} catch (error) {
+			return new Response(JSON.stringify({ error: error.message }), {
+				status: 500,
+				headers: {
+					'Content-Type': 'application/json',
+					// Tambahkan header CORS ini ke respons
+					'Access-Control-Allow-Origin': '*',
+				},
+			});
+		}
+	},
+};
