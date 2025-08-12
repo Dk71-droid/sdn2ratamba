@@ -128,7 +128,7 @@
         width: 100%;
         height: 100%;
         background-color: rgba(255, 255, 255, 0.8);
-        display: flex;
+        display: none; /* Changed from hidden to none */
         justify-content: center;
         align-items: center;
         z-index: 9999;
@@ -184,11 +184,11 @@
 
         <form id="studentLoginForm">
           <div class="form-group">
-            <label for="studentUsername">Username</label>
+            <label for="loginIdentifier">Username atau Email</label>
             <input
               type="text"
-              id="studentUsername"
-              placeholder="Masukkan username Anda"
+              id="loginIdentifier"
+              placeholder="Masukkan username atau email"
               required
             />
           </div>
@@ -221,36 +221,118 @@
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay hidden" aria-hidden="true">
+    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
       <div class="spinner"></div>
     </div>
 
+    <!-- Main script block with all imports combined -->
     <script type="module">
+      // Menggabungkan semua impor Firebase Auth dan Firestore di sini
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
       import {
-        db,
+        getFirestore,
         collection,
         query,
         where,
         getDocs,
         doc,
         getDoc,
-        // Hapus impor terkait Firebase Auth seperti auth, onAuthStateChanged, signInWithCustomToken, signOut
-      } from "./js/firebase.js";
-      import { showMessage, hashString } from "./js/utils.js";
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      import {
+        getAuth,
+        signOut,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+      // Konfigurasi Firebase Anda
+      const firebaseConfig = {
+        apiKey: "AIzaSyBWTYZH2OZuyq_mnbbxiap7iBg-17II55A",
+        authDomain: "tabungansiswa-8bbd6.firebaseapp.com",
+        projectId: "tabungansiswa-8bbd6",
+        storageBucket: "tabungansiswa-8bbd6.firebasestorage.app",
+        messagingSenderId: "1068130708793",
+        appId: "1:1068130708793:web:d6afeed38a9d42dd034ce8",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
 
       const studentLoginForm = document.getElementById("studentLoginForm");
       const loadingOverlay = document.getElementById("loading-overlay");
 
+      function showMessage(type, message) {
+        const globalMessage = document.getElementById("globalMessage");
+        const messageTitle = document.getElementById("messageTitle");
+        const messageText = document.getElementById("messageText");
+        const messageCloseBtn = document.getElementById("messageCloseBtn");
+
+        // Set classes based on type
+        globalMessage.className = "";
+        if (type === "success") {
+          globalMessage.classList.add(
+            "bg-green-100",
+            "border-green-500",
+            "text-green-700"
+          );
+          messageTitle.textContent = "Sukses!";
+        } else if (type === "error") {
+          globalMessage.classList.add(
+            "bg-red-100",
+            "border-red-500",
+            "text-red-700"
+          );
+          messageTitle.textContent = "Error!";
+        } else {
+          globalMessage.classList.add(
+            "bg-blue-100",
+            "border-blue-500",
+            "text-blue-700"
+          );
+          messageTitle.textContent = "Informasi";
+        }
+        globalMessage.classList.add(
+          "fixed",
+          "top-4",
+          "right-4",
+          "z-50",
+          "w-full",
+          "max-w-md",
+          "rounded-lg",
+          "border",
+          "p-4",
+          "shadow-lg",
+          "transform",
+          "translate-x-0",
+          "transition-transform",
+          "duration-300",
+          "ease-out"
+        );
+
+        messageText.textContent = message;
+
+        // Show message
+        globalMessage.classList.remove("hidden");
+
+        // Hide message after 5 seconds
+        setTimeout(() => {
+          globalMessage.classList.add("hidden");
+        }, 5000);
+
+        // Close button functionality
+        messageCloseBtn.onclick = () => {
+          globalMessage.classList.add("hidden");
+        };
+      }
+
       function showLoadingOverlay() {
-        if (loadingOverlay) loadingOverlay.classList.remove("hidden");
+        if (loadingOverlay) loadingOverlay.style.display = "flex";
       }
 
       function hideLoadingOverlay() {
-        if (loadingOverlay) loadingOverlay.classList.add("hidden");
+        if (loadingOverlay) loadingOverlay.style.display = "none";
       }
 
       // Fungsi untuk memeriksa status "login" berdasarkan localStorage
-      // Ini akan dipanggil saat halaman dimuat
       async function checkLoginStatus() {
         showLoadingOverlay();
         const storedStudentId = localStorage.getItem("currentStudentId");
@@ -263,16 +345,14 @@
               studentDocSnap.exists() &&
               studentDocSnap.data().role === "student"
             ) {
-              // Jika ID ada dan peran adalah siswa, anggap sudah login
               window.location.href = "portalsiswa.html";
             } else {
-              // Jika data tidak valid, hapus dari localStorage dan tetap di halaman login
               localStorage.removeItem("currentStudentId");
               hideLoadingOverlay();
             }
           } catch (error) {
             console.error("Error checking stored student ID:", error);
-            localStorage.removeItem("currentStudentId"); // Hapus jika ada error
+            localStorage.removeItem("currentStudentId");
             hideLoadingOverlay();
           }
         } else {
@@ -280,60 +360,90 @@
         }
       }
 
-      // Panggil fungsi checkLoginStatus saat DOMContentLoaded
       document.addEventListener("DOMContentLoaded", checkLoginStatus);
 
-      // Handle login form submission
       studentLoginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         showLoadingOverlay();
 
-        const username = document.getElementById("studentUsername").value;
+        const loginIdentifier =
+          document.getElementById("loginIdentifier").value;
         const password = document.getElementById("studentPassword").value;
+        const auth = getAuth(app);
+        let userEmail = loginIdentifier; // Asumsikan awalnya adalah email
 
         try {
-          // Fetch user by username to get their UID and password hash
-          const usersRef = collection(db, "users");
-          const q = query(usersRef, where("username", "==", username));
-          const querySnapshot = await getDocs(q);
+          // Coba login langsung dengan identifier sebagai email
+          await signInWithEmailAndPassword(auth, userEmail, password);
+        } catch (error) {
+          console.error("Login with email failed:", error);
 
-          if (querySnapshot.empty) {
-            showMessage("error", "Username atau password salah.");
+          // Jika login dengan email gagal, coba cari username di Firestore
+          try {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("username", "==", loginIdentifier));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+              // Jika username ditemukan, ambil emailnya
+              const userData = querySnapshot.docs[0].data();
+              userEmail = userData.email;
+
+              // Coba login lagi dengan email yang ditemukan
+              await signInWithEmailAndPassword(auth, userEmail, password);
+            } else {
+              // Username tidak ditemukan, lemparkan error asli
+              throw error;
+            }
+          } catch (firestoreError) {
+            // Jika login kedua gagal atau username tidak ditemukan
+            console.error("Login with username failed:", firestoreError);
+            let errorMessage = "Username atau password salah.";
+            if (firestoreError.code) {
+              switch (firestoreError.code) {
+                case "auth/user-not-found":
+                case "auth/invalid-credential":
+                case "auth/wrong-password":
+                  errorMessage = "Username atau password salah.";
+                  break;
+                default:
+                  errorMessage = firestoreError.message;
+                  break;
+              }
+            }
+            showMessage("error", errorMessage);
             hideLoadingOverlay();
             return;
           }
+        }
 
-          const userData = querySnapshot.docs[0].data();
-          const userId = querySnapshot.docs[0].id; // Get UID from Firestore doc ID
-          const storedPasswordHash = userData.passwordHash;
+        // Logika lanjutan setelah login berhasil (baik dengan email atau username)
+        try {
+          const user = auth.currentUser;
+          const userId = user.uid;
 
-          // Verify password
-          const hashedPassword = await hashString(password);
-          if (hashedPassword !== storedPasswordHash) {
-            showMessage("error", "Username atau password salah.");
-            hideLoadingOverlay();
-            return;
-          }
+          // Cek peran (role) dari Firestore
+          const userDocRef = doc(db, "users", userId);
+          const userDocSnap = await getDoc(userDocRef);
 
-          // Verify role
-          if (userData.role !== "student") {
+          if (!userDocSnap.exists() || userDocSnap.data().role !== "student") {
+            // Jika dokumen tidak ada atau peran bukan siswa, logout
+            await signOut(auth);
             showMessage("error", "Akses ditolak. Silakan login sebagai siswa.");
             hideLoadingOverlay();
             return;
           }
 
-          // Jika username, password, dan peran cocok, simpan userId di localStorage
           localStorage.setItem("currentStudentId", userId);
           showMessage(
             "success",
             "Login berhasil. Mengarahkan ke portal siswa..."
           );
 
-          // Redirect to student portal
           window.location.href = "portalsiswa.html";
         } catch (error) {
-          console.error("Login siswa error:", error);
-          let errorMessage = "Terjadi kesalahan saat login siswa.";
+          console.error("Error checking role:", error);
+          let errorMessage = "Terjadi kesalahan saat memeriksa peran pengguna.";
           showMessage("error", errorMessage);
           hideLoadingOverlay();
         }

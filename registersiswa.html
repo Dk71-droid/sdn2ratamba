@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aplikasi Web Registrasi</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: #333;
+      }
+
+      .card {
+        background-color: #fff;
+        padding: 2.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        box-sizing: border-box;
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      h2 {
+        margin-top: 0;
+        color: #1e3a8a; /* Warna biru gelap */
+        font-weight: 700;
+      }
+
+      .input-group {
+        margin-bottom: 1.5rem;
+        text-align: left;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease;
+        font-size: 1rem;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #3b82f6; /* Warna biru terang saat fokus */
+      }
+
+      button {
+        width: 100%;
+        padding: 1rem;
+        background-color: #3b82f6;
+        color: #fff;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+      }
+
+      button:hover {
+        background-color: #2563eb;
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      #message-box {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        display: none;
+        text-align: center;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      #message-box.success {
+        background-color: #d1fae5;
+        color: #065f46;
+      }
+
+      #message-box.error {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Registrasi</h2>
+      <form id="registration-form">
+        <div class="input-group">
+          <label for="name">Nama Lengkap</label>
+          <input type="text" id="name" required />
+        </div>
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" required />
+        </div>
+        <div class="input-group">
+          <label for="dob">Tanggal Lahir</label>
+          <input type="date" id="dob" required />
+        </div>
+        <div class="input-group">
+          <label for="classId">ID Kelas</label>
+          <input type="text" id="classId" required />
+        </div>
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required />
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required />
+        </div>
+        <button type="submit" id="register-button">Daftar</button>
+      </form>
+      <div id="message-box"></div>
+    </div>
+
+    <script type="module">
+      // Konfigurasi Firebase Anda yang dimasukkan secara langsung.
+      const firebaseConfig = {
+        apiKey: "AIzaSyBWTYZH2OZuyq_mnbbxiap7iBg-17II55A",
+        authDomain: "tabungansiswa-8bbd6.firebaseapp.com",
+        projectId: "tabungansiswa-8bbd6",
+        storageBucket: "tabungansiswa-8bbd6.firebasestorage.app",
+        messagingSenderId: "1068130708793",
+        appId: "1:1068130708793:web:d6afeed38a9d42dd034ce8",
+      };
+
+      // Impor modul Firebase yang dibutuhkan
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+      // Inisialisasi Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // Fungsi untuk menampilkan pesan di kotak pesan
+      const showMessage = (message, type) => {
+        const messageBox = document.getElementById("message-box");
+        messageBox.textContent = message;
+        messageBox.className = "";
+        messageBox.classList.add(type);
+        messageBox.style.display = "block";
+        setTimeout(() => {
+          messageBox.style.opacity = "1";
+        }, 10);
+        setTimeout(() => {
+          messageBox.style.opacity = "0";
+          setTimeout(() => {
+            messageBox.style.display = "none";
+          }, 500);
+        }, 5000);
+      };
+
+      // Event listener untuk form registrasi
+      document
+        .getElementById("registration-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const username = document.getElementById("username").value;
+          const dob = document.getElementById("dob").value;
+          const classId = document.getElementById("classId").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const registerButton = document.getElementById("register-button");
+
+          // Nonaktifkan tombol saat proses registrasi berlangsung
+          registerButton.disabled = true;
+          registerButton.textContent = "Memproses...";
+
+          try {
+            // Menggunakan Firebase Authentication untuk membuat pengguna baru
+            const userCredential = await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+            const user = userCredential.user;
+
+            // Menyimpan data pengguna ke Firestore di koleksi "users" langsung
+            await setDoc(doc(db, "users", user.uid), {
+              name: name,
+              username: username,
+              dob: dob,
+              classId: classId,
+              role: "student", // Menambahkan peran (role) secara langsung
+              email: user.email,
+              createdAt: new Date(),
+              userId: user.uid,
+            });
+
+            // Menampilkan pesan sukses
+            showMessage(
+              "Registrasi berhasil! Anda sekarang bisa login.",
+              "success"
+            );
+
+            // Mengosongkan form
+            document.getElementById("registration-form").reset();
+          } catch (error) {
+            // Menangani error dari Firebase
+            const errorCode = error.code;
+            let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
+
+            switch (errorCode) {
+              case "auth/email-already-in-use":
+                errorMessage = "Email ini sudah terdaftar.";
+                break;
+              case "auth/invalid-email":
+                errorMessage = "Format email tidak valid.";
+                break;
+              case "auth/weak-password":
+                errorMessage = "Password terlalu lemah (minimal 6 karakter).";
+                break;
+              case "auth/operation-not-allowed":
+                errorMessage =
+                  'Operasi tidak diizinkan. Mohon pastikan metode "Email/Password" diaktifkan di konsol Firebase Anda.';
+                break;
+              case "permission-denied":
+                errorMessage =
+                  'Izin ditolak. Pastikan aturan keamanan Firestore Anda sudah diperbarui untuk koleksi "users".';
+                break;
+              default:
+                errorMessage = error.message;
+                break;
+            }
+
+            console.error("Error registrasi:", error);
+            showMessage(`Gagal mendaftar: ${errorMessage}`, "error");
+          } finally {
+            // Aktifkan kembali tombol setelah proses selesai
+            registerButton.disabled = false;
+            registerButton.textContent = "Daftar";
+          }
+        });
+    </script>
+  </body>
+</html>
