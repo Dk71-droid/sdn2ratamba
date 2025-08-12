@@ -112,13 +112,8 @@ async function initializeApp() {
   });
 
   // Setup logout listener
-  const logoutButtonDesktop = document.getElementById("logoutButtonDesktop");
   if (logoutButtonDesktop) {
     logoutButtonDesktop.addEventListener("click", handleLogout);
-  }
-  const logoutButtonSettings = document.getElementById("logoutButtonSettings");
-  if (logoutButtonSettings) {
-    logoutButtonSettings.addEventListener("click", handleLogout);
   }
 }
 
